@@ -1,0 +1,14 @@
+[build-system]
+requires = ["setuptool"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "SEP_IU"
+version = "0.1.0"
+description = "Studentisches Projekt zur Darstellung von Cyber-Threat-Intelligence-Daten"
+authors = [{name = "Insanity JoJo"}]
+dependencies = []
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
