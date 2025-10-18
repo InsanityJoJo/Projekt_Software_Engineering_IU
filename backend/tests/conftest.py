@@ -76,10 +76,10 @@ def sample_query_result():
         list: A list of mock Neo4j records.
     """
     mock_record1 = Mock()
-    mock_record1.data.return_value = {"name": "Alice", "age": 30}
+    mock_record1.data.return_value = {"name": "Alice", "type": "Gang"}
 
     mock_record2 = Mock()
-    mock_record2.data.return_value = {"name": "Bob", "age": 25}
+    mock_record2.data.return_value = {"name": "Bob", "type": "Gang"}
 
     return [mock_record1, mock_record2]
 
@@ -104,7 +104,7 @@ def sample_cypher_query():
     Returns:
         str: A sample MATCH query.
     """
-    return "MATCH (n:Person) RETURN n.name, n.age"
+    return "MATCH (n:ThreatActor) RETURN n.name, n.type"
 
 
 @pytest.fixture
@@ -114,4 +114,4 @@ def sample_query_params():
     Returns:
         dict: A dictionary of sample parameters.
     """
-    return {"name": "Alice", "age": 30}
+    return {"name": "Alice", "type": "gang"}

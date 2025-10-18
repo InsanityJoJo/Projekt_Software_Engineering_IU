@@ -136,15 +136,15 @@ class TestGraphDBDriverExecute:
         result = db_driver.execute(sample_cypher_query)
 
         assert len(result) == 2
-        assert result[0] == {"name": "Alice", "age": 30}
-        assert result[1] == {"name": "Bob", "age": 25}
+        assert result[0] == {"name": "Alice", "type": "Gang"}
+        assert result[1] == {"name": "Bob", "type": "Gang"}
         mock_session.execute_read.assert_called_once()
 
     def test_execute_write_query_success(
         self, db_driver, mock_session, sample_query_result
     ):
         """Test successful execution of a write query."""
-        query = "CREATE (n:Person {name: $name})"
+        query = "CREATE (n:ThreatActor {name: $name})"
         params = {"name": "Charlie"}
         mock_session.execute_write.return_value = sample_query_result
 
@@ -157,7 +157,7 @@ class TestGraphDBDriverExecute:
         self, db_driver, mock_session, sample_query_result, sample_query_params
     ):
         """Test execute method with query parameters."""
-        query = "MATCH (n:Person {name: $name}) RETURN n"
+        query = "MATCH (n:ThreatActor {name: $name}) RETURN n"
         mock_session.execute_read.return_value = sample_query_result
 
         result = db_driver.execute(query, sample_query_params)
@@ -169,7 +169,7 @@ class TestGraphDBDriverExecute:
         self, db_driver, mock_session, sample_query_result
     ):
         """Test execute method without parameters."""
-        query = "MATCH (n:Person) RETURN n"
+        query = "MATCH (n:ThreatActor) RETURN n"
         mock_session.execute_read.return_value = sample_query_result
 
         result = db_driver.execute(query)
@@ -256,7 +256,7 @@ class TestGraphDBDriverRunSafeQuery:
         self, db_driver, mock_session, sample_query_result, sample_query_params
     ):
         """Test run_safe_query with query parameters."""
-        query = "MATCH (n:Person {name: $name}) RETURN n"
+        query = "MATCH (n:ThreatActor {name: $name}) RETURN n"
         mock_session.execute_read.return_value = sample_query_result
 
         result = db_driver.run_safe_query(query, sample_query_params)

@@ -1,0 +1,8 @@
+# Neo4j Driver
+neo4j==5.15.0
+
+# Testing (optional for production, include for dev)
+pytest==8.4.2
+pytest-mock==3.14.0
+
+# Add your other dependencies here
