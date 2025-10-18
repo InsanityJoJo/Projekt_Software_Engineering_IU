@@ -1,30 +1,128 @@
-# Logs
-logs/
-*.log
+# ============================================================================
+# Environment Variables (NEVER COMMIT THESE!)
+# ============================================================================
+.env
+.env.*
+!.env.example
+*.env
 
-# Python
+# ============================================================================
+# Python Backend
+# ============================================================================
+# Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
-.Python
 
+backend/__pycache__/
+backend/.py[cod]
+backend/$py.class
+backend/.so
 # Virtual environments
-venv/
-env/
-ENV/
-.env
+backend/.venv/
+backend/venv/
+backend/env/
+backend/ENV/
+
+# Testing
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+backend/tests/logs/
+backend/tests/**/*.log
+
+# Distribution / packaging
+backend/dist/
+backend/build/
+backend/*.egg-info/
 
 # IDE
+backend/.vscode/
+backend/.idea/
+
+# Logs
+backend/logs/
+backend/**/*.log
+
+# ============================================================================
+# Frontend (Svelte/Node.js)
+# ============================================================================
+frontend/* 
+# Dependencies
+frontend/node_modules/
+
+# Build output
+frontend/dist/
+frontend/build/
+frontend/.svelte-kit/
+
+# Environment
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+
+# IDE
+frontend/.vscode/*
+frontend/.idea/
+frontend/!.vscode/extensions.json
+frontend/.idea
+frontend/.DS_Store
+frontend/.suo
+frontend/.ntvs*
+frontend/.njsproj
+frontend/.sln
+frontend/.sw?
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/logs
+frontend/.log
+frontend/pnpm-debug.log*
+fontend/lerna-debug.log*
+
+frontend/node_modules
+frontend/dist
+frontend/dist-ssr
+frontend*.local
+
+# OS specific
+frontend/.DS_Store
+frontend/Thumbs.db
+
+# ============================================================================
+# Docker
+# ============================================================================
+# No need to ignore docker-compose files - they should be committed
+# But ignore any override files
+docker-compose.override.yml
+
+# ============================================================================
+# Database Data (if running locally)
+# ============================================================================
+neo4j_data/
+.neo4j/
+
+# ============================================================================
+# IDE & Editor
+# ============================================================================
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
+.DS_Store
+Thumbs.db
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Neo4j
-.neo4j/
+# ============================================================================
+# OS
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
