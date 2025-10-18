@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # Neo4j Database
+  neo4j:
+    image: neo4j:5.15.0
+    container_name: neo4j_db
+    ports:
+      - "7474:7474" # HTTP Neo4j Browser
+      - "7687:7687" # Bolt protocol
+    env_file:
+      - .env.docker
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_dbms_memory_pagecache_size=512M
+      - NEO4J_dbms_memory_heap_initial__size=512M
+      - NEO4J_dbms_memory_heap_max__size=1G
+    volumes:
+      - neo4j_data:/data
+      - neo4j_logs:/logs
+    networks:
+      - app_network
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u ${NEO4J_USER} -p ${NEO4J_PASSWORD} 'RETURN 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  # Python Backend 
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: python_backend
+    ports:
+      - "8000:8000"  # API Port
+    env_file:
+      - .env.docker
+    environment:
+      - PYTHONPATH=/app/src
+
+    volumes:
+      - ./backend/src:/app/src # Hot reload: changes reflect immediately
+      - ./backend/tests:/app/tests # For running tests in container
+      - backend_logs:/app/logs
+       
+    depends_on:
+      neo4j:
+        condition: service_healthy
+    networks:
+      - app_network
+    # For development with hot reload    
+    command: python src/main.py  # Adjust startup command if changes occure
+
+  # Svelte Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev # Development Dockerfile
+    container_name: svelte_frontend
+    ports:
+      - "5173:5173" # Vite dev server default port
+    volumes:
+      - ./frontend:/app # Hot reload for frontend too
+      - /app/node_modules # Prevent overwriting node_modules
+    environment:
+      - VITE_API_URL=http://localhost:8000 # Backend API URL
+    networks:
+      - app_network
+    depends_on:
+      - backend
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  neo4j_data:
+  neo4j_logs:
+  backend_logs:
+
+networks:
+  app_network:
+    driver: bridge 
+
