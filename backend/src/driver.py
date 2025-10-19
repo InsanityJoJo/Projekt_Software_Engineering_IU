@@ -152,27 +152,28 @@ class GraphDBDriver:
             RuntimeError: If the query execution fails, with details about
                 the query, parameters, and underlying exception.
         """
+
+        def _execute_query(tx):
+            """Execute query within transaction and consume results."""
+            result = tx.run(query, parameters or {})
+            # CRITICAL: Consume results INSIDE the transaction
+            return [record.data() for record in result]
+
         try:
             # Open session using context manager for automatic cleanup
             with self.driver.session() as session:
                 # Use appropriate transaction function based on operation type
                 if write:
-                    result = session.execute_write(
-                        lambda tx: tx.run(query, parameters or {})
-                    )
+                    data = session.execute_write(_execute_query)
                     self.logger.info(
                         f"Write query executed: {query} with params: {parameters}"
                     )
                 else:
-                    result = session.execute_read(
-                        lambda tx: tx.run(query, parameters or {})
-                    )
+                    data = session.execute_read(_execute_query)
                     self.logger.info(
                         f"Read query executed: {query} with params: {parameters}"
                     )
 
-                # Convert Neo4j records to dictionaries
-                data = [record.data() for record in result]
                 self.logger.debug(f"Query returned {len(data)} records")
 
                 return data
