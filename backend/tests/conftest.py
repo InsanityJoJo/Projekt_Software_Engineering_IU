@@ -8,6 +8,7 @@ consistent and isolated unit tests.
 import pytest
 from unittest.mock import Mock, MagicMock, patch
 from src.driver import GraphDBDriver, ResultWrapper
+from src.main import app
 
 
 @pytest.fixture
@@ -68,20 +69,13 @@ def db_driver(mock_neo4j_driver, mock_session):
 def sample_query_result():
     """Provide sample query result data.
 
-    This fixture returns a list of mock Neo4j record objects that simulate
-    the structure of actual query results. Each record has a data() method
-    that returns a dictionary.
+    Returns data in the format that execute() now returns
+    (list of dicts, not Mock objects).
 
     Returns:
-        list: A list of mock Neo4j records.
+        list: A list of dictionaries representing query results.
     """
-    mock_record1 = Mock()
-    mock_record1.data.return_value = {"name": "Alice", "type": "Gang"}
-
-    mock_record2 = Mock()
-    mock_record2.data.return_value = {"name": "Bob", "type": "Gang"}
-
-    return [mock_record1, mock_record2]
+    return [{"name": "Alice", "type": "Gang"}, {"name": "Bob", "type": "Gang"}]
 
 
 @pytest.fixture
@@ -115,3 +109,32 @@ def sample_query_params():
         dict: A dictionary of sample parameters.
     """
     return {"name": "Alice", "type": "gang"}
+
+
+# Flask API Fixtures
+
+
+@pytest.fixture
+def client():
+    """Provide Flask test client.
+
+    Returns:
+        FlaskClient: Test client for making requests.
+    """
+    app.config["TESTING"] = True
+    with app.test_client() as client:
+        yield client
+
+
+@pytest.fixture
+def mock_driver():
+    """Provide a mocked GraphDBDriver instance.
+
+    Returns:
+        Mock: Mocked driver with run_safe_query method.
+    """
+    driver = Mock()
+    driver.run_safe_query = Mock()
+    driver.execute = Mock()
+    driver.close = Mock()
+    return driver
