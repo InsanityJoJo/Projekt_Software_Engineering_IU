@@ -30,6 +30,7 @@ backend/.pytest_cache/
 backend/.coverage
 backend/htmlcov/
 backend/tests/logs/
+backend/tests/cov/
 backend/tests/**/*.log
 
 # Distribution / packaging

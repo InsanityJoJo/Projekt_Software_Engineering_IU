@@ -22,7 +22,7 @@ def mock_neo4j_driver():
     Returns:
         MagicMock: A mocked Neo4j driver instance.
     """
-    with patch("driver.GraphDatabase.driver") as mock_driver:
+    with patch("src.driver.GraphDatabase.driver") as mock_driver:
         yield mock_driver
 
 

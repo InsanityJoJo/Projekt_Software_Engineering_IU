@@ -32,6 +32,15 @@ exclude_lines = [
     "if __name__ == .__main__.:",
 ]
 
+[tool.coverage.html]
+directory = "tests/cov/html"  # HTML reports
+
+[tool.coverage.xml]
+output = "tests/cov/coverage.xml"  # XML reports
+
+[tool.coverage.json]
+output = "tests/cov/coverage.json"  # JSON reports
+
 [build-system]
 requires = ["setuptools>=45", "wheel"]
 build-backend = "setuptools.build_meta"
