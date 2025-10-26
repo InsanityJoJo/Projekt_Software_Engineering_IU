@@ -12,6 +12,7 @@ from driver import GraphDBDriver
 from logger import setup_logger
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 
 
 # Initialize Flask
@@ -23,6 +24,23 @@ logger = setup_logger("API", logging.INFO)
 
 # Global database driver, declare type (initialized in main() method)
 db_driver: Optional[GraphDBDriver] = None
+
+
+def get_driver() -> GraphDBDriver:
+    """
+    This helper function provides type safety and runtime checking.
+
+    Returns:
+        GraphDBDriver: The initialized driver instance.
+
+    Raises:
+        RuntimeError: If driver is not initialized.
+    """
+    if db_driver is None:
+        raise RuntimeError(
+            "Database driver not initialized. Call init_database() first"
+        )
+    return db_driver
 
 
 def init_database() -> GraphDBDriver:
@@ -70,21 +88,28 @@ def health_check():
 
     Returns:
         JSON: Service health status.
+        Status Codes:
+            200: Service healty
+            503: Service unavailable (database disconnected)
     """
-
     try:
-        assert db_driver is not None, "Database not initialized"
+        driver = get_driver()  # RuntimeError oif None
         result = db_driver.run_safe_query("RETURN 1 AS health")
         db_healthy = result.success
-    except:
+    except RuntimeError as e:
+        logger.error(f"Health check failed: {e}")
+        return jsonify({"status": "unhealthy", "error": str(e)}), 503
+    except Exception as e:
+        logger.error(f"Unexpected error in health check: {e}")
         db_healthy = False
 
+    status_code = 200 if db_healthy else 503
     return jsonify(
         {
             "status": "healthy" if db_healthy else "unhealthy",
             "database": "connected" if db_healthy else "disconnected",
         }
-    ), 200 if db_healthy else 503
+    ), status_code
 
 
 @app.route("/api/query", methods=["POST"])
@@ -101,6 +126,7 @@ def execute_query():
         JSON: Query results or error message.
     """
     try:
+        driver = get_driver()
         data = request.get_json()
 
         if not data or "query" not in data:
@@ -120,9 +146,17 @@ def execute_query():
         else:
             return jsonify({"success": False, "error": result.error}), 400
 
+    except (BadRequest, UnsupportedMediaType) as e:
+        logger.warning(f"Bad request: {e}")
+        return jsonify({"error": "Invalid JSON format"}), 400
+
+    except RuntimeError as e:
+        logger.error(f"Database not initialized: {e}")
+        return jsonify({"error": "Service temporarily unavailable"}), 503
+
     except Exception as e:
         logger.error(f"Query execution error: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route("/api/nodes", methods=["GET"])
@@ -134,12 +168,17 @@ def get_nodes():
 
     Returns:
         JSON: List of nodes.
+        Status Codes:
+            200: Nodes retrieved successfully
+            503: Service unavailable (database down)
+            500: Internal server error
     """
     try:
+        driver = get_driver()
         limit = request.args.get("limit", 100, type=int)
 
         query = "MATCH (n) RETURN n LIMIT $limit"
-        result = db_driver.run_safe_query(query, {"limit": limit})
+        result = driver.run_safe_query(query, {"limit": limit})
 
         if result.success:
             return jsonify(
@@ -148,9 +187,13 @@ def get_nodes():
         else:
             return jsonify({"success": False, "error": result.error}), 500
 
+    except RuntimeError as e:
+        logger.error(f"Database not initialized: {e}")
+        return jsonify({"error": "Service temporarily unavailable"}), 503
+
     except Exception as e:
         logger.error(f"Error fetching nodes: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route("/api/nodes", methods=["POST"])
@@ -159,17 +202,24 @@ def create_node():
 
     Request JSON:
         {
-            "label": "Person",
+            "label": "ThreatActor",
             "properties": {
-                "name": "Alice",
-                "age": 30
+                "name": "Lockbit",
+                "type": "Ransomware Gang"
             }
         }
 
+
     Returns:
         JSON: Created node information.
+        Status Codes:
+            201: Node created successfully
+            400: Bad request (missing label or invalid JSON)
+            503: Service unavailable (database down)
+            500: Internal server error
     """
     try:
+        driver = get_driver()
         data = request.get_json()
 
         if not data or "label" not in data:
@@ -194,9 +244,23 @@ def create_node():
             }
         ), 201
 
+    except (BadRequest, UnsupportedMediaType) as e:
+        logger.warning(f"Bad request: {e}")
+        return jsonify(
+            {"error": "Invalid request. Expected JSON with 'label' field."}
+        ), 400
+
+    except ValueError as e:
+        logger.warning(f"Invalid data: {e}")
+        return jsonify({"error": f"Invalid data: {str(e)}"}), 400
+
+    except RuntimeError as e:
+        logger.error(f"Database not initialized: {e}")
+        return jsonify({"error": "Service temporarily unavailable"}), 503
+
     except Exception as e:
         logger.error(f"Error creating node: {e}")
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": "Internal server error"}), 500
 
 
 @app.route("/api/stats", methods=["GET"])

@@ -411,3 +411,436 @@ class SafeQueryBuilder:
 
         self.validate_query_safety(query)
         return query, params
+
+
+class AdminQueryBuilder(SafeQueryBuilder):
+    """Builder for constructing safe administrative Cypher queries.
+
+    This class extends SafeQueryBuilder to allow write operations while
+    maintaining validation and parametrization. It is for administrative
+    tasks like data import and should not be exposed to endusers.
+
+    All operations use MERGE to check if nodes or raltionships exist.
+
+    Inherits all validation methods from SafeQueryBuilder but alloes write keywords.
+    All operations will still use parameterization to prevent cypher injection.
+    """
+
+    def __init__(self, max_results: int = 100):
+        """Initialize the admin query builder.
+        Args:
+            max_results: Maximum number or results to return (safty limit).
+        """
+        super().__init__(max_results)
+
+    def validate_query_safety(self, query: str) -> None:
+        """Override parent method to allow write operations.
+
+        Admin queries are allowed to contain CREATE, DELETE, SET, MERGE, etc.
+        This method intentionally does nothing to allow these keywords.
+
+        Args:
+            query: The query string (not validated for write keywords).
+        """
+        pass
+
+    def _validate_properties_dict(self, properties: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate all properties in a dictionary.
+
+        Args:
+            properties: Dictionary of property names and values.
+
+        Returns:
+            Dict[str, Any]: The validated properties dictionary.
+
+        Raises:
+            QueryValidationError: If any property name is not allowed.
+        """
+        for prop_name in properties.keys():
+            self.validate_property(prop_name)
+        return properties
+
+    def merge_node(
+        self,
+        label: str,
+        match_properties: Dict[str, Any],
+        set_properties: Optional[Dict[str, Any]] = None,
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to merge a node
+
+        Uses MERGE to find or create a node based on match_properties.
+        Sets all properties from both match_properties and set_properties.
+
+        Args:
+            label : The node label.
+            match_properties: Properties to match on
+            set_properties: Optional additional properties to set.
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If label or properties are not allowed.
+
+        Examples:
+            >>> builder = AdminQueryBuilder()
+            >>> query, params = builder.merge_node(
+            ...     "ThreatActor",
+            ...     {"name": "APT28"},
+            ...     {"type": "Nation-State", "last_seen": "2024-01-01"}
+            ... )
+        """
+        # validate inputs
+        label = self.validate_label(label)
+        match_properties = self._validate_properties_dict(match_properties)
+
+        if not match_properties:
+            raise QueryValidationError("match_properties cannot be empty for MERGE")
+
+        # build match clause
+        match_keys = ", ".join(
+            [f"{key}: $match_{key}" for key in match_properties.keys()]
+        )
+        match_clause = f"{{{match_keys}}}"
+
+        # Build SET clause for additional properties
+        set_clause = ""
+        if set_properties:
+            set_properties = self._validate_properties_dict(set_properties)
+            # Use += to merge properties (Neo4j map addition)
+            set_clause = "SET n += $set_properties"
+
+        # Build query
+        query = f"""
+        MERGE (n:{label} {match_clause})
+        {set_clause}
+        RETURN n
+        """
+
+        # Build parameters
+        params = {f"match_{k}": v for k, v in match_properties.items()}
+        if set_properties:
+            params["set_properties"] = set_properties
+
+        return query, params
+
+    def merge_nodes_batch(
+        self, nodes: List[Dict[str, Any]], match_property: str = "name"
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to merge multiple nodes efficiently.
+
+        Uses UNWIND with dynamic labels $(expression) for efficient batch operations.
+        Nodes are matched on a single property (default: 'name') and created/updated.
+
+        Args:
+            nodes: List of node dictionaries, each containing:
+                - label: str (node label)
+                - properties: Dict (all node properties including match property)
+            match_property: Property name to use for matching (default: "name").
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If any label or property is not allowed.
+
+        Examples:
+            >>> builder = AdminQueryBuilder()
+            >>> nodes = [
+            ...     {"label": "ThreatActor", "properties": {"name": "APT28", "type": "Nation-State"}},
+            ...     {"label": "Malware", "properties": {"name": "X-Agent", "family": "Sofacy"}}
+            ... ]
+            >>> query, params = builder.merge_nodes_batch(nodes)
+        """
+
+        # Validate match property
+        match_property = self.validate_property(match_property)
+
+        # Validate all nodes
+        for node in nodes:
+            if "label" not in node:
+                raise QueryValidationError("Each node must have a 'label' field")
+            if "properties" not in node:
+                raise QueryValidationError("Each node must have a 'properties' field")
+
+            self.validate_label(node["label"])
+            properties = node["properties"]
+
+            if match_property not in properties:
+                raise QueryValidationError(
+                    f"Each node must have '{match_property}' in properties"
+                )
+
+            self._validate_properties_dict(properties)
+
+        # Build query using UNWIND with dynamic labels
+        query = f"""
+        UNWIND $nodes AS nodeData
+        MERGE (n:$(nodeData.label) {{{match_property}: nodeData.properties.{match_property}}})
+        SET n += nodeData.properties
+        RETURN n
+        """
+
+        params = {"nodes": nodes}
+
+        return query, params
+
+    def delete_node(
+        self, label: str, property_name: str, property_value: Any
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to delete a node and its relationships.
+
+        Uses DETACH DELETE to remove the node and all its relationships.
+
+        Args:
+            label: The node label.
+            property_name: Property name to identify the node.
+            property_value: Value to match the node.
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If label or property is not allowed.
+
+        Examples:
+            >>> builder = AdminQueryBuilder()
+            >>> query, params = builder.delete_node(
+            ...     "ThreatActor",
+            ...     "name",
+            ...     "APT28"
+            ... )
+        """
+        # Validate inputs
+        label = self.validate_label(label)
+        property_name = self.validate_property(property_name)
+
+        # Build query with DETACH DELETE to remove relationships too
+        query = f"""
+        MATCH (n:{label} {{{property_name}: $value}})
+        DETACH DELETE n
+        """
+
+        params = {"value": property_value}
+
+        return query, params
+
+    def merge_relationship(
+        self,
+        from_label: str,
+        from_value: Any,
+        to_label: str,
+        to_value: Any,
+        relationship_type: str,
+        properties: Optional[Dict[str, Any]] = None,
+        match_property: str = "name",
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to merge a relationship between two existing nodes.
+
+        Both nodes must exist before creating the relationship. Uses MERGE to
+        prevent duplicate relationships. Identifies nodes by a single property
+        (default: 'name').
+
+        Args:
+            from_label: Label of the source node.
+            from_value: Value to identify the source node.
+            to_label: Label of the target node.
+            to_value: Value to identify the target node.
+            relationship_type: Type of the relationship.
+            properties: Optional properties for the relationship.
+            match_property: Property name to identify nodes (default: "name").
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If labels, properties, or relationship type not allowed.
+
+        Examples:
+            >>> builder = AdminQueryBuilder()
+            >>> query, params = builder.merge_relationship(
+            ...     "ThreatActor", "APT28",
+            ...     "Malware", "X-Agent",
+            ...     "USES",
+            ...     {"source": "Report XYZ", "first_seen": "2015-06-01"}
+            ... )
+        """
+        # Validate inputs
+        from_label = self.validate_label(from_label)
+        to_label = self.validate_label(to_label)
+        relationship_type = self.validate_relationship(relationship_type)
+        match_property = self.validate_property(match_property)
+
+        # Validate relationship properties if provided
+        if properties:
+            properties = self._validate_properties_dict(properties)
+
+        # Build query
+        if properties:
+            query = f"""
+            MATCH (from:{from_label} {{{match_property}: $from_value}})
+            MATCH (to:{to_label} {{{match_property}: $to_value}})
+            MERGE (from)-[r:{relationship_type}]->(to)
+            SET r += $properties
+            RETURN from, r, to
+            """
+            params = {
+                "from_value": from_value,
+                "to_value": to_value,
+                "properties": properties,
+            }
+        else:
+            query = f"""
+            MATCH (from:{from_label} {{{match_property}: $from_value}})
+            MATCH (to:{to_label} {{{match_property}: $to_value}})
+            MERGE (from)-[r:{relationship_type}]->(to)
+            RETURN from, r, to
+            """
+            params = {"from_value": from_value, "to_value": to_value}
+
+        return query, params
+
+    def merge_relationships_batch(
+        self,
+        relationships: List[Dict[str, Any]],
+        match_property: str = "name",
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to merge multiple relationships efficiently.
+
+        Uses UNWIND with dynamic relationship types $(expression) for efficient
+        batch operations. Identifies nodes by a single property (default: 'name').
+
+        Args:
+            relationships: List of relationship dictionaries, each containing:
+                - from_label: str (source node label)
+                - from_value: Any (source node identifier)
+                - to_label: str (target node label)
+                - to_value: Any (target node identifier)
+                - type: str (relationship type)
+                - properties: Optional[Dict] (relationship properties)
+            match_property: Property name to identify nodes (default: "name").
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If any validation fails.
+
+        Examples:
+            >>> builder = AdminQueryBuilder()
+            >>> relationships = [
+            ...     {
+            ...         "from_label": "ThreatActor",
+            ...         "from_value": "APT28",
+            ...         "to_label": "Malware",
+            ...         "to_value": "X-Agent",
+            ...         "type": "USES",
+            ...         "properties": {"source": "Report 1"}
+            ...     }
+            ... ]
+            >>> query, params = builder.merge_relationships_batch(relationships)
+        """
+        # Validate match property
+        match_property = self.validate_property(match_property)
+
+        # Validate all relationships
+        for rel in relationships:
+            required_fields = [
+                "from_label",
+                "from_value",
+                "to_label",
+                "to_value",
+                "type",
+            ]
+            if not all(k in rel for k in required_fields):
+                raise QueryValidationError(
+                    f"Each relationship must have: {', '.join(required_fields)}"
+                )
+
+            self.validate_label(rel["from_label"])
+            self.validate_label(rel["to_label"])
+            self.validate_relationship(rel["type"])
+
+            # Validate relationship properties if provided
+            if "properties" in rel and rel["properties"]:
+                self._validate_properties_dict(rel["properties"])
+
+        # Build query using UNWIND with dynamic relationship types
+        query = f"""
+        UNWIND $relationships AS relData
+        MATCH (from:$(relData.from_label) {{{match_property}: relData.from_value}})
+        MATCH (to:$(relData.to_label) {{{match_property}: relData.to_value}})
+        MERGE (from)-[r:$(relData.type)]->(to)
+        SET r += CASE WHEN relData.properties IS NOT NULL THEN relData.properties ELSE {{}} END
+        RETURN from, r, to
+        """
+
+        params = {"relationships": relationships}
+
+        return query, params
+
+    def delete_relationship(
+        self,
+        from_label: str,
+        from_value: Any,
+        to_label: str,
+        to_value: Any,
+        relationship_type: Optional[str] = None,
+        match_property: str = "name",
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to delete a relationship between two nodes.
+
+        Deletes the relationship but leaves both nodes intact. If relationship_type
+        is not specified, deletes all relationships between the two nodes.
+
+        Args:
+            from_label: Label of the source node.
+            from_value: Value to identify the source node.
+            to_label: Label of the target node.
+            to_value: Value to identify the target node.
+            relationship_type: Optional specific relationship type to delete.
+            match_property: Property name to identify nodes (default: "name").
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If labels, properties, or relationship type not allowed.
+
+        Examples:
+            >>> builder = AdminQueryBuilder()
+            >>> # Delete specific relationship type
+            >>> query, params = builder.delete_relationship(
+            ...     "ThreatActor", "APT28",
+            ...     "Malware", "X-Agent",
+            ...     "USES"
+            ... )
+            >>> # Delete all relationships between nodes
+            >>> query, params = builder.delete_relationship(
+            ...     "ThreatActor", "APT28",
+            ...     "Malware", "X-Agent"
+            ... )
+        """
+        # Validate inputs
+        from_label = self.validate_label(from_label)
+        to_label = self.validate_label(to_label)
+        match_property = self.validate_property(match_property)
+
+        # Build relationship pattern
+        if relationship_type:
+            relationship_type = self.validate_relationship(relationship_type)
+            rel_pattern = f"[r:{relationship_type}]"
+        else:
+            rel_pattern = "[r]"
+
+        # Build query
+        query = f"""
+        MATCH (from:{from_label} {{{match_property}: $from_value}})
+              -{rel_pattern}->
+              (to:{to_label} {{{match_property}: $to_value}})
+        DELETE r
+        """
+
+        params = {"from_value": from_value, "to_value": to_value}
+
+        return query, params
