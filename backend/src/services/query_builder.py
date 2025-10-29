@@ -526,11 +526,12 @@ class AdminQueryBuilder(SafeQueryBuilder):
 
     def merge_nodes_batch(
         self, nodes: List[Dict[str, Any]], match_property: str = "name"
-    ) -> tuple[str, Dict[str, Any]]:
-        """Build a query to merge multiple nodes efficiently.
+    ) -> List[tuple[str, Dict[str, Any]]]:
+        """Build separate queries to merge multiple nodes efficiently.
 
-        Uses UNWIND with dynamic labels $(expression) for efficient batch operations.
-        Nodes are matched on a single property (default: 'name') and created/updated.
+        This method groups nodes by their label and creates a separate query
+        for each unique label type to avoid variable redeclaration issues in Cypher.
+        Each query is executed separately.
 
         Args:
             nodes: List of node dictionaries, each containing:
@@ -539,7 +540,8 @@ class AdminQueryBuilder(SafeQueryBuilder):
             match_property: Property name to use for matching (default: "name").
 
         Returns:
-            tuple: (query_string, parameters_dict)
+            List of tuples: [(query_string, parameters_dict), ...]
+            One tuple per unique label found in the nodes.
 
         Raises:
             QueryValidationError: If any label or property is not allowed.
@@ -550,20 +552,21 @@ class AdminQueryBuilder(SafeQueryBuilder):
             ...     {"label": "ThreatActor", "properties": {"name": "APT28", "type": "Nation-State"}},
             ...     {"label": "Malware", "properties": {"name": "X-Agent", "family": "Sofacy"}}
             ... ]
-            >>> query, params = builder.merge_nodes_batch(nodes)
+            >>> queries = builder.merge_nodes_batch(nodes)
+            >>> # Returns list with 2 queries, one for ThreatActor, one for Malware
         """
-
         # Validate match property
         match_property = self.validate_property(match_property)
 
-        # Validate all nodes
+        # Validate all nodes and group by label
+        nodes_by_label = {}
         for node in nodes:
             if "label" not in node:
                 raise QueryValidationError("Each node must have a 'label' field")
             if "properties" not in node:
                 raise QueryValidationError("Each node must have a 'properties' field")
 
-            self.validate_label(node["label"])
+            label = self.validate_label(node["label"])
             properties = node["properties"]
 
             if match_property not in properties:
@@ -573,17 +576,29 @@ class AdminQueryBuilder(SafeQueryBuilder):
 
             self._validate_properties_dict(properties)
 
-        # Build query using UNWIND with dynamic labels
-        query = f"""
-        UNWIND $nodes AS nodeData
-        MERGE (n:$(nodeData.label) {{{match_property}: nodeData.properties.{match_property}}})
-        SET n += nodeData.properties
-        RETURN n
-        """
+            # Group nodes by label
+            if label not in nodes_by_label:
+                nodes_by_label[label] = []
+            nodes_by_label[label].append(properties)  # Store just properties
 
-        params = {"nodes": nodes}
+        # Build separate query for each label
+        queries = []
 
-        return query, params
+        for label, properties_list in nodes_by_label.items():
+            # Create unique parameter name for this label
+            param_name = f"nodes_{label.replace(':', '_')}"
+            params = {param_name: properties_list}
+
+            # Build query for this label with count and label in return
+            query = f"""
+UNWIND ${param_name} AS props
+MERGE (n:{label} {{{match_property}: props.{match_property}}})
+SET n += props
+RETURN count(n) AS count, '{label}' AS label"""
+
+            queries.append((query, params))
+
+        return queries
 
     def delete_node(
         self, label: str, property_name: str, property_value: Any
@@ -704,11 +719,12 @@ class AdminQueryBuilder(SafeQueryBuilder):
         self,
         relationships: List[Dict[str, Any]],
         match_property: str = "name",
-    ) -> tuple[str, Dict[str, Any]]:
-        """Build a query to merge multiple relationships efficiently.
+    ) -> List[tuple[str, Dict[str, Any]]]:
+        """Build separate queries to merge multiple relationships efficiently.
 
-        Uses UNWIND with dynamic relationship types $(expression) for efficient
-        batch operations. Identifies nodes by a single property (default: 'name').
+        This method groups relationships by their pattern (from_label, to_label, type)
+        and creates a separate query for each unique pattern to avoid variable
+        redeclaration issues in Cypher.
 
         Args:
             relationships: List of relationship dictionaries, each containing:
@@ -721,7 +737,8 @@ class AdminQueryBuilder(SafeQueryBuilder):
             match_property: Property name to identify nodes (default: "name").
 
         Returns:
-            tuple: (query_string, parameters_dict)
+            List of tuples: [(query_string, parameters_dict), ...]
+            One tuple per unique relationship pattern.
 
         Raises:
             QueryValidationError: If any validation fails.
@@ -738,12 +755,15 @@ class AdminQueryBuilder(SafeQueryBuilder):
             ...         "properties": {"source": "Report 1"}
             ...     }
             ... ]
-            >>> query, params = builder.merge_relationships_batch(relationships)
+            >>> queries = builder.merge_relationships_batch(relationships)
+            >>> # Returns list with queries, one per unique pattern
         """
         # Validate match property
         match_property = self.validate_property(match_property)
 
-        # Validate all relationships
+        # Validate all relationships and group by pattern
+        rels_by_pattern = {}
+
         for rel in relationships:
             required_fields = [
                 "from_label",
@@ -757,27 +777,49 @@ class AdminQueryBuilder(SafeQueryBuilder):
                     f"Each relationship must have: {', '.join(required_fields)}"
                 )
 
-            self.validate_label(rel["from_label"])
-            self.validate_label(rel["to_label"])
-            self.validate_relationship(rel["type"])
+            from_label = self.validate_label(rel["from_label"])
+            to_label = self.validate_label(rel["to_label"])
+            rel_type = self.validate_relationship(rel["type"])
 
             # Validate relationship properties if provided
             if "properties" in rel and rel["properties"]:
                 self._validate_properties_dict(rel["properties"])
 
-        # Build query using UNWIND with dynamic relationship types
-        query = f"""
-        UNWIND $relationships AS relData
-        MATCH (from:$(relData.from_label) {{{match_property}: relData.from_value}})
-        MATCH (to:$(relData.to_label) {{{match_property}: relData.to_value}})
-        MERGE (from)-[r:$(relData.type)]->(to)
-        SET r += CASE WHEN relData.properties IS NOT NULL THEN relData.properties ELSE {{}} END
-        RETURN from, r, to
-        """
+            # Create pattern key
+            pattern = (from_label, to_label, rel_type)
 
-        params = {"relationships": relationships}
+            if pattern not in rels_by_pattern:
+                rels_by_pattern[pattern] = []
 
-        return query, params
+            # Store simplified rel data
+            rels_by_pattern[pattern].append(
+                {
+                    "from_value": rel["from_value"],
+                    "to_value": rel["to_value"],
+                    "properties": rel.get("properties", {}),
+                }
+            )
+
+        # Build separate query for each pattern
+        queries = []
+
+        for (from_label, to_label, rel_type), rel_list in rels_by_pattern.items():
+            # Create unique parameter name
+            param_name = f"rels_{from_label}_{rel_type}_{to_label}".replace(":", "_")
+            params = {param_name: rel_list}
+
+            # Build query for this pattern with count and pattern info in return
+            query = f"""
+UNWIND ${param_name} AS relData
+MATCH (from:{from_label} {{{match_property}: relData.from_value}})
+MATCH (to:{to_label} {{{match_property}: relData.to_value}})
+MERGE (from)-[r:{rel_type}]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, '{from_label}' AS from_label, '{to_label}' AS to_label, '{rel_type}' AS type"""
+
+            queries.append((query, params))
+
+        return queries
 
     def delete_relationship(
         self,

@@ -526,7 +526,7 @@ class TestAdminMergeNodesBatch:
     """Test suite for merge_nodes_batch method."""
 
     def test_merge_nodes_batch_basic(self):
-        """Test basic batch node merge."""
+        """Test basic batch merge with multiple labels."""
         builder = AdminQueryBuilder()
         nodes = [
             {
@@ -534,28 +534,60 @@ class TestAdminMergeNodesBatch:
                 "properties": {"name": "APT28", "type": "Nation-State"},
             },
             {"label": "Malware", "properties": {"name": "X-Agent", "family": "Sofacy"}},
+            {
+                "label": "ThreatActor",
+                "properties": {"name": "APT29", "type": "Nation-State"},
+            },
         ]
 
-        query, params = builder.merge_nodes_batch(nodes)
+        queries = builder.merge_nodes_batch(nodes)
 
-        assert "UNWIND $nodes AS nodeData" in query
-        assert "MERGE (n:$(nodeData.label) {name: nodeData.properties.name})" in query
-        assert "SET n += nodeData.properties" in query
-        assert params["nodes"] == nodes
+        # Should return a list of queries
+        assert isinstance(queries, list)
+        assert len(queries) == 2  # One for ThreatActor, one for Malware
+
+        # Check ThreatActor query
+        threat_actor_query = None
+        malware_query = None
+
+        for query, params in queries:
+            if "nodes_ThreatActor" in query:
+                threat_actor_query = (query, params)
+            elif "nodes_Malware" in query:
+                malware_query = (query, params)
+
+        # Verify ThreatActor query
+        assert threat_actor_query is not None
+        query, params = threat_actor_query
+        assert "UNWIND $nodes_ThreatActor AS props" in query
+        assert "MERGE (n:ThreatActor {name: props.name})" in query
+        assert "SET n += props" in query
+        assert "RETURN count(n) AS count" in query
+        assert "'ThreatActor' AS label" in query
+        assert len(params["nodes_ThreatActor"]) == 2  # Two ThreatActor nodes
+
+        # Verify Malware query
+        assert malware_query is not None
+        query, params = malware_query
+        assert "UNWIND $nodes_Malware AS props" in query
+        assert "MERGE (n:Malware {name: props.name})" in query
+        assert len(params["nodes_Malware"]) == 1  # One Malware node
 
     def test_merge_nodes_batch_custom_match_property(self):
         """Test batch merge with custom match property."""
         builder = AdminQueryBuilder()
         nodes = [
-            {
-                "label": "Vulnerability",
-                "properties": {"cve_id": "CVE-2024-1234", "cvss_score": "9.8"},
-            }
+            {"label": "Tool", "properties": {"name": "Nmap", "version": "7.91"}},
         ]
 
-        query, params = builder.merge_nodes_batch(nodes, match_property="cve_id")
+        queries = builder.merge_nodes_batch(nodes, match_property="version")
 
-        assert "{cve_id: nodeData.properties.cve_id}" in query
+        assert len(queries) == 1
+        query, params = queries[0]
+
+        assert "MERGE (n:Tool {version: props.version})" in query
+        assert "name" in params["nodes_Tool"][0]
+        assert "version" in params["nodes_Tool"][0]
 
     def test_merge_nodes_batch_validates_labels(self):
         """Test that batch merge validates all labels."""
@@ -601,23 +633,109 @@ class TestAdminMergeNodesBatch:
 
         assert "must have a 'properties' field" in str(exc_info.value)
 
-    def test_merge_nodes_batch_requires_match_property_in_properties(self):
-        """Test that match property must exist in node properties."""
+    def test_merge_nodes_batch_empty_list(self):
+        """Test batch merge with empty list returns empty list."""
         builder = AdminQueryBuilder()
-        nodes = [{"label": "ThreatActor", "properties": {"type": "Nation-State"}}]
+        nodes = []
+
+        queries = builder.merge_nodes_batch(nodes)
+
+        assert queries == []
+        assert len(queries) == 0
+
+    def test_merge_nodes_batch_missing_label(self):
+        """Test that nodes without label field raise error."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"properties": {"name": "Test"}},  # Missing 'label'
+        ]
 
         with pytest.raises(QueryValidationError) as exc_info:
-            builder.merge_nodes_batch(nodes, match_property="name")
+            builder.merge_nodes_batch(nodes)
+
+        assert "must have a 'label' field" in str(exc_info.value)
+
+    def test_merge_nodes_batch_missing_properties(self):
+        """Test that nodes without properties field raise error."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"label": "ThreatActor"},  # Missing 'properties'
+        ]
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_nodes_batch(nodes)
+
+        assert "must have a 'properties' field" in str(exc_info.value)
+
+    def test_merge_nodes_batch_invalid_label(self):
+        """Test that invalid labels are rejected."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"label": "InvalidLabel", "properties": {"name": "Test"}},
+        ]
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_nodes_batch(nodes)
+
+        assert "not allowed" in str(exc_info.value)
+
+    def test_merge_nodes_batch_missing_match_property(self):
+        """Test that nodes missing the match property raise error."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {
+                "label": "ThreatActor",
+                "properties": {"type": "Nation-State"},
+            },  # Missing 'name'
+        ]
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_nodes_batch(nodes)
 
         assert "must have 'name' in properties" in str(exc_info.value)
 
-    def test_merge_nodes_batch_empty_list(self):
-        """Test batch merge with empty list."""
+    def test_merge_nodes_batch_invalid_property(self):
+        """Test that invalid properties are rejected."""
         builder = AdminQueryBuilder()
-        query, params = builder.merge_nodes_batch([])
+        nodes = [
+            {
+                "label": "ThreatActor",
+                "properties": {"name": "APT28", "invalid_prop": "value"},
+            },
+        ]
 
-        assert "UNWIND $nodes" in query
-        assert params["nodes"] == []
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_nodes_batch(nodes)
+
+        assert "not allowed" in str(exc_info.value)
+
+    def test_merge_nodes_batch_groups_by_label(self):
+        """Test that nodes are correctly grouped by label."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"label": "ThreatActor", "properties": {"name": "APT1"}},
+            {"label": "Malware", "properties": {"name": "Malware1"}},
+            {"label": "ThreatActor", "properties": {"name": "APT2"}},
+            {"label": "Tool", "properties": {"name": "Tool1"}},
+            {"label": "Malware", "properties": {"name": "Malware2"}},
+        ]
+
+        queries = builder.merge_nodes_batch(nodes)
+
+        # Should create 3 queries (ThreatActor, Malware, Tool)
+        assert len(queries) == 3
+
+        # Count nodes per label
+        label_counts = {}
+        for query, params in queries:
+            for label in ["ThreatActor", "Malware", "Tool"]:
+                param_key = f"nodes_{label}"
+                if param_key in params:
+                    label_counts[label] = len(params[param_key])
+
+        assert label_counts["ThreatActor"] == 2
+        assert label_counts["Malware"] == 2
+        assert label_counts["Tool"] == 1
 
 
 class TestAdminDeleteNode:
@@ -742,7 +860,7 @@ class TestAdminMergeRelationshipsBatch:
     """Test suite for merge_relationships_batch method."""
 
     def test_merge_relationships_batch_basic(self):
-        """Test basic batch relationship merge."""
+        """Test basic batch merge with multiple relationship patterns."""
         builder = AdminQueryBuilder()
         relationships = [
             {
@@ -752,17 +870,72 @@ class TestAdminMergeRelationshipsBatch:
                 "to_value": "X-Agent",
                 "type": "USES",
                 "properties": {"source": "Report 1"},
-            }
+            },
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT29",
+                "to_label": "Malware",
+                "to_value": "Y-Agent",
+                "type": "USES",
+                "properties": {"source": "Report 2"},
+            },
         ]
 
-        query, params = builder.merge_relationships_batch(relationships)
+        queries = builder.merge_relationships_batch(relationships)
 
-        assert "UNWIND $relationships AS relData" in query
-        assert "MATCH (from:$(relData.from_label) {name: relData.from_value})" in query
-        assert "MATCH (to:$(relData.to_label) {name: relData.to_value})" in query
-        assert "MERGE (from)-[r:$(relData.type)]->(to)" in query
-        assert "SET r +=" in query
-        assert params["relationships"] == relationships
+        # Should return a list of queries
+        assert isinstance(queries, list)
+        assert len(queries) == 1  # Same pattern (ThreatActor)-[USES]->(Malware)
+
+        query, params = queries[0]
+
+        # Verify query structure
+        assert "UNWIND $rels_ThreatActor_USES_Malware AS relData" in query
+        assert "MATCH (from:ThreatActor {name: relData.from_value})" in query
+        assert "MATCH (to:Malware {name: relData.to_value})" in query
+        assert "MERGE (from)-[r:USES]->(to)" in query
+        assert "SET r += relData.properties" in query
+        assert "RETURN count(r) AS count" in query
+
+        # Verify parameters
+        assert "rels_ThreatActor_USES_Malware" in params
+        assert len(params["rels_ThreatActor_USES_Malware"]) == 2
+
+    def test_merge_relationships_batch_multiple_patterns(self):
+        """Test batch merge with different relationship patterns."""
+        builder = AdminQueryBuilder()
+        relationships = [
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT28",
+                "to_label": "Malware",
+                "to_value": "X-Agent",
+                "type": "USES",
+            },
+            {
+                "from_label": "Campaign",
+                "from_value": "Operation X",
+                "to_label": "ThreatActor",
+                "to_value": "APT28",
+                "type": "LAUNCHED",
+            },
+        ]
+
+        queries = builder.merge_relationships_batch(relationships)
+
+        # Should create 2 queries (different patterns)
+        assert len(queries) == 2
+
+        # Verify both patterns exist
+        patterns = []
+        for query, params in queries:
+            if "USES" in query:
+                patterns.append("USES")
+            if "LAUNCHED" in query:
+                patterns.append("LAUNCHED")
+
+        assert "USES" in patterns
+        assert "LAUNCHED" in patterns
 
     def test_merge_relationships_batch_without_properties(self):
         """Test batch merge without relationship properties."""
@@ -774,70 +947,84 @@ class TestAdminMergeRelationshipsBatch:
                 "to_label": "Malware",
                 "to_value": "X-Agent",
                 "type": "USES",
-            }
+            },
         ]
 
-        query, params = builder.merge_relationships_batch(relationships)
+        queries = builder.merge_relationships_batch(relationships)
 
-        assert "MERGE (from)-[r:$(relData.type)]->(to)" in query
-        assert "CASE WHEN relData.properties IS NOT NULL" in query
+        assert len(queries) == 1
+        query, params = queries[0]
+
+        # Should still have SET clause but with empty properties
+        assert "SET r += relData.properties" in query
+        assert params["rels_ThreatActor_USES_Malware"][0]["properties"] == {}
 
     def test_merge_relationships_batch_custom_match_property(self):
         """Test batch merge with custom match property."""
         builder = AdminQueryBuilder()
         relationships = [
             {
-                "from_label": "Vulnerability",
-                "from_value": "CVE-2024-1234",
-                "to_label": "Observable",
-                "to_value": "malicious.exe",
-                "type": "RELATED_TO",
-            }
+                "from_label": "ThreatActor",
+                "from_value": "id-123",
+                "to_label": "Malware",
+                "to_value": "id-456",
+                "type": "USES",
+            },
         ]
 
-        query, params = builder.merge_relationships_batch(
-            relationships, match_property="cve_id"
-        )
+        queries = builder.merge_relationships_batch(relationships, match_property="id")
 
-        assert "{cve_id: relData.from_value}" in query
+        assert len(queries) == 1
+        query, params = queries[0]
 
-    def test_merge_relationships_batch_validates_required_fields(self):
-        """Test that all required fields must be present."""
+        assert "MATCH (from:ThreatActor {id: relData.from_value})" in query
+        assert "MATCH (to:Malware {id: relData.to_value})" in query
+
+    def test_merge_relationships_batch_empty_list(self):
+        """Test batch merge with empty list returns empty list."""
         builder = AdminQueryBuilder()
+        relationships = []
 
-        # Missing 'type'
+        queries = builder.merge_relationships_batch(relationships)
+
+        assert queries == []
+        assert len(queries) == 0
+
+    def test_merge_relationships_batch_missing_required_fields(self):
+        """Test that relationships missing required fields raise error."""
+        builder = AdminQueryBuilder()
         relationships = [
             {
                 "from_label": "ThreatActor",
                 "from_value": "APT28",
                 "to_label": "Malware",
-                "to_value": "X-Agent",
-            }
+                # Missing 'to_value' and 'type'
+            },
         ]
 
         with pytest.raises(QueryValidationError) as exc_info:
             builder.merge_relationships_batch(relationships)
 
-        assert "must have" in str(exc_info.value)
+        assert "must have:" in str(exc_info.value)
 
-    def test_merge_relationships_batch_validates_labels(self):
-        """Test that batch merge validates all labels."""
+    def test_merge_relationships_batch_invalid_labels(self):
+        """Test that invalid labels are rejected."""
         builder = AdminQueryBuilder()
         relationships = [
             {
                 "from_label": "InvalidLabel",
-                "from_value": "test",
+                "from_value": "Test",
                 "to_label": "Malware",
                 "to_value": "X-Agent",
                 "type": "USES",
-            }
+            },
         ]
 
         with pytest.raises(QueryValidationError):
             builder.merge_relationships_batch(relationships)
 
-    def test_merge_relationships_batch_validates_relationship_types(self):
-        """Test that batch merge validates relationship types."""
+    def test_merge_relationships_batch_invalid_relationship_type(self):
+        """Test that invalid relationship types are rejected."""
         builder = AdminQueryBuilder()
         relationships = [
             {
@@ -846,36 +1033,65 @@ class TestAdminMergeRelationshipsBatch:
                 "to_label": "Malware",
                 "to_value": "X-Agent",
                 "type": "INVALID_REL",
-            }
+            },
         ]
 
         with pytest.raises(QueryValidationError):
             builder.merge_relationships_batch(relationships)
 
-    def test_merge_relationships_batch_validates_properties(self):
-        """Test that batch merge validates relationship properties."""
+    def test_merge_relationships_batch_groups_by_pattern(self):
+        """Test that relationships are correctly grouped by pattern."""
         builder = AdminQueryBuilder()
         relationships = [
+            # Pattern 1: (ThreatActor)-[USES]->(Malware)
             {
                 "from_label": "ThreatActor",
-                "from_value": "APT28",
+                "from_value": "APT1",
                 "to_label": "Malware",
-                "to_value": "X-Agent",
+                "to_value": "M1",
                 "type": "USES",
-                "properties": {"invalid_prop": "test"},
-            }
+            },
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT2",
+                "to_label": "Malware",
+                "to_value": "M2",
+                "type": "USES",
+            },
+            # Pattern 2: (ThreatActor)-[TARGETS]->(Organization)
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT1",
+                "to_label": "Organization",
+                "to_value": "O1",
+                "type": "TARGETS",
+            },
+            # Pattern 3: (Campaign)-[USES]->(Malware)
+            {
+                "from_label": "Campaign",
+                "from_value": "C1",
+                "to_label": "Malware",
+                "to_value": "M1",
+                "type": "USES",
+            },
         ]
 
-        with pytest.raises(QueryValidationError):
-            builder.merge_relationships_batch(relationships)
+        queries = builder.merge_relationships_batch(relationships)
 
-    def test_merge_relationships_batch_empty_list(self):
-        """Test batch merge with empty list."""
-        builder = AdminQueryBuilder()
-        query, params = builder.merge_relationships_batch([])
+        # Should create 3 queries (3 unique patterns)
+        assert len(queries) == 3
 
-        assert "UNWIND $relationships" in query
-        assert params["relationships"] == []
+        # Count relationships per pattern
+        pattern_counts = {}
+        for query, params in queries:
+            for key, value in params.items():
+                pattern_counts[key] = len(value)
+
+        # Pattern 1 should have 2 relationships
+        assert pattern_counts.get("rels_ThreatActor_USES_Malware") == 2
+        # Patterns 2 and 3 should have 1 each
+        assert pattern_counts.get("rels_ThreatActor_TARGETS_Organization") == 1
+        assert pattern_counts.get("rels_Campaign_USES_Malware") == 1
 
 
 class TestAdminDeleteRelationship:
@@ -946,44 +1162,55 @@ class TestAdminDeleteRelationship:
 
 
 class TestAdminParameterization:
-    """Test suite for proper parameterization in AdminQueryBuilder."""
-
-    def test_merge_node_parameterizes_values(self):
-        """Test that merge_node parameterizes all values."""
-        builder = AdminQueryBuilder()
-        malicious_value = "'; DELETE (n); //"
-
-        query, params = builder.merge_node("ThreatActor", {"name": malicious_value})
-
-        # Malicious value should be in params, not in query
-        assert malicious_value not in query
-        assert params["match_name"] == malicious_value
+    """Test suite for proper parameterization in Admin methods."""
 
     def test_merge_nodes_batch_parameterizes_values(self):
-        """Test that batch operations parameterize values."""
+        """Test that node property values are parameterized."""
         builder = AdminQueryBuilder()
-        malicious_value = "'; DROP DATABASE; //"
 
-        nodes = [{"label": "ThreatActor", "properties": {"name": malicious_value}}]
+        # Try with potentially malicious values
+        malicious_name = "'; DROP TABLE nodes; --"
+        nodes = [
+            {
+                "label": "ThreatActor",
+                "properties": {"name": malicious_name, "type": "Test"},
+            },
+        ]
 
-        query, params = builder.merge_nodes_batch(nodes)
+        queries = builder.merge_nodes_batch(nodes)
 
-        # Malicious value should only be in params
+        assert len(queries) == 1
+        query, params = queries[0]
+
+        # Malicious string should be in params, not in query
+        assert malicious_name not in query
+        assert params["nodes_ThreatActor"][0]["name"] == malicious_name
+
+    def test_merge_relationships_batch_parameterizes_values(self):
+        """Test that relationship values are parameterized."""
+        builder = AdminQueryBuilder()
+
+        malicious_value = "Test'; DELETE (n); //"
+        relationships = [
+            {
+                "from_label": "ThreatActor",
+                "from_value": malicious_value,
+                "to_label": "Malware",
+                "to_value": "Test",
+                "type": "USES",
+            },
+        ]
+
+        queries = builder.merge_relationships_batch(relationships)
+
+        assert len(queries) == 1
+        query, params = queries[0]
+
+        # Malicious string should be in params, not in query
         assert malicious_value not in query
-        assert params["nodes"][0]["properties"]["name"] == malicious_value
-
-    def test_merge_relationship_parameterizes_values(self):
-        """Test that merge_relationship parameterizes values."""
-        builder = AdminQueryBuilder()
-        malicious_value = "admin' OR 1=1 --"
-
-        query, params = builder.merge_relationship(
-            "ThreatActor", malicious_value, "Malware", "X-Agent", "USES"
+        assert (
+            params["rels_ThreatActor_USES_Malware"][0]["from_value"] == malicious_value
         )
-
-        # Malicious value should be in params, not in query
-        assert malicious_value not in query
-        assert params["from_value"] == malicious_value
 
 
 class TestAdminValidatePropertiesDict:

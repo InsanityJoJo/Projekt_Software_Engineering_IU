@@ -39,15 +39,17 @@ services:
     volumes:
       - ./backend/src:/app/src # Hot reload: changes reflect immediately
       - ./backend/tests:/app/tests # For running tests in container
+      - ./backend/data:/app/data # For demo data
+      - ./backend/scripts:/app/scripts # For import scripts
       - backend_logs:/app/logs
-       
+      
     depends_on:
       neo4j:
         condition: service_healthy
     networks:
       - app_network
     # For development with hot reload    
-    command: python src/main.py  # Adjust startup command if changes occure
+    command: python src/main.py && python scripts/import_data.py /app/data/demo_data.json
 
   # Svelte Frontend
   frontend:

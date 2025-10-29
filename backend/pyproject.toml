@@ -12,7 +12,7 @@ log_cli = true
 log_cli_level = "INFO"
 
 # Add src to Python path so imports work
-pythonpath = ["src", "src/api", "src/services"]
+pythonpath = ["src", "src/api", "src/services", "scripts"]
 
 [tool.coverage.run]
 source = ["src"]

@@ -17,9 +17,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY src/ ./src/
+COPY scripts/ ./scripts/
+COPY data/ ./data/
 
 # Create logs directory
 RUN mkdir -p logs
+
+# Make script executable
+RUN chmod +x scripts/import_data.py
 
 # Add src to PYTHONPATH so imports work
 ENV PYTHONPATH=/app/src
@@ -32,4 +37,4 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Run the application
-CMD ["python", "src/main.py"]
+CMD ["python", "src/main.py", "scripts/import_data.py", "data/demo_data.json"]
