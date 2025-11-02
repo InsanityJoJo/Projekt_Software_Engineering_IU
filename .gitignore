@@ -10,7 +10,7 @@
 # Python Backend
 # ============================================================================
 # Byte-compiled / optimized / DLL files
-__pycache__/        # Python 3 cache directories
+**/__pycache__/     # Python 3 cache directories
 *.py[cod]           # Matches: .pyc, .pyo, .pyd files
 *$py.class          # Jython compiled files
 *.so                # Compiled C extensions (if you use Cython/C modules)
