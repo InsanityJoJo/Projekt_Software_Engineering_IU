@@ -10,15 +10,11 @@
 # Python Backend
 # ============================================================================
 # Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
-*.so
+__pycache__/        # Python 3 cache directories
+*.py[cod]           # Matches: .pyc, .pyo, .pyd files
+*$py.class          # Jython compiled files
+*.so                # Compiled C extensions (if you use Cython/C modules)
 
-backend/__pycache__/
-backend/.py[cod]
-backend/$py.class
-backend/.so
 # Virtual environments
 backend/.venv/
 backend/venv/
@@ -34,13 +30,9 @@ backend/tests/cov/
 backend/tests/**/*.log
 
 # Distribution / packaging
-backend/dist/
-backend/build/
-backend/*.egg-info/
-
-# IDE
-backend/.vscode/
-backend/.idea/
+backend/dist/               # Built distribution files (.whl, .tar.gz)
+backend/build/              # Temporary build directory
+backend/*.egg-info/         # Package metadata
 
 # Logs
 backend/logs/
@@ -49,55 +41,51 @@ backend/**/*.log
 # ============================================================================
 # Frontend (Svelte/Node.js)
 # ============================================================================
-frontend/* 
-# Dependencies
+
+# Dependencies 
 frontend/node_modules/
 
 # Build output
-frontend/dist/
-frontend/build/
-frontend/.svelte-kit/
+frontend/dist/              # Production build output
+frontend/build/             # Alternative build folder (some tools use this)
+frontend/dist-ssr/          # Server-side rendering build (if you use SSR)
+frontend/.svelte-kit/       # SvelteKit specific build cache
 
 # Environment
 frontend/.env
 frontend/.env.*
 !frontend/.env.example
 
+# Vite
+frontend/.vite/             # Vite dependency pre-bundling cache
+frontend/.vite-temp/        # Vite temporary files during build
+
 # IDE
-frontend/.vscode/*
 frontend/.idea/
-frontend/!.vscode/extensions.json
-frontend/.idea
-frontend/.DS_Store
-frontend/.suo
-frontend/.ntvs*
-frontend/.njsproj
-frontend/.sln
-frontend/.sw?
 
 # Logs
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
-frontend/logs
-frontend/.log
-frontend/pnpm-debug.log*
-fontend/lerna-debug.log*
+frontend/npm-debug.log*     # npm error logs
+frontend/yarn-debug.log*    # yarn error logs
+frontend/yarn-error.log*    # yarn error logs
+frontend/pnpm-debug.log*    # pnpm error logs
+frontend/lerna-debug.log*   # lerna (monorepo tool) logs
+frontend/logs/              # Application logs directory
+frontend/*.log              # Any .log file in frontend root
 
-frontend/node_modules
-frontend/dist
-frontend/dist-ssr
-frontend*.local
 
-# OS specific
-frontend/.DS_Store
-frontend/Thumbs.db
+# Testing
+frontend/coverage/
+frontend/.nyc_output/
+
+# Temporary files
+frontend/*.tmp
+frontend/*.temp
+frontend/*.local
 
 # ============================================================================
 # Docker
 # ============================================================================
-# No need to ignore docker-compose files - they should be committed
-# But ignore any override files
+# Ignore override files.
 docker-compose.override.yml
 
 # ============================================================================
@@ -107,23 +95,17 @@ neo4j_data/
 .neo4j/
 
 # ============================================================================
-# IDE & Editor
+# Neovim (Global)
 # ============================================================================
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-.DS_Store
-Thumbs.db
-
+*.swp                       # Swap file (active editing session)
+*.swo                       # Swap file (older/secondary)
+*~                          # Backup file (~ suffix)
+*.un~                       # Undo file (persistent undo history)
+.netrwhist                  # Neovim's file browser history
 # ============================================================================
-# OS
+# Fedora (Globasl)
 # ============================================================================
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
+*~                          # Backup files (text editors)
+.directory                  # KDE Dolphin folder settings
+.fuse_hidden*               # FUSE filesystem hidden files
+.Trash-*                    # Linux trash folder
