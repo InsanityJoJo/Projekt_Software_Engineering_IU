@@ -13,9 +13,9 @@ from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
 
-from driver import GraphDBDriver
-from services.query_builder import AdminQueryBuilder, QueryValidationError
-from logger import setup_logger
+from src.driver import GraphDBDriver
+from src.services.query_builder import AdminQueryBuilder, QueryValidationError
+from src.logger import setup_logger
 
 
 @dataclass

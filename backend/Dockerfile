@@ -26,8 +26,8 @@ RUN mkdir -p logs
 # Make script executable
 RUN chmod +x scripts/import_data.py
 
-# Add src to PYTHONPATH so imports work
-ENV PYTHONPATH=/app/src
+# Add root to PYTHONPATH so imports work
+ENV PYTHONPATH=/app
 
 # Expose port (adjust as needed)
 EXPOSE 8000
@@ -37,4 +37,4 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Run the application
-CMD ["python", "src/main.py", "scripts/import_data.py", "data/demo_data.json"]
+CMD ["python", "src/main.py", "src/scripts/import_data.py", "src/data/demo_data.json"]

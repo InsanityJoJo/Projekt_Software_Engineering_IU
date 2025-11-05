@@ -9,7 +9,7 @@ query result handling.
 from typing import Any, Optional
 from neo4j import GraphDatabase
 import logging
-from logger import setup_logger
+from src.logger import setup_logger
 
 
 class ResultWrapper:

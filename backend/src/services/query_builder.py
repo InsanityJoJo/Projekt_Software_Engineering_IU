@@ -5,8 +5,9 @@ user input. It uses parameterized queries and validates all inputs to
 prevent Cypher injection attacks and restrict operations to read-only.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, reveal_type
 from enum import Enum
+from src.constants import ALLOWED_LABELS, ALLOWED_PROPERTIES, ALLOWED_RELATIONSHIPS
 
 
 class QueryType(Enum):
@@ -31,79 +32,6 @@ class SafeQueryBuilder:
     3. Labels and property names are validated (whitelist approach)
     4. Query complexity is limited (prevents resource exhaustion)
     """
-
-    # Whitelist of allowed node labels
-    ALLOWED_LABELS = {
-        "AttackPattern",
-        "Campaign",
-        "Identity",
-        "Incident",
-        "Indicator",
-        "Malware",
-        "Observable",
-        "File",
-        "DomainName",
-        "URL",
-        "EmailAddr",
-        "IPv4Adress",
-        "Organization",
-        "Report",
-        "ThreatActor",
-        "Tool",
-        "Vulnerability",
-        # Add more labels here
-    }
-
-    # Whitelist of allowed relationship types
-    ALLOWED_RELATIONSHIPS = {
-        "BASED_ON",
-        "DETECTS",
-        "DESCRIBES",
-        "EMPLOYES",
-        "HAS_IDENTITY",
-        "INDICATED_BY",
-        "INVOLVES",
-        "LAUNCHED",
-        "RELATED_TO",
-        "TARGETS",
-        "USES",
-        # Add more relationship types here
-    }
-
-    # Whitelist of allowed property names
-    ALLOWED_PROPERTIES = {
-        "name",
-        "description",
-        "title",
-        "published_date",
-        "source",
-        "aliases",
-        "type",
-        "id",
-        "motivation",
-        "first_seen",
-        "last_seen",
-        "version",
-        "start_date",
-        "end_date",
-        "cve_id",
-        "cvss_score",
-        "family",
-        "detection_date",
-        "resolved_date",
-        "sector",
-        "region",
-        "roles",
-        "contact_info",
-        "filename",
-        "size",
-        "hash_md5",
-        "hash_sha1",
-        "hash_sha256",
-        "domain",
-        "addressurl",
-        # Add more properties here
-    }
 
     # Forbidden keywords (for read-only enforcement)
     FORBIDDEN_KEYWORDS = {
@@ -137,10 +65,10 @@ class SafeQueryBuilder:
         Raises:
             QueryValidationError: If label is not allowed.
         """
-        if label not in self.ALLOWED_LABELS:
+        if label not in ALLOWED_LABELS:
             raise QueryValidationError(
                 f"Label '{label}' is not allowed. "
-                f"Allowed labels: {', '.join(self.ALLOWED_LABELS)}"
+                f"Allowed labels: {', '.join(ALLOWED_LABELS)}"
             )
         return label
 
@@ -156,10 +84,10 @@ class SafeQueryBuilder:
         Raises:
             QueryValidationError: If relationship type is not allowed.
         """
-        if rel_type not in self.ALLOWED_RELATIONSHIPS:
+        if rel_type not in ALLOWED_RELATIONSHIPS:
             raise QueryValidationError(
                 f"Relationship '{rel_type}' is not allowed. "
-                f"Allowed types: {', '.join(self.ALLOWED_RELATIONSHIPS)}"
+                f"Allowed types: {', '.join(ALLOWED_RELATIONSHIPS)}"
             )
         return rel_type
 
@@ -175,10 +103,10 @@ class SafeQueryBuilder:
         Raises:
             QueryValidationError: If property is not allowed.
         """
-        if prop not in self.ALLOWED_PROPERTIES:
+        if prop not in ALLOWED_PROPERTIES:
             raise QueryValidationError(
                 f"Property '{prop}' is not allowed. "
-                f"Allowed properties: {', '.join(self.ALLOWED_PROPERTIES)}"
+                f"Allowed properties: {', '.join(ALLOWED_PROPERTIES)}"
             )
         return prop
 
@@ -409,6 +337,66 @@ class SafeQueryBuilder:
 
         params = {"search_value": search_value, "limit": limit or self.max_results}
 
+        self.validate_query_safety(query)
+        return query, params
+
+    def count_nodes(self, label: Optional[str] = None) -> tuple[str, Dict[str, Any]]:
+        """Build query to count nodes.
+
+        Args:
+            label: Optional label to filter by
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+        """
+        if label:
+            label = self.validate_label(label)
+            query = f"MATCH (n:{label}) RETURN count(n) AS count"
+        else:
+            query = "Match (n) RETRUN count(n) AS count"
+
+        self.validate_query_safety(query)
+        return query, {}
+
+    def count_relationships(
+        self, relationship_type: Optional[str] = None
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build query to count relationships.
+
+        Args:
+            relationship_type: Optional relationship type to filter by
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+        """
+        if relationship_type:
+            rel_type = self.validate_relationship(relationship_type)
+            query = f"MATCH ()-[r:{rel_type}]->() RETURN count(r) AS count"
+        else:
+            query = "MATCH ()-[r]->() RETURN count(r) AS count"
+
+        self.validate_query_safety(query)
+        return query, {}
+
+    def get_all_nodes(
+        self, label: Optional[str] = None, limit: Optional[int] = None
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build query to get all nodes.
+
+        Args:
+            label: Optional label to filter by
+            limit: Maximum results to return
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+        """
+        if label:
+            label = self.validate_label(label)
+            query = f"MATCH (n:{label}) RETURN n LIMIT $limit"
+        else:
+            query = "MATCH (n) RETURN n LIMIT $limit"
+
+        params = {"limit": limit or self.max_results}
         self.validate_query_safety(query)
         return query, params
 
