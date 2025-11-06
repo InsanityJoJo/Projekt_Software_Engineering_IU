@@ -59,6 +59,11 @@ ALLOWED_PROPERTIES = {
     "resolved_date",
     "sector",
     "region",
+    "filename",
+    "size",
+    "hash_md5",
+    "hash_sha256",
+    "addressurl",
 }
 
 # API Configuration

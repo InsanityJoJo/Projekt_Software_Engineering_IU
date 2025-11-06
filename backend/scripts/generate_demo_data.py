@@ -413,14 +413,14 @@ def generate_files(count: int) -> List[Dict[str, Any]]:
 
 
 def generate_ipv4_addresses(count: int) -> List[Dict[str, Any]]:
-    """Generate IPv4Adress nodes."""
+    """Generate IPv4Address nodes."""
     ips = []
 
     for i in range(count):
         ip = generate_reserved_ip()
         ips.append(
             {
-                "label": "IPv4Adress",
+                "label": "IPv4Address",
                 "properties": {
                     "name": ip,
                     "addressurl": ip,
@@ -637,7 +637,7 @@ def generate_relationships(nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     add_relationship("Malware", "Indicator", "INDICATED_BY", 2)
     add_relationship("Indicator", "Observable", "BASED_ON", 1)
     add_relationship("Observable", "File", "BASED_ON", 1)
-    add_relationship("Observable", "IPv4Adress", "BASED_ON", 1)
+    add_relationship("Observable", "IPv4Address", "BASED_ON", 1)
     add_relationship("Incident", "Organization", "TARGETS", 1)
     add_relationship("Incident", "Indicator", "INDICATED_BY", 2)
     add_relationship("Report", "ThreatActor", "DESCRIBES", 2)
@@ -692,7 +692,7 @@ def generate_demo_data(total_nodes: int = 500) -> Dict[str, Any]:
         "Indicator": 0.15,  # 15%
         "Observable": 0.10,  # 10%
         "File": 0.08,  # 8%
-        "IPv4Adress": 0.08,  # 8%
+        "IPv4Address": 0.08,  # 8%
         "Organization": 0.06,  # 6%
         "Tool": 0.04,  # 4%
         "Vulnerability": 0.03,  # 3%
@@ -712,7 +712,9 @@ def generate_demo_data(total_nodes: int = 500) -> Dict[str, Any]:
     nodes.extend(generate_indicators(int(total_nodes * distribution["Indicator"])))
     nodes.extend(generate_observables(int(total_nodes * distribution["Observable"])))
     nodes.extend(generate_files(int(total_nodes * distribution["File"])))
-    nodes.extend(generate_ipv4_addresses(int(total_nodes * distribution["IPv4Adress"])))
+    nodes.extend(
+        generate_ipv4_addresses(int(total_nodes * distribution["IPv4Address"]))
+    )
     nodes.extend(
         generate_organizations(int(total_nodes * distribution["Organization"]))
     )
@@ -801,4 +803,3 @@ Examples:
     print(f"  Format Version: {data['metadata']['version']}")
     print(f"  Generated: {data['metadata']['created']}")
     print("\n✓ Done!")
-

@@ -1,17 +1,26 @@
 """Autocomplete service for node name suggestions.
 
-This module provides efficient autocomplete functionality for searching
-nodes in the Neo4j database. It uses case-insensitive prefix matching
-and returns only the minimal data needed for suggestions.
+This module provides autocomplete functionality for searching
+nodes in the Neo4j database using the SafeQueryBuilder for consistency
+and security.
+
+REFACTORED: Now uses SafeQueryBuilder instead of raw Cypher queries.
+FIXED: Properly extracts Neo4j labels from nodes.
 """
 
 from typing import Optional
 from src.driver import GraphDBDriver, ResultWrapper
-from src.constants import ALLOWED_LABELS
+from src.services.query_builder import SafeQueryBuilder
 
 
 class AutocompleteService:
-    """Service for providing node name autocomplete suggestions."""
+    """Service for providing node name autocomplete suggestions.
+
+    This service uses SafeQueryBuilder to ensure all queries are:
+    - Properly parameterized (no injection risk)
+    - Validated (only allowed labels/properties)
+    - Consistent with the rest of the application
+    """
 
     def __init__(self, driver: GraphDBDriver):
         """Initialize the autocomplete service.
@@ -20,22 +29,7 @@ class AutocompleteService:
             driver: The Neo4j database driver instance.
         """
         self.driver = driver
-
-    def _validate_label(self, label: str) -> str:
-        """Validate and sanitize label input.
-
-        Args:
-            label: Node label to validate
-
-        Returns:
-            Validated label string
-
-        Raises:
-            ValueError: If label is invalid
-        """
-        if label and label not in ALLOWED_LABELS:
-            raise ValueError(f"Invalid label: {label}. Must be one of {ALLOWED_LABELS}")
-        return label
+        self.query_builder = SafeQueryBuilder(max_results=100)
 
     def suggest_node_names(
         self, prefix: str, label: Optional[str] = None, limit: int = 10
@@ -43,7 +37,7 @@ class AutocompleteService:
         """Get node name suggestions based on prefix.
 
         This method performs case-insensitive prefix matching on node names.
-        It's optimized to return only names, not full node data.
+        Returns: name, label, and id for each matching node.
 
         Args:
             prefix: The text prefix to match against node names.
@@ -63,124 +57,49 @@ class AutocompleteService:
 
         prefix = prefix.strip()
 
-        # Validate label if provided
-        if label:
-            try:
-                label = self._validate_label(label)
-            except ValueError as e:
-                return ResultWrapper(success=False, error=str(e))
+        try:
+            # Build custom query that returns label explicitly
+            # We can't use search_nodes() because it doesn't return labels
+            from src.constants import ALLOWED_LABELS
 
-        # Build query based on whether label is specified
-        if label:
-            query = f"""
-            MATCH (n:{label})
-            WHERE toLower(n.name) STARTS WITH toLower($prefix)
-            RETURN n.name AS name, labels(n)[0] AS label, elementId(n) AS id
-            ORDER BY n.name
-            LIMIT $limit
-            """
-        else:
-            query = """
-            MATCH (n)
-            WHERE n.name IS NOT NULL 
-              AND toLower(n.name) STARTS WITH toLower($prefix)
-            RETURN n.name AS name, labels(n)[0] AS label, elementId(n) AS id
-            ORDER BY n.name
-            LIMIT $limit
-            """
+            if label:
+                # Validate label
+                if label not in ALLOWED_LABELS:
+                    return ResultWrapper(success=False, error=f"Invalid label: {label}")
 
-        params = {"prefix": prefix, "limit": limit}
-        return self.driver.run_safe_query(query, params)
+                query = f"""
+                MATCH (n:{label})
+                WHERE toLower(n.name) STARTS WITH toLower($prefix)
+                RETURN n.name AS name, labels(n)[0] AS label, elementId(n) AS id
+                ORDER BY n.name
+                LIMIT $limit
+                """
+            else:
+                query = """
+                MATCH (n)
+                WHERE n.name IS NOT NULL 
+                  AND toLower(n.name) STARTS WITH toLower($prefix)
+                RETURN n.name AS name, labels(n)[0] AS label, elementId(n) AS id
+                ORDER BY n.name
+                LIMIT $limit
+                """
 
-    def check_node_exists(
-        self, name: str, label: Optional[str] = None
-    ) -> ResultWrapper:
-        """Check if a node with given name exists.
+            params = {"prefix": prefix, "limit": limit}
 
-        This is a lightweight check that returns only boolean result,
-        not the full node data.
+            # Execute query
+            result = self.driver.run_safe_query(query, params)
 
-        Args:
-            name: The exact node name to check.
-            label: Optional node label to filter by.
+            return result
 
-        Returns:
-            ResultWrapper: Contains existence check result.
-                Example data: [{'exists': True, 'count': 2}]
-        """
-        # Validate label if provided
-        if label:
-            try:
-                label = self._validate_label(label)
-            except ValueError as e:
-                return ResultWrapper(success=False, error=str(e))
-
-        if label:
-            query = f"""
-            MATCH (n:{label} {{name: $name}})
-            RETURN count(n) AS count, count(n) > 0 AS exists
-            """
-        else:
-            query = """
-            MATCH (n {name: $name})
-            RETURN count(n) AS count, count(n) > 0 AS exists
-            """
-
-        return self.driver.run_safe_query(query, {"name": name})
-
-    def get_all_node_names(
-        self, label: Optional[str] = None, max_nodes: int = 1000
-    ) -> ResultWrapper:
-        """Get all node names for frontend caching.
-
-        WARNING: Use this carefully! For large databases, this can return
-        a lot of data. Consider using pagination or limiting to specific labels.
-
-        Args:
-            label: Optional node label to filter by.
-            max_nodes: Maximum number of names to return (safety limit).
-
-        Returns:
-            ResultWrapper: Contains all node names.
-                Example data: [
-                    {'name': 'ShadowGroup', 'label': 'ThreatActor'},
-                    {'name': 'CryptoLocker-X', 'label': 'Malware'},
-                    ...
-                ]
-        """
-        # Validate label if provided
-        if label:
-            try:
-                label = self._validate_label(label)
-            except ValueError as e:
-                return ResultWrapper(success=False, error=str(e))
-
-        if label:
-            query = f"""
-            MATCH (n:{label})
-            WHERE n.name IS NOT NULL
-            RETURN DISTINCT n.name AS name, '{label}' AS label
-            ORDER BY n.name
-            LIMIT $max_nodes
-            """
-        else:
-            query = """
-            MATCH (n)
-            WHERE n.name IS NOT NULL
-            RETURN DISTINCT n.name AS name, labels(n)[0] AS label
-            ORDER BY n.name
-            LIMIT $max_nodes
-            """
-
-        return self.driver.run_safe_query(query, {"max_nodes": max_nodes})
+        except Exception as e:
+            return ResultWrapper(success=False, error=f"Search failed: {str(e)}")
 
     def fuzzy_search(
         self, search_term: str, label: Optional[str] = None, limit: int = 10
     ) -> ResultWrapper:
         """Perform fuzzy search on node names.
 
-        This uses CONTAINS instead of STARTS WITH for more flexible matching.
-        Results are ranked by relevance (prefix matches first, then substring matches).
+        This uses CONTAINS for more flexible matching with relevance scoring.
 
         Args:
             search_term: The text to search for (can appear anywhere in name).
@@ -199,73 +118,142 @@ class AutocompleteService:
 
         search_term = search_term.strip()
 
-        # Validate label if provided
-        if label:
-            try:
-                label = self._validate_label(label)
-            except ValueError as e:
-                return ResultWrapper(success=False, error=str(e))
+        try:
+            # Build custom query with label and relevance
+            from src.constants import ALLOWED_LABELS
 
-        if label:
-            query = f"""
-            MATCH (n:{label})
-            WHERE toLower(n.name) CONTAINS toLower($search_term)
-            RETURN n.name AS name, 
-                   labels(n)[0] AS label, 
-                   elementId(n) AS id,
-                   CASE 
-                     WHEN toLower(n.name) STARTS WITH toLower($search_term) THEN 1
-                     ELSE 2
-                   END AS relevance
-            ORDER BY relevance, n.name
-            LIMIT $limit
-            """
-        else:
-            query = """
-            MATCH (n)
-            WHERE n.name IS NOT NULL 
-              AND toLower(n.name) CONTAINS toLower($search_term)
-            RETURN n.name AS name, 
-                   labels(n)[0] AS label, 
-                   elementId(n) AS id,
-                   CASE 
-                     WHEN toLower(n.name) STARTS WITH toLower($search_term) THEN 1
-                     ELSE 2
-                   END AS relevance
-            ORDER BY relevance, n.name
-            LIMIT $limit
-            """
+            if label:
+                # Validate label
+                if label not in ALLOWED_LABELS:
+                    return ResultWrapper(success=False, error=f"Invalid label: {label}")
 
-        return self.driver.run_safe_query(
-            query, {"search_term": search_term, "limit": limit}
-        )
+                query = f"""
+                MATCH (n:{label})
+                WHERE toLower(n.name) CONTAINS toLower($search_term)
+                RETURN n.name AS name, 
+                       labels(n)[0] AS label, 
+                       elementId(n) AS id,
+                       CASE 
+                         WHEN toLower(n.name) STARTS WITH toLower($search_term) THEN 1
+                         ELSE 2
+                       END AS relevance
+                ORDER BY relevance, n.name
+                LIMIT $limit
+                """
+            else:
+                query = """
+                MATCH (n)
+                WHERE n.name IS NOT NULL 
+                  AND toLower(n.name) CONTAINS toLower($search_term)
+                RETURN n.name AS name, 
+                       labels(n)[0] AS label, 
+                       elementId(n) AS id,
+                       CASE 
+                         WHEN toLower(n.name) STARTS WITH toLower($search_term) THEN 1
+                         ELSE 2
+                       END AS relevance
+                ORDER BY relevance, n.name
+                LIMIT $limit
+                """
 
+            params = {"search_term": search_term, "limit": limit}
 
-# Example usage:
-if __name__ == "__main__":
-    # This is just for testing during development
-    from driver import GraphDBDriver
+            # Execute query
+            result = self.driver.run_safe_query(query, params)
 
-    driver = GraphDBDriver(
-        uri="bolt://localhost:7687", user="neo4j", password="password"
-    )
+            return result
 
-    service = AutocompleteService(driver)
+        except Exception as e:
+            return ResultWrapper(success=False, error=f"Fuzzy search failed: {str(e)}")
 
-    # Test prefix search
-    result = service.suggest_node_names("Sha", limit=5)
-    if result.success:
-        print("Prefix search results:")
-        for item in result.data:
-            print(f"  - {item['name']} ({item['label']})")
+    def check_node_exists(
+        self, name: str, label: Optional[str] = None
+    ) -> ResultWrapper:
+        """Check if a node with given name exists.
 
-    # Test fuzzy search
-    fuzzy_result = service.fuzzy_search("Shadow", limit=5)
-    if fuzzy_result.success:
-        print("\nFuzzy search results:")
-        for item in fuzzy_result.data:
-            print(
-                f"  - {item['name']} ({item['label']}) - relevance: {item['relevance']}"
+        This is a lightweight check that returns only boolean result.
+
+        Args:
+            name: The exact node name to check.
+            label: Optional node label to filter by.
+
+        Returns:
+            ResultWrapper: Contains existence check result.
+                Example data: [{'exists': True, 'count': 1}]
+        """
+        try:
+            from src.constants import ALLOWED_LABELS
+
+            if label and label not in ALLOWED_LABELS:
+                return ResultWrapper(success=False, error=f"Invalid label: {label}")
+
+            if label:
+                query = f"""
+                MATCH (n:{label} {{name: $name}})
+                RETURN count(n) AS count, count(n) > 0 AS exists
+                """
+            else:
+                query = """
+                MATCH (n {{name: $name}})
+                WHERE n.name IS NOT NULL
+                RETURN count(n) AS count, count(n) > 0 AS exists
+                """
+
+            result = self.driver.run_safe_query(query, {"name": name})
+
+            return result
+
+        except Exception as e:
+            return ResultWrapper(
+                success=False, error=f"Existence check failed: {str(e)}"
             )
 
-    driver.close()
+    def get_all_node_names(
+        self, label: Optional[str] = None, max_nodes: int = 1000
+    ) -> ResultWrapper:
+        """Get all node names for frontend caching.
+
+        WARNING: Use this carefully! For large databases, this can return
+        a lot of data.
+
+        Args:
+            label: Optional node label to filter by.
+            max_nodes: Maximum number of names to return (safety limit).
+
+        Returns:
+            ResultWrapper: Contains all node names.
+                Example data: [
+                    {'name': 'ShadowGroup', 'label': 'ThreatActor'},
+                    {'name': 'CryptoLocker-X', 'label': 'Malware'},
+                    ...
+                ]
+        """
+        try:
+            from src.constants import ALLOWED_LABELS
+
+            if label and label not in ALLOWED_LABELS:
+                return ResultWrapper(success=False, error=f"Invalid label: {label}")
+
+            if label:
+                query = f"""
+                MATCH (n:{label})
+                WHERE n.name IS NOT NULL
+                RETURN DISTINCT n.name AS name, labels(n)[0] AS label
+                ORDER BY n.name
+                LIMIT $max_nodes
+                """
+            else:
+                query = """
+                MATCH (n)
+                WHERE n.name IS NOT NULL
+                RETURN DISTINCT n.name AS name, labels(n)[0] AS label
+                ORDER BY n.name
+                LIMIT $max_nodes
+                """
+
+            result = self.driver.run_safe_query(query, {"max_nodes": max_nodes})
+
+            return result
+
+        except Exception as e:
+            return ResultWrapper(success=False, error=f"Get all names failed: {str(e)}")

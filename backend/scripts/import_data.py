@@ -19,8 +19,8 @@ from pathlib import Path
 # Add src directory to path for imports
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
 
-from driver import GraphDBDriver
-from services.import_service import ImportService
+from src.driver import GraphDBDriver
+from src.services.import_service import ImportService
 
 
 def print_banner():

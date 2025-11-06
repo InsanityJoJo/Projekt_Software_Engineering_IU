@@ -1,17 +1,13 @@
 """API Handlers - Request handling and business logic.
 
-This module contains all request handling logic:
-- Input validation
-- Calling services
-- Response formatting
-- Error handling
+FIXED: handle_get_node_by_name now properly fetches nodes with correct queries.
 """
 
 from flask import jsonify, request
 from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 from src.logger import setup_logger
 from src.services.autocomplete_service import AutocompleteService
-from src.services.query_builder import QueryValidationError
+from src.services.query_builder import QueryValidationError, SafeQueryBuilder
 
 # Initialize logger
 logger = setup_logger("Handlers", "INFO")
@@ -40,18 +36,13 @@ def init_handlers(driver, autocomplete_svc=None):
 
 # Health & Status Handlers
 def handle_health_check():
-    """Handle health check request.
-
-    Returns:
-        JSON response with health status
-    """
+    """Handle health check request."""
     try:
         if db_driver is None:
             return jsonify(
                 {"status": "unhealthy", "error": "Database driver not initialized"}
             ), 503
 
-        # Test database connection
         result = db_driver.run_safe_query("RETURN 1 AS health")
 
         if result.success:
@@ -71,25 +62,16 @@ def handle_health_check():
 
 
 def handle_get_stats():
-    """Handle get statistics request.
-
-    Returns:
-        JSON response with database statistics
-    """
+    """Handle get statistics request."""
     try:
         if db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
-        # Create query builder instance
-        from src.services.query_builder import SafeQueryBuilder
-
         builder = SafeQueryBuilder()
 
-        # Count nodes using builder
         node_query, node_params = builder.count_nodes()
         node_result = db_driver.run_safe_query(node_query, node_params)
 
-        # Count relationships using builder
         rel_query, rel_params = builder.count_relationships()
         rel_result = db_driver.run_safe_query(rel_query, rel_params)
 
@@ -113,21 +95,13 @@ def handle_get_stats():
 
 # Query Handlers
 def handle_execute_query(request):
-    """Handle Cypher query execution.
-
-    Args:
-        request: Flask request object
-
-    Returns:
-        JSON response with query results
-    """
+    """Handle Cypher query execution."""
     try:
         if db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
         data = request.get_json()
 
-        # Validate input
         if not data or "query" not in data:
             return jsonify({"error": "Query required"}), 400
 
@@ -136,7 +110,6 @@ def handle_execute_query(request):
 
         logger.info(f"Executing query: {query[:100]}...")
 
-        # Execute query
         result = db_driver.run_safe_query(query, parameters)
 
         if result.success:
@@ -156,26 +129,17 @@ def handle_execute_query(request):
 
 
 def handle_autocomplete(request):
-    """Handle autocomplete request.
-
-    Args:
-        request: Flask request object
-
-    Returns:
-        JSON response with suggestions
-    """
+    """Handle autocomplete request."""
     try:
         if autocomplete_service is None:
             return jsonify(
                 {"success": False, "error": "Autocomplete service not available"}
             ), 503
 
-        # Get query parameters
         query = request.args.get("q", "").strip()
         label = request.args.get("label", None)
         limit = min(int(request.args.get("limit", 10)), 20)
 
-        # Validate minimum length
         if len(query) < 3:
             return jsonify(
                 {
@@ -186,13 +150,12 @@ def handle_autocomplete(request):
                 }
             ), 200
 
-        # Try prefix match first (fast)
+        # Try prefix match first
         result = autocomplete_service.suggest_node_names(
             prefix=query, label=label, limit=limit
         )
 
         # If fewer than 3 results, try fuzzy search
-
         if result.success and isinstance(result.data, list) and len(result.data) < 3:
             fuzzy_result = autocomplete_service.fuzzy_search(
                 search_term=query, label=label, limit=limit
@@ -226,24 +189,13 @@ def handle_autocomplete(request):
 
 # Node Handlers
 def handle_get_nodes(request):
-    """Handle get all nodes request.
-
-    Args:
-        request: Flask request objeit
-
-    Returns:
-        JSON response with nodes
-    """
+    """Handle get all nodes request."""
     try:
         if db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
-        # Get limit parameter
         limit = request.args.get("limit", 100, type=int)
-        label = request.args.get("label", None)  # Optional filter by label
-
-        # Use query builder
-        from src.services.query_builder import SafeQueryBuilder
+        label = request.args.get("label", None)
 
         builder = SafeQueryBuilder()
 
@@ -271,8 +223,7 @@ def handle_get_nodes(request):
 def handle_create_node(request):
     """Handle create node request.
 
-    IMPORTANT: This uses AdminQueryBuilder for write operations.
-    Should be restricted to authenticated admin users only!
+    IMPORTANT: Should be restricted to authenticated admin users!
     """
     try:
         if db_driver is None:
@@ -280,14 +231,12 @@ def handle_create_node(request):
 
         data = request.get_json()
 
-        # Validate input
         if not data or "label" not in data:
             return jsonify({"error": "Label required"}), 400
 
         label = data["label"]
         properties = data.get("properties", {})
 
-        # Use AdminQueryBuilder for validated creation
         from src.services.query_builder import AdminQueryBuilder
 
         admin_builder = AdminQueryBuilder()
@@ -299,7 +248,6 @@ def handle_create_node(request):
                 match_properties={"name": properties["name"]}
                 if "name" in properties
                 else {},
-                # Merge on name if exists
             )
 
             result = db_driver.run_safe_query(query, params)
@@ -331,8 +279,10 @@ def handle_create_node(request):
 def handle_get_node_by_name(name, request):
     """Handle get node by name request.
 
+    CRITICAL FIX: Now uses proper query that returns nodes with connections.
+
     Args:
-        name: Node name to search for
+        name: Node name to search for (exact match, case-sensitive)
         request: Flask request object
 
     Returns:
@@ -342,43 +292,75 @@ def handle_get_node_by_name(name, request):
         if db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
-        # Optional: filter by label if provided
+        # Get optional label filter
         label = request.args.get("label", None)
 
-        # Use query builder
-        from src.services.query_builder import SafeQueryBuilder
+        logger.info(f"Fetching node: name='{name}', label={label}")
 
-        builder = SafeQueryBuilder()
+        # Build query to get node with relationships
+        # We need a custom query here because we need both node and connections
+        if label:
+            # Validate label
+            from src.constants import ALLOWED_LABELS
 
-        try:
-            # Use get_node_with_relationships method
-            query, params = builder.get_node_with_relationships(
-                label=label if label else "ThreatActor",
-                property_name="name",
-                property_value=name,
-                relationship_type=None,  # Get all relationships
-                limit=100,
-            )
+            if label not in ALLOWED_LABELS:
+                return jsonify({"error": f"Invalid label: {label}"}), 400
 
-            result = db_driver.run_safe_query(query, {"name": name})
+            # Query with specific label
+            query = f"""
+            MATCH (n:{label} {{name: $name}})
+            OPTIONAL MATCH (n)-[r]-(connected)
+            RETURN n, 
+                   collect({{
+                       relationship: type(r),
+                       node: connected,
+                       type: type(r),
+                       direction: CASE 
+                         WHEN startNode(r) = n THEN 'outgoing'
+                         ELSE 'incoming'
+                       END
+                   }}) AS connections
+            LIMIT 1
+            """
+        else:
+            # Query without label (search all types)
+            query = """
+            MATCH (n {name: $name})
+            WHERE n.name IS NOT NULL
+            OPTIONAL MATCH (n)-[r]-(connected)
+            RETURN n, 
+                   collect({
+                       relationship: type(r),
+                       node: connected,
+                       type: type(r),
+                       direction: CASE 
+                         WHEN startNode(r) = n THEN 'outgoing'
+                         ELSE 'incoming'
+                       END
+                   }) AS connections
+            LIMIT 1
+            """
 
-            if result.success:
-                if len(result.data) == 0:
-                    return jsonify(
-                        {"success": False, "error": f"Node '{name}' not found"}
-                    ), 404
+        # Execute query with proper parameters
+        params = {"name": name}
+        result = db_driver.run_safe_query(query, params)
 
+        if result.success:
+            if len(result.data) == 0:
+                logger.warning(f"Node not found: '{name}' (label={label})")
                 return jsonify(
-                    {"success": True, "data": result.data, "count": len(result.data)}
-                ), 200
-            else:
-                logger.error(f"Get node query failed: {result.error}")
-                return jsonify({"success": False, "error": result.error}), 500
+                    {"success": False, "error": f"Node '{name}' not found"}
+                ), 404
 
-        except QueryValidationError as e:
-            logger.warning(f"Validation error: {e}")
-            return jsonify({"error": str(e)}), 400
+            logger.info(f"Node found: '{name}', returning {len(result.data)} result(s)")
+
+            return jsonify(
+                {"success": True, "data": result.data, "count": len(result.data)}
+            ), 200
+        else:
+            logger.error(f"Get node query failed: {result.error}")
+            return jsonify({"success": False, "error": result.error}), 500
 
     except Exception as e:
-        logger.error(f"Get node error: {e}")
+        logger.error(f"Get node error: {e}", exc_info=True)
         return jsonify({"success": False, "error": "Internal server error"}), 500
