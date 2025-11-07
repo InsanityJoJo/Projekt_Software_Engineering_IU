@@ -279,7 +279,7 @@ def handle_create_node(request):
 def handle_get_node_by_name(name, request):
     """Handle get node by name request.
 
-    CRITICAL FIX: Now uses proper query that returns nodes with connections.
+    Uses SafeQueryBuilder for secure, validated query construction.
 
     Args:
         name: Node name to search for (exact match, case-sensitive)
@@ -297,52 +297,23 @@ def handle_get_node_by_name(name, request):
 
         logger.info(f"Fetching node: name='{name}', label={label}")
 
-        # Build query to get node with relationships
-        # We need a custom query here because we need both node and connections
-        if label:
-            # Validate label
-            from src.constants import ALLOWED_LABELS
+        # Use query builder for safe, validated query
+        builder = SafeQueryBuilder()
 
-            if label not in ALLOWED_LABELS:
-                return jsonify({"error": f"Invalid label: {label}"}), 400
+        try:
+            query, params = builder.get_node_with_relationships(
+                property_name="name",
+                property_value=name,
+                label=label,
+                include_metadata=True,
+                limit=1,
+            )
+        except QueryValidationError as e:
+            # Validation errors return 400 Bad Request
+            logger.warning(f"Validation error: {e}")
+            return jsonify({"error": str(e)}), 400
 
-            # Query with specific label
-            query = f"""
-            MATCH (n:{label} {{name: $name}})
-            OPTIONAL MATCH (n)-[r]-(connected)
-            RETURN n, 
-                   collect({{
-                       relationship: type(r),
-                       node: connected,
-                       type: type(r),
-                       direction: CASE 
-                         WHEN startNode(r) = n THEN 'outgoing'
-                         ELSE 'incoming'
-                       END
-                   }}) AS connections
-            LIMIT 1
-            """
-        else:
-            # Query without label (search all types)
-            query = """
-            MATCH (n {name: $name})
-            WHERE n.name IS NOT NULL
-            OPTIONAL MATCH (n)-[r]-(connected)
-            RETURN n, 
-                   collect({
-                       relationship: type(r),
-                       node: connected,
-                       type: type(r),
-                       direction: CASE 
-                         WHEN startNode(r) = n THEN 'outgoing'
-                         ELSE 'incoming'
-                       END
-                   }) AS connections
-            LIMIT 1
-            """
-
-        # Execute query with proper parameters
-        params = {"name": name}
+        # Execute query
         result = db_driver.run_safe_query(query, params)
 
         if result.success:

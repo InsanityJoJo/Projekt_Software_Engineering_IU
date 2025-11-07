@@ -1,11 +1,7 @@
 """Autocomplete service for node name suggestions.
 
 This module provides autocomplete functionality for searching
-nodes in the Neo4j database using the SafeQueryBuilder for consistency
-and security.
-
-REFACTORED: Now uses SafeQueryBuilder instead of raw Cypher queries.
-FIXED: Properly extracts Neo4j labels from nodes.
+nodes in the Neo4j database using the SafeQueryBuilder.
 """
 
 from typing import Optional
@@ -17,8 +13,8 @@ class AutocompleteService:
     """Service for providing node name autocomplete suggestions.
 
     This service uses SafeQueryBuilder to ensure all queries are:
-    - Properly parameterized (no injection risk)
-    - Validated (only allowed labels/properties)
+    - Properly parameterized
+    - Validated
     - Consistent with the rest of the application
     """
 
@@ -58,33 +54,17 @@ class AutocompleteService:
         prefix = prefix.strip()
 
         try:
-            # Build custom query that returns label explicitly
-            # We can't use search_nodes() because it doesn't return labels
-            from src.constants import ALLOWED_LABELS
-
-            if label:
-                # Validate label
-                if label not in ALLOWED_LABELS:
-                    return ResultWrapper(success=False, error=f"Invalid label: {label}")
-
-                query = f"""
-                MATCH (n:{label})
-                WHERE toLower(n.name) STARTS WITH toLower($prefix)
-                RETURN n.name AS name, labels(n)[0] AS label, elementId(n) AS id
-                ORDER BY n.name
-                LIMIT $limit
-                """
-            else:
-                query = """
-                MATCH (n)
-                WHERE n.name IS NOT NULL 
-                  AND toLower(n.name) STARTS WITH toLower($prefix)
-                RETURN n.name AS name, labels(n)[0] AS label, elementId(n) AS id
-                ORDER BY n.name
-                LIMIT $limit
-                """
-
-            params = {"prefix": prefix, "limit": limit}
+            # Use query builder for safe, validated query
+            # search_nodes with starts_with match type for prefix matching
+            # include_metadata=True to get labels and IDs
+            query, params = self.query_builder.search_nodes(
+                label=label,
+                search_property="name",
+                search_value=prefix,
+                match_type="starts_with",
+                limit=limit,
+                include_metadata=True,
+            )
 
             # Execute query
             result = self.driver.run_safe_query(query, params)
@@ -119,44 +99,15 @@ class AutocompleteService:
         search_term = search_term.strip()
 
         try:
-            # Build custom query with label and relevance
-            from src.constants import ALLOWED_LABELS
-
-            if label:
-                # Validate label
-                if label not in ALLOWED_LABELS:
-                    return ResultWrapper(success=False, error=f"Invalid label: {label}")
-
-                query = f"""
-                MATCH (n:{label})
-                WHERE toLower(n.name) CONTAINS toLower($search_term)
-                RETURN n.name AS name, 
-                       labels(n)[0] AS label, 
-                       elementId(n) AS id,
-                       CASE 
-                         WHEN toLower(n.name) STARTS WITH toLower($search_term) THEN 1
-                         ELSE 2
-                       END AS relevance
-                ORDER BY relevance, n.name
-                LIMIT $limit
-                """
-            else:
-                query = """
-                MATCH (n)
-                WHERE n.name IS NOT NULL 
-                  AND toLower(n.name) CONTAINS toLower($search_term)
-                RETURN n.name AS name, 
-                       labels(n)[0] AS label, 
-                       elementId(n) AS id,
-                       CASE 
-                         WHEN toLower(n.name) STARTS WITH toLower($search_term) THEN 1
-                         ELSE 2
-                       END AS relevance
-                ORDER BY relevance, n.name
-                LIMIT $limit
-                """
-
-            params = {"search_term": search_term, "limit": limit}
+            # Use query builder for fuzzy search with relevance scoring
+            # fuzzy_search_nodes includes CONTAINS matching and automatic relevance scoring
+            query, params = self.query_builder.fuzzy_search_nodes(
+                label=label,
+                search_property="name",
+                search_value=search_term,
+                limit=limit,
+                include_metadata=True,
+            )
 
             # Execute query
             result = self.driver.run_safe_query(query, params)
@@ -182,24 +133,13 @@ class AutocompleteService:
                 Example data: [{'exists': True, 'count': 1}]
         """
         try:
-            from src.constants import ALLOWED_LABELS
+            # Use query builder for efficient existence check
+            # Returns only count and boolean, not full node data
+            query, params = self.query_builder.check_node_exists(
+                property_name="name", property_value=name, label=label
+            )
 
-            if label and label not in ALLOWED_LABELS:
-                return ResultWrapper(success=False, error=f"Invalid label: {label}")
-
-            if label:
-                query = f"""
-                MATCH (n:{label} {{name: $name}})
-                RETURN count(n) AS count, count(n) > 0 AS exists
-                """
-            else:
-                query = """
-                MATCH (n {{name: $name}})
-                WHERE n.name IS NOT NULL
-                RETURN count(n) AS count, count(n) > 0 AS exists
-                """
-
-            result = self.driver.run_safe_query(query, {"name": name})
+            result = self.driver.run_safe_query(query, params)
 
             return result
 
@@ -229,29 +169,16 @@ class AutocompleteService:
                 ]
         """
         try:
-            from src.constants import ALLOWED_LABELS
+            # Use query builder for bulk name retrieval
+            # Returns DISTINCT names with labels for frontend caching
+            query, params = self.query_builder.get_all_node_names(
+                label=label,
+                property_name="name",
+                limit=max_nodes,
+                include_metadata=True,
+            )
 
-            if label and label not in ALLOWED_LABELS:
-                return ResultWrapper(success=False, error=f"Invalid label: {label}")
-
-            if label:
-                query = f"""
-                MATCH (n:{label})
-                WHERE n.name IS NOT NULL
-                RETURN DISTINCT n.name AS name, labels(n)[0] AS label
-                ORDER BY n.name
-                LIMIT $max_nodes
-                """
-            else:
-                query = """
-                MATCH (n)
-                WHERE n.name IS NOT NULL
-                RETURN DISTINCT n.name AS name, labels(n)[0] AS label
-                ORDER BY n.name
-                LIMIT $max_nodes
-                """
-
-            result = self.driver.run_safe_query(query, {"max_nodes": max_nodes})
+            result = self.driver.run_safe_query(query, params)
 
             return result
 

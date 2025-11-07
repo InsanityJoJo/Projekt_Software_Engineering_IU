@@ -1237,3 +1237,359 @@ class TestAdminValidatePropertiesDict:
         builder = AdminQueryBuilder()
         result = builder._validate_properties_dict({})
         assert result == {}
+
+
+class TestSearchNodesWithMetadata:
+    """Test suite for enhanced search_nodes method with metadata support."""
+
+    def test_search_with_metadata_enabled(self):
+        """Test that metadata is included when requested."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_value="Shadow", match_type="starts_with", include_metadata=True
+        )
+
+        assert "labels(n)[0] AS label" in query
+        assert "elementId(n) AS id" in query
+        assert "n.name AS name" in query
+        assert params["search_value"] == "Shadow"
+
+    def test_search_without_metadata(self):
+        """Test that metadata is excluded when not requested."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_value="Shadow", match_type="starts_with", include_metadata=False
+        )
+
+        assert "labels(n)[0]" not in query
+        assert "elementId(n)" not in query
+        assert "RETURN n" in query
+
+    def test_search_with_label_filter(self):
+        """Test search with specific label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            label="ThreatActor",
+            search_value="APT",
+            match_type="starts_with",
+            include_metadata=True,
+        )
+
+        assert ":ThreatActor" in query
+        assert "WHERE n.name IS NOT NULL" in query
+
+    def test_search_without_label_filter(self):
+        """Test search across all labels."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_value="test", match_type="contains", include_metadata=True
+        )
+
+        assert "MATCH (n)" in query
+        assert ":ThreatActor" not in query
+
+    def test_exact_match_type(self):
+        """Test exact match type uses equality."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(search_value="APT28", match_type="exact")
+
+        assert "n.name = $search_value" in query
+        assert "STARTS WITH" not in query
+        assert "CONTAINS" not in query
+
+    def test_starts_with_match_type(self):
+        """Test starts_with match type uses STARTS WITH."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_value="APT", match_type="starts_with"
+        )
+
+        assert "STARTS WITH" in query
+        assert "toLower" in query
+
+    def test_contains_match_type(self):
+        """Test contains match type uses CONTAINS."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_value="shadow", match_type="contains"
+        )
+
+        assert "CONTAINS" in query
+        assert "toLower" in query
+
+    def test_invalid_match_type_raises_error(self):
+        """Test that invalid match type raises error."""
+        builder = SafeQueryBuilder()
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.search_nodes(search_value="test", match_type="invalid")
+
+        assert "Invalid match_type" in str(exc_info.value)
+
+    def test_custom_search_property(self):
+        """Test searching on non-name property."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_property="description", search_value="malware", match_type="contains"
+        )
+
+        assert "n.description" in query
+        assert "ORDER BY n.description" in query
+
+    def test_custom_limit(self):
+        """Test custom limit is applied."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(search_value="test", limit=50)
+
+        assert params["limit"] == 50
+
+    def test_parameterization(self):
+        """Test that search value is properly parameterized."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_value="'; DROP TABLE nodes; --", match_type="exact"
+        )
+
+        assert "$search_value" in query
+        assert "DROP TABLE" not in query
+        assert params["search_value"] == "'; DROP TABLE nodes; --"
+
+
+class TestFuzzySearchNodes:
+    """Test suite for fuzzy_search_nodes method with relevance scoring."""
+
+    def test_fuzzy_search_includes_relevance(self):
+        """Test that relevance scoring is included."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(search_value="shadow")
+
+        assert "relevance" in query.lower()
+        assert "CASE" in query
+        assert "STARTS WITH" in query
+
+    def test_fuzzy_search_with_metadata(self):
+        """Test fuzzy search returns metadata by default."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(search_value="APT")
+
+        assert "labels(n)[0] AS label" in query
+        assert "elementId(n) AS id" in query
+
+    def test_fuzzy_search_orders_by_relevance(self):
+        """Test that results are ordered by relevance first."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(search_value="test")
+
+        assert "ORDER BY relevance" in query
+
+    def test_fuzzy_search_with_label(self):
+        """Test fuzzy search with label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(
+            label="Malware", search_value="crypto"
+        )
+
+        assert ":Malware" in query
+        assert "CONTAINS" in query
+
+    def test_fuzzy_search_without_metadata(self):
+        """Test fuzzy search without metadata."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(
+            search_value="test", include_metadata=False
+        )
+
+        assert "RETURN n" in query
+        assert "labels(n)[0] AS label" not in query
+
+    def test_relevance_scoring_logic(self):
+        """Test relevance scoring distinguishes prefix vs contains."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(search_value="shadow")
+
+        assert "WHEN toLower(n.name) STARTS WITH toLower($search_value) THEN 1" in query
+        assert "ELSE 2" in query
+
+
+class TestCheckNodeExists:
+    """Test suite for check_node_exists method."""
+
+    def test_check_exists_returns_count_and_boolean(self):
+        """Test that query returns both count and exists boolean."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="name", property_value="APT28"
+        )
+
+        assert "count(n) AS count" in query
+        assert "count(n) > 0 AS exists" in query
+
+    def test_check_exists_with_label(self):
+        """Test existence check with specific label."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="name", property_value="APT28", label="ThreatActor"
+        )
+
+        assert ":ThreatActor" in query
+        assert params["value"] == "APT28"
+
+    def test_check_exists_without_label(self):
+        """Test existence check across all labels."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="name", property_value="test"
+        )
+
+        assert "MATCH (n {name: $value})" in query
+
+    def test_check_exists_custom_property(self):
+        """Test existence check on non-name property."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="cve_id", property_value="CVE-2024-1234"
+        )
+
+        assert "n.cve_id" in query
+
+    def test_check_exists_parameterization(self):
+        """Test that value is properly parameterized."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="name", property_value="malicious'; DROP TABLE"
+        )
+
+        assert "$value" in query
+        assert "DROP TABLE" not in query
+
+
+class TestGetAllNodeNames:
+    """Test suite for get_all_node_names method."""
+
+    def test_get_all_names_with_metadata(self):
+        """Test getting all names with metadata."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names(include_metadata=True)
+
+        assert "DISTINCT n.name AS name" in query
+        assert "labels(n)[0] AS label" in query
+
+    def test_get_all_names_without_metadata(self):
+        """Test getting all names without metadata."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names(include_metadata=False)
+
+        assert "DISTINCT n.name AS name" in query
+        assert "labels(n)[0]" not in query
+
+    def test_get_all_names_with_label_filter(self):
+        """Test getting names for specific label."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names(label="ThreatActor", limit=500)
+
+        assert ":ThreatActor" in query
+        assert params["limit"] == 500
+
+    def test_get_all_names_ordered(self):
+        """Test that names are ordered."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names()
+
+        assert "ORDER BY n.name" in query
+
+    def test_get_all_names_distinct(self):
+        """Test that DISTINCT is used to avoid duplicates."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names()
+
+        assert "DISTINCT" in query
+
+    def test_get_all_names_custom_property(self):
+        """Test getting all values of custom property."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names(property_name="title")
+
+        assert "n.title AS title" in query
+        assert "ORDER BY n.title" in query
+
+
+class TestGetNodeWithRelationshipsEnhanced:
+    """Test suite for enhanced get_node_with_relationships method."""
+
+    def test_get_node_with_metadata(self):
+        """Test that metadata is included by default."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="APT28", label="ThreatActor"
+        )
+
+        assert "labels(n)[0] AS nodeLabel" in query
+        assert "elementId(n) AS nodeId" in query
+        assert "labels(connected)[0]" in query
+
+    def test_get_node_without_label(self):
+        """Test searching across all labels."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="test"
+        )
+
+        assert "MATCH (n {name: $value})" in query
+        assert "WHERE n.name IS NOT NULL" in query
+
+    def test_get_node_with_specific_label(self):
+        """Test searching with specific label."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="APT28", label="ThreatActor"
+        )
+
+        assert "MATCH (n:ThreatActor {name: $value})" in query
+
+    def test_get_node_with_relationship_filter(self):
+        """Test filtering by relationship type."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="APT28", relationship_type="USES"
+        )
+
+        assert "[r:USES]" in query
+
+    def test_get_node_without_metadata(self):
+        """Test getting node without metadata."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="test", include_metadata=False
+        )
+
+        assert "labels(n)[0]" not in query
+        assert "elementId(n)" not in query
+
+    def test_get_node_includes_direction(self):
+        """Test that relationship direction is included."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="test"
+        )
+
+        assert "direction" in query
+        assert "CASE" in query
+        assert "startNode(r)" in query
+
+    def test_get_node_uses_optional_match(self):
+        """Test that OPTIONAL MATCH is used for relationships."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="test"
+        )
+
+        assert "OPTIONAL MATCH" in query
+
+    def test_get_node_custom_limit(self):
+        """Test custom limit for relationships."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_node_with_relationships(
+            property_name="name", property_value="test", limit=10
+        )
+
+        assert params["limit"] == 10

@@ -2,7 +2,7 @@
 
 This module provides a safe interface for building Cypher queries from
 user input. It uses parameterized queries and validates all inputs to
-prevent Cypher injection attacks and restrict operations to read-only.
+prevent Cypher injection attacks and restrict user operations to read-only.
 """
 
 from typing import Dict, List, Optional, Any, reveal_type
@@ -228,27 +228,68 @@ class SafeQueryBuilder:
 
     def get_node_with_relationships(
         self,
-        label: str,
         property_name: str,
         property_value: Any,
+        label: Optional[str] = None,
         relationship_type: Optional[str] = None,
         limit: Optional[int] = None,
+        include_metadata: bool = True,
     ) -> tuple[str, Dict[str, Any]]:
-        """Build a query to get a node and its direct relationships.
+        """Build a query to get a node and its direct relationships with metadata.
+
+        This method is designed for the frontend graph visualization where
+        we need both the node data and all its connections with metadata
+        (labels, IDs, relationship types, directions).
+
+        The query uses OPTIONAL MATCH to handle nodes with no relationships.
+
+        Security: All inputs validated and parameterized to prevent injection.
 
         Args:
-            label: Node label.
-            property_name: Property to identify the node.
-            property_value: Value to match.
+            property_name: Property to identify the node (must be in ALLOWED_PROPERTIES).
+            property_value: Value to match (parameterized for safety).
+            label: Optional node label to filter by (if None, searches all labels).
             relationship_type: Optional specific relationship type filter.
-            limit: Maximum relationships to return.
+            limit: Maximum relationships to return per node.
+            include_metadata: If True, includes labels and IDs in response.
 
         Returns:
             tuple: (query_string, parameters_dict)
+            Query returns: {
+                n: node object,
+                nodeLabel: string (if include_metadata),
+                nodeId: string (if include_metadata),
+                connections: [array of relationship objects with metadata]
+            }
+
+        Raises:
+            QueryValidationError: If validation fails.
+
+        Examples:
+            With specific label:
+            >>> builder = SafeQueryBuilder()
+            >>> query, params = builder.get_node_with_relationships(
+            ...     property_name="name",
+            ...     property_value="APT28",
+            ...     label="ThreatActor"
+            ... )
+
+            Without label (search all):
+            >>> query, params = builder.get_node_with_relationships(
+            ...     property_name="name",
+            ...     property_value="APT28"
+            ... )
         """
-        # Validate inputs
-        label = self.validate_label(label)
+        # Validate property name against whitelist
         property_name = self.validate_property(property_name)
+
+        # Build MATCH clause - with or without label
+        if label:
+            label = self.validate_label(label)
+            match_clause = f"MATCH (n:{label} {{{property_name}: $value}})"
+        else:
+            # Search across all labels - need WHERE clause to ensure property exists
+            match_clause = f"MATCH (n {{{property_name}: $value}})\n        WHERE n.{property_name} IS NOT NULL"
 
         # Build relationship filter
         if relationship_type:
@@ -257,20 +298,42 @@ class SafeQueryBuilder:
         else:
             rel_pattern = "[r]"
 
-        # Build query
+        # Build RETURN clause based on metadata requirement
+        if include_metadata:
+            # Include Neo4j metadata for frontend display
+            return_clause = """n,
+                   labels(n)[0] AS nodeLabel,
+                   elementId(n) AS nodeId,
+                   collect({
+                       relationship: type(r),
+                       node: connected,
+                       nodeLabel: labels(connected)[0],
+                       nodeId: elementId(connected),
+                       type: type(r),
+                       direction: CASE 
+                         WHEN startNode(r) = n THEN 'outgoing'
+                         ELSE 'incoming'
+                       END
+                   }) AS connections"""
+        else:
+            # Basic version without metadata
+            return_clause = """n,
+                   collect({
+                       relationship: r,
+                       node: connected,
+                       type: type(r),
+                       direction: CASE 
+                         WHEN startNode(r) = n THEN 'outgoing'
+                         ELSE 'incoming'
+                       END
+                   }) AS connections"""
+
+        # Build complete query
+        # OPTIONAL MATCH ensures we get the node even if it has no relationships
         query = f"""
-        MATCH (n:{label} {{{property_name}: $value}})
+        {match_clause}
         OPTIONAL MATCH (n)-{rel_pattern}-(connected)
-        RETURN n, 
-               collect({{
-                   relationship: r,
-                   node: connected,
-                   type: type(r),
-                   direction: CASE 
-                     WHEN startNode(r) = n THEN 'outgoing'
-                     ELSE 'incoming'
-                   END
-               }}) AS connections
+        RETURN {return_clause}
         LIMIT $limit
         """
 
@@ -284,25 +347,55 @@ class SafeQueryBuilder:
         label: Optional[str] = None,
         search_property: str = "name",
         search_value: str = "",
-        match_type: str = "contains",  # 'exact', 'starts_with', 'contains'
+        match_type: str = "contains",
         limit: Optional[int] = None,
+        include_metadata: bool = False,
     ) -> tuple[str, Dict[str, Any]]:
-        """Build a safe search query for nodes.
+        """Build a safe search query for nodes with optional metadata.
+
+        This method supports three types of matching:
+        - exact: Case-sensitive exact match
+        - starts_with: Case-insensitive prefix match (for autocomplete)
+        - contains: Case-insensitive substring match (for fuzzy search)
+
+        Security: All inputs are validated against whitelists and parameterized
+        to prevent Cypher injection attacks.
 
         Args:
-            label: Optional node label to filter by.
-            search_property: Property to search in.
-            search_value: Value to search for.
+            label: Optional node label to filter by (e.g., 'ThreatActor').
+            search_property: Property to search in (must be in ALLOWED_PROPERTIES).
+            search_value: Value to search for (parameterized for safety).
             match_type: Type of matching ('exact', 'starts_with', 'contains').
-            limit: Maximum results to return.
+            limit: Maximum results to return (default: max_results).
+            include_metadata: If True, returns node labels and IDs alongside properties.
 
         Returns:
             tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If validation fails or match_type is invalid.
+
+        Examples:
+            Basic search:
+            >>> builder = SafeQueryBuilder()
+            >>> query, params = builder.search_nodes(
+            ...     search_value="Shadow",
+            ...     match_type="starts_with"
+            ... )
+
+            Search with metadata (for autocomplete):
+            >>> query, params = builder.search_nodes(
+            ...     label="ThreatActor",
+            ...     search_value="APT",
+            ...     match_type="starts_with",
+            ...     include_metadata=True
+            ... )
         """
-        # Validate inputs
+        # Validate inputs using whitelist approach
+        # This prevents injection by ensuring only safe, pre-approved property names
         search_property = self.validate_property(search_property)
 
-        # Build label clause
+        # Build label clause - validation ensures only allowed labels
         if label:
             label = self.validate_label(label)
             label_clause = f":{label}"
@@ -310,13 +403,16 @@ class SafeQueryBuilder:
             label_clause = ""
 
         # Build WHERE clause based on match type
+        # All values are parameterized ($search_value) to prevent injection
         if match_type == "exact":
             where_clause = f"n.{search_property} = $search_value"
         elif match_type == "starts_with":
+            # Case-insensitive prefix match for autocomplete
             where_clause = (
                 f"toLower(n.{search_property}) STARTS WITH toLower($search_value)"
             )
         elif match_type == "contains":
+            # Case-insensitive substring match for fuzzy search
             where_clause = (
                 f"toLower(n.{search_property}) CONTAINS toLower($search_value)"
             )
@@ -326,16 +422,242 @@ class SafeQueryBuilder:
                 "Must be 'exact', 'starts_with', or 'contains'"
             )
 
-        # Build query
+        # Build RETURN clause - with or without metadata
+        if include_metadata:
+            # Return node properties plus Neo4j metadata
+            # labels(n)[0] gets the primary label
+            # elementId(n) gets the unique node identifier
+            return_clause = f"""n.{search_property} AS {search_property},
+                   labels(n)[0] AS label,
+                   elementId(n) AS id"""
+        else:
+            # Return entire node object
+            return_clause = "n"
+
+        # Build complete query
         query = f"""
         MATCH (n{label_clause})
-        WHERE {where_clause}
-        RETURN n
+        WHERE n.{search_property} IS NOT NULL AND {where_clause}
+        RETURN {return_clause}
         ORDER BY n.{search_property}
         LIMIT $limit
         """
 
         params = {"search_value": search_value, "limit": limit or self.max_results}
+
+        # Final safety check - ensures no forbidden keywords
+        self.validate_query_safety(query)
+        return query, params
+
+    def fuzzy_search_nodes(
+        self,
+        label: Optional[str] = None,
+        search_property: str = "name",
+        search_value: str = "",
+        limit: Optional[int] = None,
+        include_metadata: bool = True,
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a fuzzy search query with relevance scoring.
+
+        This method performs case-insensitive CONTAINS matching and adds
+        relevance scoring to prioritize results that start with the search term.
+
+        Relevance scoring:
+        - 1: Property starts with search term (higher relevance)
+        - 2: Property contains search term (lower relevance)
+
+        This is optimized for autocomplete where prefix matches should appear first.
+
+        Security: All inputs validated and parameterized to prevent injection.
+
+        Args:
+            label: Optional node label to filter by.
+            search_property: Property to search in (must be in ALLOWED_PROPERTIES).
+            search_value: Value to search for (parameterized).
+            limit: Maximum results to return.
+            include_metadata: If True, returns labels and IDs (default: True for autocomplete).
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+
+        Raises:
+            QueryValidationError: If validation fails.
+
+        Examples:
+            >>> builder = SafeQueryBuilder()
+            >>> query, params = builder.fuzzy_search_nodes(
+            ...     label="Malware",
+            ...     search_value="shadow",
+            ...     limit=10
+            ... )
+            Returns nodes where name contains "shadow", ordered by relevance
+        """
+        # Validate inputs against whitelist
+        search_property = self.validate_property(search_property)
+
+        # Build label clause with validation
+        if label:
+            label = self.validate_label(label)
+            label_clause = f":{label}"
+        else:
+            label_clause = ""
+
+        # Build RETURN clause with relevance scoring
+        if include_metadata:
+            return_clause = f"""n.{search_property} AS {search_property},
+                   labels(n)[0] AS label,
+                   elementId(n) AS id,
+                   CASE 
+                     WHEN toLower(n.{search_property}) STARTS WITH toLower($search_value) THEN 1
+                     ELSE 2
+                   END AS relevance"""
+            order_clause = f"relevance, n.{search_property}"
+        else:
+            # Without metadata, still include relevance for ordering but don't return it
+            return_clause = f"""n,
+                   CASE 
+                     WHEN toLower(n.{search_property}) STARTS WITH toLower($search_value) THEN 1
+                     ELSE 2
+                   END AS relevance"""
+            order_clause = f"relevance, n.{search_property}"
+
+        # Build complete query with CONTAINS for fuzzy matching
+        query = f"""
+        MATCH (n{label_clause})
+        WHERE n.{search_property} IS NOT NULL 
+          AND toLower(n.{search_property}) CONTAINS toLower($search_value)
+        RETURN {return_clause}
+        ORDER BY {order_clause}
+        LIMIT $limit
+        """
+
+        params = {"search_value": search_value, "limit": limit or self.max_results}
+
+        self.validate_query_safety(query)
+        return query, params
+
+    def check_node_exists(
+        self,
+        property_name: str = "name",
+        property_value: Any = None,
+        label: Optional[str] = None,
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to check if a node exists.
+
+        This is a lightweight query that only returns count and boolean,
+        not the full node data. Useful for validation before operations.
+
+        Security: Uses parameterization to safely check user input.
+
+        Args:
+            property_name: Property to match on (must be in ALLOWED_PROPERTIES).
+            property_value: Value to match (parameterized for safety).
+            label: Optional node label to filter by.
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+            Query returns: {count: number, exists: boolean}
+
+        Raises:
+            QueryValidationError: If validation fails.
+
+        Examples:
+            >>> builder = SafeQueryBuilder()
+            >>> query, params = builder.check_node_exists(
+            ...     property_name="name",
+            ...     property_value="APT28",
+            ...     label="ThreatActor"
+            ... )
+            Returns: [{"count": 1, "exists": true}] if node exists
+        """
+        # Validate property name against whitelist
+        property_name = self.validate_property(property_name)
+
+        # Build label clause with validation
+        if label:
+            label = self.validate_label(label)
+            label_clause = f":{label}"
+        else:
+            label_clause = ""
+
+        # Build query - using COUNT for efficiency
+        # No need to return node data, just existence check
+        query = f"""
+        MATCH (n{label_clause} {{{property_name}: $value}})
+        WHERE n.{property_name} IS NOT NULL
+        RETURN count(n) AS count, count(n) > 0 AS exists
+        """
+
+        params = {"value": property_value}
+
+        self.validate_query_safety(query)
+        return query, params
+
+    def get_all_node_names(
+        self,
+        label: Optional[str] = None,
+        property_name: str = "name",
+        limit: Optional[int] = None,
+        include_metadata: bool = True,
+    ) -> tuple[str, Dict[str, Any]]:
+        """Build a query to get all node names for frontend caching.
+
+        NOTE: Not in use yet. Maybe future.
+
+        This method is designed for frontend autocomplete caching where
+        the UI needs a list of all available node names upfront.
+
+        Security: Validated and parameterized for safety.
+
+        Args:
+            label: Optional node label to filter by.
+            property_name: Property to return (default: "name").
+            limit: Maximum results to return (safety limit).
+            include_metadata: If True, returns labels alongside names.
+
+        Returns:
+            tuple: (query_string, parameters_dict)
+            Query returns list of {name: string, label: string}
+
+        Raises:
+            QueryValidationError: If validation fails.
+
+        Examples:
+            >>> builder = SafeQueryBuilder()
+            >>> query, params = builder.get_all_node_names(
+            ...     label="ThreatActor",
+            ...     limit=1000
+            ... )
+            Returns all ThreatActor names for caching
+        """
+        # Validate property name against whitelist
+        property_name = self.validate_property(property_name)
+
+        # Build label clause with validation
+        if label:
+            label = self.validate_label(label)
+            label_clause = f":{label}"
+        else:
+            label_clause = ""
+
+        # Build RETURN clause
+        if include_metadata:
+            return_clause = (
+                f"DISTINCT n.{property_name} AS {property_name}, labels(n)[0] AS label"
+            )
+        else:
+            return_clause = f"DISTINCT n.{property_name} AS {property_name}"
+
+        # Build query with DISTINCT to avoid duplicates
+        query = f"""
+        MATCH (n{label_clause})
+        WHERE n.{property_name} IS NOT NULL
+        RETURN {return_clause}
+        ORDER BY n.{property_name}
+        LIMIT $limit
+        """
+
+        params = {"limit": limit or self.max_results}
 
         self.validate_query_safety(query)
         return query, params

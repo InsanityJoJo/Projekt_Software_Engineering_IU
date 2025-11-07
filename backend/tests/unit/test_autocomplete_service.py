@@ -23,39 +23,6 @@ class TestAutocompleteServiceInit:
         assert ALLOWED_LABELS is not None
 
 
-class TestLabelValidation:
-    """Test label validation in AutocompleteService."""
-
-    def test_validate_label_valid(self):
-        """Test validation of valid labels."""
-        mock_driver = Mock()
-        service = AutocompleteService(mock_driver)
-
-        # Test a few valid labels
-        assert service._validate_label("ThreatActor") == "ThreatActor"
-        assert service._validate_label("Malware") == "Malware"
-        assert service._validate_label("Campaign") == "Campaign"
-
-    def test_validate_label_invalid(self):
-        """Test validation of invalid labels."""
-        mock_driver = Mock()
-        service = AutocompleteService(mock_driver)
-
-        with pytest.raises(ValueError) as exc_info:
-            service._validate_label("InvalidLabel")
-
-        assert "Invalid label" in str(exc_info.value)
-
-    def test_validate_label_none(self):
-        """Test validation when label is None."""
-        mock_driver = Mock()
-        service = AutocompleteService(mock_driver)
-
-        # When label is None or empty, validation should pass
-        result = service._validate_label(None)
-        assert result is None
-
-
 class TestSuggestNodeNames:
     """Test suggest_node_names method."""
 
@@ -118,7 +85,7 @@ class TestSuggestNodeNames:
         result = service.suggest_node_names("test", label="InvalidLabel", limit=10)
 
         assert result.success is False
-        assert "Invalid label" in result.error
+        assert "not allowed" in result.error or "Invalid label" in result.error
 
     def test_suggest_no_label_filter(self):
         """Test suggestion without label filter."""
@@ -211,7 +178,7 @@ class TestFuzzySearch:
         result = service.fuzzy_search("test", label="InvalidLabel", limit=10)
 
         assert result.success is False
-        assert "Invalid label" in result.error
+        assert "not allowed" in result.error or "Invalid label" in result.error
 
     def test_fuzzy_search_relevance_ordering(self):
         """Test that fuzzy search orders by relevance."""
@@ -292,7 +259,7 @@ class TestCheckNodeExists:
         result = service.check_node_exists("test", label="InvalidLabel")
 
         assert result.success is False
-        assert "Invalid label" in result.error
+        assert "not allowed" in result.error or "Invalid label" in result.error
 
 
 class TestGetAllNodeNames:
@@ -344,7 +311,7 @@ class TestGetAllNodeNames:
 
         # Check that limit was passed to driver
         call_args = mock_driver.run_safe_query.call_args
-        assert call_args[0][1]["max_nodes"] == 500
+        assert call_args[0][1]["limit"] == 500
 
     def test_get_all_nodes_invalid_label(self):
         """Test getting all nodes with invalid label."""
@@ -354,7 +321,7 @@ class TestGetAllNodeNames:
         result = service.get_all_node_names(label="InvalidLabel")
 
         assert result.success is False
-        assert "Invalid label" in result.error
+        assert "not allowed" in result.error or "Invalid label" in result.error
 
 
 class TestIntegrationScenarios:
