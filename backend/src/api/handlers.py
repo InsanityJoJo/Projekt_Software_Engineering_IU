@@ -10,7 +10,7 @@ from src.services.autocomplete_service import AutocompleteService
 from src.services.query_builder import QueryValidationError, SafeQueryBuilder
 
 # Initialize logger
-logger = setup_logger("Handlers", "INFO")
+logger = setup_logger("Handlers", 10)
 
 # Service instances (will be injected from main.py)
 db_driver = None
@@ -276,6 +276,258 @@ def handle_create_node(request):
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
+def transform_neo4j_results_to_graph(neo4j_results):
+    """
+    Transform Neo4j path results to graph format with full path preservation.
+
+    Args:
+        neo4j_results: List of records from Neo4j query, each containing:
+            - start: Dict with node properties (already converted by driver)
+            - start_label: String label from Cypher
+            - connected: Dict with node properties
+            - connected_label: String label from Cypher
+            - relationship_details: List of dicts with rel info and node labels
+            - pathNodes: List of all nodes in path (for reference)
+
+    Returns:
+        List with single dict containing:
+            - n: Main node data with label
+            - connections: List of connection objects
+            - nodes: List of all unique nodes with labels
+            - edges: List of all edges with source/target
+    """
+    if not neo4j_results:
+        return []
+
+    all_nodes = {}  # Key: node name, Value: {id, data, isMainNode}
+    all_edges = []  # List of {id, source, target, relationship}
+    start_node_key = None
+
+    logger.info("=" * 60)
+    logger.info(f"Starting transformation of {len(neo4j_results)} Neo4j records")
+    logger.info("=" * 60)
+
+    for record_idx, record in enumerate(neo4j_results):
+        # Extract data from record
+        start = record.get("start")  # Dict like {'name': 'Rose Corp', ...}
+        start_label = record.get("start_label")  # String like 'Organization'
+        connected = record.get("connected")  # Dict
+        connected_label = record.get("connected_label")  # String
+        relationship_details = record.get("relationship_details", [])
+
+        if not start:
+            logger.warning(f"Record {record_idx} missing 'start' node")
+            continue
+
+        # ==========================================
+        # PROCESS START NODE (Main Node)
+        # ==========================================
+
+        # start is already a dict, just add the label
+        start_dict = dict(start)  # Make a copy
+
+        # Add label from Cypher query result
+        if start_label:
+            start_dict["label"] = start_label
+            logger.debug(
+                f"Start node: {start_dict.get('name')} with label: {start_label}"
+            )
+        else:
+            logger.warning(f"Start node missing label: {start_dict.get('name')}")
+            start_dict["label"] = "Unknown"
+
+        start_node_key = start_dict.get("name", str(id(start)))
+
+        # Add start node to collection (only once)
+        if start_node_key not in all_nodes:
+            all_nodes[start_node_key] = {
+                "id": start_node_key,
+                "data": start_dict,
+                "isMainNode": True,
+            }
+            logger.debug(
+                f"Added main node: {start_node_key} with label: {start_dict['label']}"
+            )
+
+        # ==========================================
+        # PROCESS RELATIONSHIPS AND CONNECTED NODES
+        # ==========================================
+
+        # Add the connected node (endpoint of path)
+        if connected:
+            connected_dict = dict(connected)  # Make a copy
+
+            if connected_label:
+                connected_dict["label"] = connected_label
+            else:
+                logger.warning(
+                    f"Connected node missing label: {connected_dict.get('name')}"
+                )
+                connected_dict["label"] = "Unknown"
+
+            connected_key = connected_dict.get("name", str(id(connected)))
+
+            if connected_key not in all_nodes:
+                all_nodes[connected_key] = {
+                    "id": connected_key,
+                    "data": connected_dict,
+                    "isMainNode": False,
+                }
+                logger.debug(
+                    f"Added connected node: {connected_key} with label: {connected_dict['label']}"
+                )
+
+        # Process each relationship in the path
+        if relationship_details:
+            for rel_idx, rel_detail in enumerate(relationship_details):
+                # rel_detail structure:
+                # {
+                #   'type': 'LAUNCHES',
+                #   'start_node': {...},
+                #   'start_node_label': 'Organization',
+                #   'end_node': {...},
+                #   'end_node_label': 'Campaign'
+                # }
+
+                rel_type = rel_detail.get("type", "CONNECTED")
+
+                # Get source node
+                source_node_dict = dict(rel_detail.get("start_node", {}))
+                source_node_label = rel_detail.get("start_node_label")
+
+                if source_node_label:
+                    source_node_dict["label"] = source_node_label
+                else:
+                    source_node_dict["label"] = "Unknown"
+
+                source_key = source_node_dict.get("name", str(id(source_node_dict)))
+
+                # Get target node
+                target_node_dict = dict(rel_detail.get("end_node", {}))
+                target_node_label = rel_detail.get("end_node_label")
+
+                if target_node_label:
+                    target_node_dict["label"] = target_node_label
+                else:
+                    target_node_dict["label"] = "Unknown"
+
+                target_key = target_node_dict.get("name", str(id(target_node_dict)))
+
+                # ==========================================
+                # ADD NODES TO COLLECTION
+                # ==========================================
+
+                # Add source node if new
+                if source_key not in all_nodes:
+                    all_nodes[source_key] = {
+                        "id": source_key,
+                        "data": source_node_dict,
+                        "isMainNode": (source_key == start_node_key),
+                    }
+                    logger.debug(
+                        f"Added source node: {source_key} with label: {source_node_dict['label']}"
+                    )
+
+                # Add target node if new
+                if target_key not in all_nodes:
+                    all_nodes[target_key] = {
+                        "id": target_key,
+                        "data": target_node_dict,
+                        "isMainNode": False,
+                    }
+                    logger.debug(
+                        f"Added target node: {target_key} with label: {target_node_dict['label']}"
+                    )
+
+                # ==========================================
+                # ADD EDGE TO COLLECTION
+                # ==========================================
+
+                edge_id = f"{source_key}-{rel_type}-{target_key}"
+
+                # Add edge if not already present (avoid duplicates)
+                if not any(e["id"] == edge_id for e in all_edges):
+                    all_edges.append(
+                        {
+                            "id": edge_id,
+                            "source": source_key,
+                            "target": target_key,
+                            "relationship": rel_type,
+                        }
+                    )
+                    logger.debug(
+                        f"Added edge: {source_key} -[{rel_type}]-> {target_key}"
+                    )
+
+    # ==========================================
+    # LOG TRANSFORMATION RESULTS
+    # ==========================================
+
+    logger.info("=" * 60)
+    logger.info("Transformation complete:")
+    logger.info(f"  Total unique nodes: {len(all_nodes)}")
+    logger.info(f"  Total edges: {len(all_edges)}")
+
+    # Check first few nodes for labels (debugging)
+    for idx, (node_key, node_info) in enumerate(list(all_nodes.items())[:5]):
+        has_label = "label" in node_info["data"]
+        label_value = node_info["data"].get("label", "MISSING")
+        logger.info(f"  Node '{node_key}': label={label_value} (present={has_label})")
+
+    logger.info("=" * 60)
+
+    # ==========================================
+    # FORMAT FOR FRONTEND
+    # ==========================================
+
+    if not all_nodes:
+        logger.warning("No nodes found after transformation")
+        return []
+
+    # Find the main node
+    main_node = None
+    for node in all_nodes.values():
+        if node.get("isMainNode"):
+            main_node = node
+            break
+
+    if not main_node:
+        # Fallback: use first node
+        main_node = list(all_nodes.values())[0]
+        logger.warning(f"No main node found, using first node: {main_node['id']}")
+
+    # Build connections array from edges
+    connections = []
+    for edge in all_edges:
+        target_node = all_nodes.get(edge["target"])
+        if target_node:
+            connections.append(
+                {
+                    "relationship": edge["relationship"],
+                    "node": target_node["data"],
+                    "source": edge["source"],
+                    "target": edge["target"],
+                }
+            )
+
+    # Construct final result structure
+    result = [
+        {
+            "n": main_node["data"],  # Main node data (includes label)
+            "connections": connections,  # All connections with correct rel types
+            "nodes": list(all_nodes.values()),  # All nodes for reference
+            "edges": all_edges,  # All edges with source/target info
+        }
+    ]
+
+    logger.info(
+        f"Transformed {len(neo4j_results)} Neo4j records into "
+        f"{len(all_nodes)} unique nodes with {len(all_edges)} edges"
+    )
+
+    return result
+
+
 def handle_get_node_by_name(name, request):
     """Handle get node by name request.
 
@@ -285,6 +537,10 @@ def handle_get_node_by_name(name, request):
         name: Node name to search for (exact match, case-sensitive)
         request: Flask request object
 
+    Query parameters:
+        - label: Node label (from autocomplete)
+        - hops: Context depth 0-3 (default: 1)
+
     Returns:
         JSON response with node details and relationships
     """
@@ -292,24 +548,42 @@ def handle_get_node_by_name(name, request):
         if db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
-        # Get optional label filter
+        # Get parameters
         label = request.args.get("label", None)
+        hops = int(request.args.get("hops", 1))  # Default: 1 hop
 
-        logger.info(f"Fetching node: name='{name}', label={label}")
+        # Validate hops parameter
+        if hops < 0 or hops > 3:
+            return jsonify({"error": "Hops must be between 0 and 3"}), 400
 
-        # Use query builder for safe, validated query
+        # Validate label (required for graph queries)
+        if not label:
+            return jsonify({"error": "Label required for node lookup"}), 400
+
+        logger.info(f"Fetching node: name='{name}', label={label}, hops={hops}")
+
         builder = SafeQueryBuilder()
 
         try:
-            query, params = builder.get_node_with_relationships(
-                property_name="name",
-                property_value=name,
-                label=label,
-                include_metadata=True,
-                limit=1,
-            )
+            if hops == 0:
+                # Special case: Just the node, no relationships
+                query, params = builder.get_node_with_relationships(
+                    property_name="name",
+                    property_value=name,
+                    label=label,
+                    include_metadata=True,
+                    limit=1,
+                )
+            else:
+                # Multi-hop: Use find_connected_nodes
+                query, params = builder.find_connected_nodes(
+                    start_label=label,
+                    start_property="name",
+                    start_value=name,
+                    max_hops=hops,
+                    limit=100,  # Adjust based on your needs
+                )
         except QueryValidationError as e:
-            # Validation errors return 400 Bad Request
             logger.warning(f"Validation error: {e}")
             return jsonify({"error": str(e)}), 400
 
@@ -325,13 +599,74 @@ def handle_get_node_by_name(name, request):
 
             logger.info(f"Node found: '{name}', returning {len(result.data)} result(s)")
 
+            transformed_data = transform_neo4j_results_to_graph(result.data)
+
             return jsonify(
-                {"success": True, "data": result.data, "count": len(result.data)}
+                {
+                    "success": True,
+                    "data": transformed_data,  # ← Transformed format!
+                    "count": len(transformed_data[0].get("connections", []))
+                    if transformed_data
+                    else 0,
+                    "hops": hops,
+                }
             ), 200
         else:
             logger.error(f"Get node query failed: {result.error}")
             return jsonify({"success": False, "error": result.error}), 500
 
+        # Transform the results
+        transformed_data = transform_neo4j_results_to_graph(result.data)
+
+        if not transformed_data:
+            logger.error("Transformation failed - no data returned")
+            return jsonify(
+                {"success": False, "error": "Failed to process node data"}
+            ), 500
+
+        # ADD THIS: Log the complete JSON response
+        import json
+
+        response_json = {
+            "success": True,
+            "data": transformed_data,
+            "count": len(transformed_data[0].get("connections", [])),
+            "hops": hops,
+        }
+
+        # Pretty print the JSON to console
+        logger.info("=" * 80)
+        logger.info("RESPONSE JSON:")
+        logger.info(json.dumps(response_json, indent=2, default=str))
+        logger.info("=" * 80)
+
+        # Also log just the first node's data to see the label
+        if transformed_data and len(transformed_data) > 0:
+            first_node = transformed_data[0]
+            logger.info("First node 'n' data:")
+            logger.info(json.dumps(first_node.get("n"), indent=2, default=str))
+
+            if "nodes" in first_node and len(first_node["nodes"]) > 0:
+                logger.info("First item in 'nodes' array:")
+                logger.info(json.dumps(first_node["nodes"][0], indent=2, default=str))
+
+                if len(first_node["nodes"]) > 1:
+                    logger.info("Second item in 'nodes' array:")
+                    logger.info(
+                        json.dumps(first_node["nodes"][1], indent=2, default=str)
+                    )
+
+        logger.info(
+            "Node found: '{}', returning node with {} connection(s)".format(
+                name, len(transformed_data[0].get("connections", []))
+            )
+        )
+
+        return jsonify(response_json), 200
+
+    except ValueError as e:
+        logger.warning("Invalid hops parameter: {}".format(e))
+        return jsonify({"error": "Invalid hops parameter - must be integer"}), 400
     except Exception as e:
-        logger.error(f"Get node error: {e}", exc_info=True)
+        logger.error("Get node error: {}".format(e), exc_info=True)
         return jsonify({"success": False, "error": "Internal server error"}), 500

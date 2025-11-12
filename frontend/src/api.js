@@ -73,17 +73,40 @@ export async function getAutocompleteSuggestions(query, label = null) {
  *
  * @param {string} name - Entity name (e.g., 'APT28')
  * @param {string} label - Optional: entity type filter
- * @returns {Promise<object>} - { success, data, count }
+ * @param {number} hops - Optional: context depth (0-3). If not provided, uses setting from SettingsMenu
+ * @returns {Promise<object>} - { success, data, count, hops }
  */
-export async function getNodeByName(name, label = null) {
+export async function getNodeByName(name, label = null, hops = null) {
   if (!name) {
     throw new Error("Node name is required");
   }
 
-  const params = label ? `?label=${encodeURIComponent(label)}` : "";
-  return apiRequest(`/api/node/${encodeURIComponent(name)}${params}`);
-}
+  // If hops not explicitly provided, get from settings store
+  if (hops === null) {
+    // Import store dynamically to avoid circular dependencies
+    const { contextDepth } = await import("./stores.js");
+    const { get } = await import("svelte/store");
+    hops = get(contextDepth);
+  }
+  hops = parseInt(hops, 10);
 
+  // Validate and fallback to 1 if invalid
+  if (isNaN(hops) || hops < 0 || hops > 3) {
+    console.warn(`Invalid hops value: ${hops}, falling back to 1`);
+    hops = 1;
+  }
+
+  // Build query parameters
+  const params = new URLSearchParams();
+  if (label) {
+    params.append("label", encodeURIComponent(label));
+  }
+  params.append("hops", String(hops));
+
+  return apiRequest(
+    `/api/node/${encodeURIComponent(name)}?${params.toString()}`,
+  );
+}
 /**
  * Health check -verify backend is running
  * @retruns {Promise<object>} Health status

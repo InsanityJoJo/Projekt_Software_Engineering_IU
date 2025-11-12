@@ -1,7 +1,10 @@
+/* ========================================
+   THREAT INTELLIGENCE GRAPH - STYLES
+   Clean, minimal CSS with only used styles
+   ======================================== */
+
 :root {
-  /* ========================================
-     TYPOGRAPHY & RENDERING
-     ======================================== */
+  /* Typography */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
@@ -11,55 +14,30 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* ========================================
-     COLOR SCHEME - DARK MODE (Default)
+     COLOR SCHEME - DARK MODE
      ======================================== */
   color-scheme: light dark;
 
   /* Base Colors */
-  --color-background: #1f1f1f; /* Deep dark background */
-  --color-background-secondary: #1e293b; /* Slightly lighter for cards */
-  --color-surface: #2a2a2a; /* Cards, Sidebar */
-  --color-text: #e7fdf0; /* Light greenish-white, high contrast */
-  --color-accent: #78ae99; /* Buttons, active links (Green Sheen) */
-  --color-accent-strong: #a7ddbc; /* Hover color */
-  --color-border: #497f76; /* Subtle dividing lines */
-  --color-muted: #316764; /* Muted text */
-  --color-hover: #334155; /* Hover state background */
+  --color-background: #1f1f1f;
+  --color-background-secondary: #1e293b;
+  --color-surface: #2a2a2a;
+  --color-text: #e7fdf0;
+  --color-accent: #78ae99;
+  --color-accent-strong: #a7ddbc;
+  --color-border: #497f76;
+  --color-muted: #316764;
+  --color-hover: #334155;
 
   /* Status Colors */
-  --color-info: #3b82f6; /* Information blue */
-  --color-error: #ef4444; /* Error red */
-  --color-success: #22c55e; /* Success green */
-  --color-warning: #f59e0b; /* Warning orange */
+  --color-info: #3b82f6;
+  --color-error: #ef4444;
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
 
-  /* Graph Colors */
+  /* Graph Colors (used for background/text only) */
   --graph-background: var(--color-background);
-  --graph-node: #78ae99;
   --graph-node-text: #ffffff;
-  --graph-edge: #497f76;
-
-  /* ========================================
-     NODE TYPE COLORS
-     Based on constants.py ALLOWED_LABELS
-     ======================================== */
-  --node-AttackPattern: #ef4444; /* Red - Dangerous */
-  --node-Campaign: #f59e0b; /* Orange - Active operations */
-  --node-Identity: #8b5cf6; /* Purple - Actors/entities */
-  --node-Incident: #dc2626; /* Dark red - Security events */
-  --node-Indicator: #0ea5e9; /* Sky blue - Detection markers */
-  --node-Malware: #f97316; /* Bright orange - Threats */
-  --node-Observable: #06b6d4; /* Cyan - Network artifacts */
-  --node-File: #14b8a6; /* Teal - File objects */
-  --node-DomainName: #10b981; /* Green - Domains */
-  --node-URL: #22c55e; /* Light green - URLs */
-  --node-EmailAddr: #84cc16; /* Lime - Email addresses */
-  --node-IPv4Address: #22d3ee; /* Light cyan - IP addresses */
-  --node-Organization: #6366f1; /* Indigo - Organizations */
-  --node-Report: #a855f7; /* Purple - Reports */
-  --node-ThreatActor: #e11d48; /* Rose - Threat actors */
-  --node-Tool: #059669; /* Emerald - Tools */
-  --node-Vulnerability: #c026d3; /* Fuchsia - Vulnerabilities */
-  --node-default: #6b7280; /* Gray - Fallback */
 
   /* Apply base colors */
   color: var(--color-text);
@@ -67,65 +45,10 @@
 }
 
 /* ========================================
-   LIGHT MODE OVERRIDES
-   ======================================== */
-@media (prefers-color-scheme: light) {
-  :root {
-    /* Base Colors - Light Mode */
-    --color-background: #a7ddbc;
-    --color-background-secondary: #cbd5e1;
-    --color-surface: #78ae99;
-    --color-text: #316764;
-    --color-accent: #497f76;
-    --color-accent-strong: #316764;
-    --color-border: #609687;
-    --color-muted: #78ae99;
-    --color-hover: #94a3b8;
-
-    /* Graph Colors - Light Mode */
-    --graph-background: var(--color-background);
-    --graph-node: #497f76;
-    --graph-node-text: #000000;
-    --graph-edge: #316764;
-
-    /* Node Colors - Slightly adjusted for light mode */
-    --node-AttackPattern: #dc2626;
-    --node-Campaign: #ea580c;
-    --node-Identity: #7c3aed;
-    --node-Incident: #b91c1c;
-    --node-Indicator: #0284c7;
-    --node-Malware: #ea580c;
-    --node-Observable: #0891b2;
-    --node-File: #0d9488;
-    --node-DomainName: #059669;
-    --node-URL: #16a34a;
-    --node-EmailAddr: #65a30d;
-    --node-IPv4Address: #06b6d4;
-    --node-Organization: #4f46e5;
-    --node-Report: #9333ea;
-    --node-ThreatActor: #be123c;
-    --node-Tool: #047857;
-    --node-Vulnerability: #a21caf;
-    --node-default: #52525b;
-
-    color: var(--color-text);
-    background-color: var(--color-background);
-  }
-
-  a:hover {
-    color: var(--color-accent);
-  }
-
-  button {
-    background-color: var(--color-background);
-  }
-}
-
-/* ========================================
    LAYOUT - APP CONTAINER
    ======================================== */
 .app-container {
-  max-width: 900px;
+  max-width: auto;
   margin: 0 auto;
   padding: 2rem;
   display: flex;
@@ -135,7 +58,7 @@
 }
 
 /* ========================================
-   SEARCH CONTAINER
+   SEARCH SECTION
    ======================================== */
 .search-container {
   display: flex;
@@ -158,9 +81,6 @@ h1 {
   margin: 0;
 }
 
-/* ========================================
-   SEARCH INPUT & WRAPPER
-   ======================================== */
 .search-wrapper {
   position: relative;
   width: 100%;
@@ -206,7 +126,7 @@ h1 {
 }
 
 /* ========================================
-   AUTOCOMPLETE SUGGESTIONS DROPDOWN
+   AUTOCOMPLETE DROPDOWN
    ======================================== */
 .suggestions-dropdown {
   position: absolute;
@@ -264,63 +184,62 @@ h1 {
 }
 
 /* ========================================
-   LABEL COLOR CODING
-   All node type labels get their specific color
+   LABEL COLORS (Used in node info panel)
    ======================================== */
 .label-AttackPattern {
-  color: var(--node-AttackPattern);
+  color: #ef4444;
 }
 .label-Campaign {
-  color: var(--node-Campaign);
+  color: #f59e0b;
 }
 .label-Identity {
-  color: var(--node-Identity);
+  color: #8b5cf6;
 }
 .label-Incident {
-  color: var(--node-Incident);
+  color: #ec4899;
 }
 .label-Indicator {
-  color: var(--node-Indicator);
+  color: #14b8a6;
 }
 .label-Malware {
-  color: var(--node-Malware);
+  color: #dc2626;
 }
 .label-Observable {
-  color: var(--node-Observable);
+  color: #06b6d4;
 }
 .label-File {
-  color: var(--node-File);
+  color: #84cc16;
 }
 .label-DomainName {
-  color: var(--node-DomainName);
+  color: #22d3ee;
 }
 .label-URL {
-  color: var(--node-URL);
+  color: #a855f7;
 }
 .label-EmailAddr {
-  color: var(--node-EmailAddr);
+  color: #f43f5e;
 }
-.label-IPv4Address {
-  color: var(--node-IPv4Address);
+.label-IPv4Adress {
+  color: #06b6d4;
 }
 .label-Organization {
-  color: var(--node-Organization);
+  color: #3b82f6;
 }
 .label-Report {
-  color: var(--node-Report);
+  color: #6366f1;
 }
 .label-ThreatActor {
-  color: var(--node-ThreatActor);
+  color: #b91c1c;
 }
 .label-Tool {
-  color: var(--node-Tool);
+  color: #10b981;
 }
 .label-Vulnerability {
-  color: var(--node-Vulnerability);
+  color: #f97316;
 }
 
 /* ========================================
-   LOADING & ERROR INDICATORS
+   LOADING & ERROR STATES
    ======================================== */
 .loading-indicator,
 .error-message {
@@ -388,11 +307,11 @@ button:disabled {
 }
 
 /* ========================================
-   GRAPH CONTAINER
+   GRAPH COMPONENTS
    ======================================== */
 .graph-container {
   width: 100%;
-  height: 600px;
+  height: 700px;
   margin-top: 2rem;
   background-color: var(--color-surface);
   display: flex;
@@ -403,9 +322,6 @@ button:disabled {
   overflow: hidden;
 }
 
-/* ========================================
-   GRAPH VIEW COMPONENTS
-   ======================================== */
 .graph-wrapper {
   position: relative;
   width: 100%;
@@ -419,17 +335,34 @@ button:disabled {
   height: 100%;
 }
 
-/* Node Info Panel */
+/* ========================================
+   FOOTER
+   ======================================== */
+.footer {
+  margin-top: auto;
+  padding: 2rem 1rem 1rem;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.footer p {
+  margin: 0.25rem 0;
+}
+
+/* ========================================
+   NODE INFO PANEL
+   ======================================== */
 .node-info {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: rgba(30, 41, 59, 0.95);
+  background: rgba(30, 41, 59, 0.4);
   border: 1px solid var(--color-border);
   border-radius: 0.5rem;
   padding: 1rem;
   max-width: 300px;
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(1px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
   z-index: 10;
 }
@@ -451,6 +384,14 @@ button:disabled {
   background: rgba(255, 255, 255, 0.1);
   border-radius: 0.25rem;
   margin-bottom: 0.75rem;
+}
+
+.connections-count {
+  margin-top: 0.75rem;
+  padding: 0.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.25rem;
+  font-size: 0.85rem;
 }
 
 .properties {
@@ -483,18 +424,156 @@ button:disabled {
 }
 
 /* ========================================
-   FOOTER
+   SETTINGS MENU
    ======================================== */
-.footer {
-  margin-top: auto;
-  padding: 2rem 1rem 1rem;
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--color-muted);
+.settings-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: color 0.2s ease;
 }
 
-.footer p {
-  margin: 0.25rem 0;
+.settings-btn:hover {
+  color: var(--color-accent-strong);
+}
+
+.settings-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1rem;
+}
+
+.settings-wrapper:hover:not(:disabled) {
+  background-color: var(--color-accent);
+  color: var(--color-background);
+  border-color: var(--color-accent-strong);
+}
+
+.settings-menu {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  min-width: 300px;
+  z-index: 1000;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 12px;
+}
+
+.settings-header h3 {
+  margin: 0;
+  font-size: 16px;
+  color: var(--color-text);
+}
+
+.settings-header button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: var(--color-text);
+  padding: 0 4px;
+  line-height: 1;
+  transition: color 0.2s ease;
+}
+
+.settings-header button:hover {
+  color: var(--color-error);
+}
+
+.setting-item {
+  margin-bottom: 16px;
+}
+
+.setting-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* Range Slider */
+input[type="range"] {
+  width: 100%;
+  margin: 8px 0;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  outline: none;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  background: var(--color-accent-strong);
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  background: var(--color-accent);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  background: var(--color-accent-strong);
+}
+
+.slider-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--color-muted);
+  margin-top: 4px;
+}
+
+.slider-labels span {
+  transition: all 0.2s ease;
+}
+
+.slider-labels span.active {
+  color: var(--color-accent);
+  font-weight: bold;
+  transform: scale(1.1);
+}
+
+.setting-description {
+  margin-top: 8px;
+  font-size: 13px;
+  color: var(--color-muted);
+  font-style: italic;
+  line-height: 1.4;
 }
 
 /* ========================================
@@ -572,7 +651,6 @@ button:disabled {
   }
 }
 
-/* High contrast mode support */
 @media (prefers-contrast: high) {
   :root {
     --color-border: #ffffff;

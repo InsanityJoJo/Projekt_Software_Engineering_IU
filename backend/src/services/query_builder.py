@@ -216,8 +216,21 @@ class SafeQueryBuilder:
         # Build query
         query = f"""
         MATCH path = (start:{start_label} {{{start_property}: $start_value}})
-                     -{rel_pattern}-(connected)
-        RETURN start, connected, relationships(path) AS relationships
+                 -{rel_pattern}-(connected)
+        WITH start, connected, relationships(path) AS rels, nodes(path) AS pathNodes
+        RETURN 
+            start,
+            labels(start)[0] AS start_label,
+            connected,
+            labels(connected)[0] AS connected_label,
+            [rel in rels | {{
+                type: type(rel),
+                start_node: startNode(rel),
+                start_node_label: labels(startNode(rel))[0],
+                end_node: endNode(rel),
+                end_node_label: labels(endNode(rel))[0]
+            }}] AS relationship_details,
+            pathNodes
         LIMIT $limit
         """
 
