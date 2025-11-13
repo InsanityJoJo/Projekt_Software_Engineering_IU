@@ -22,6 +22,9 @@
 	let selectedNode = null;
 	let debounceTimer = null;
 	let showSettings = false;
+	
+	// Reference to GraphView component for report generation
+	let graphViewComponent;
 
 
 
@@ -204,6 +207,19 @@
 		}
 	}
 	
+	/**
+	 * Generate report from current graph state
+	 * Calls the exposed function from GraphView component
+	 */
+	function handleGenerateReport() {
+		if (graphViewComponent) {
+			console.log('Generating report...');
+			graphViewComponent.generateReportFromGraph();
+		} else {
+			console.error('GraphView component not ready');
+		}
+	}
+	
 	// Reactive logging
 	$: {
 		console.log('=== REACTIVE: selectedNode changed ===');
@@ -270,7 +286,10 @@
 						<button title="Zeitanalyse">
 							<ChartNoAxesCombined size={20} />
 						</button>
-						<button title="Bericht">
+						<button 
+							on:click={handleGenerateReport}
+							title="Generate Report"
+						>
 							<FileText size={20} />
 						</button>
 					{/if}
@@ -326,7 +345,7 @@
 
 	{#if showGraph && selectedNode}
 		<div class="graph-container">
-			<GraphView node={selectedNode} />
+			<GraphView bind:this={graphViewComponent} node={selectedNode} />
 		</div>
 	{:else if showGraph && !selectedNode}
 		<!-- Loading state for graph -->
@@ -338,7 +357,7 @@
 	{/if}
 
 	<footer class="footer">
-		<Copyright size={13} /> 2025 Johannes Liebscher â€“ CTI Platform Version
+		<Copyright size={13} /> 2025 Johannes Liebscher â€" CTI Platform Version
 		0.21 Prototype
 		<p>Impressum</p>
 	</footer>

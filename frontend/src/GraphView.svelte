@@ -4,6 +4,7 @@
   import cytoscape from 'cytoscape';
   import { getNodeByName } from './api.js';
   import ContextMenu from './ContextMenu.svelte';
+  import { generateReport } from './ReportGenerator.js';
 
   // ============================================
   // DEBUG CONFIGURATION
@@ -631,6 +632,63 @@
   }
 
   // ============================================
+  // REPORT GENERATION
+  // ============================================
+
+  /**
+   * Generate HTML report of current graph state
+   * Called from parent component (App.svelte)
+   * 
+   * @public
+   */
+  export function generateReportFromGraph() {
+    if (!cy) {
+      console.error('Cannot generate report: Cytoscape instance not initialized');
+      return;
+    }
+
+    debugLog('=== Generating Report ===');
+
+    // Get current main node info
+    const mainNodeInfo = selectedNodeData || {
+      name: node.n.name,
+      type: node.n.label,
+      properties: node.n
+    };
+
+    // Get all visible nodes
+    const visibleNodes = cy.nodes().jsons();
+    debugLog(`Report includes ${visibleNodes.length} nodes`);
+
+    // Get all visible edges
+    const visibleEdges = cy.edges().jsons();
+    debugLog(`Report includes ${visibleEdges.length} edges`);
+
+    // Export graph as PNG image
+    const graphImage = cy.png({
+      output: 'base64uri',
+      bg: '#0f172a',  // dark background
+      full: true,      // Full graph, not just viewport
+      scale: 2,        // 2x for better quality
+      maxWidth: 2000,  // Limit width for performance
+      maxHeight: 2000
+    });
+    debugLog('Graph image exported as PNG');
+
+    // Prepare report data
+    const reportData = {
+      mainNode: mainNodeInfo,
+      nodes: visibleNodes,
+      edges: visibleEdges,
+      graphImage: graphImage
+    };
+
+    // Generate and open report
+    generateReport(reportData);
+    debugLog('Report generated and opened in new tab');
+  }
+
+  // ============================================
   // LIFECYCLE HOOKS
   // ============================================
 
@@ -759,6 +817,49 @@
     align-items: center;
     gap: 1rem;
     z-index: 100;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-overlay p {
+    color: var(--color-text);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .edge-connection {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .properties h4 {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .no-properties {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin: 0.5rem 0;
   }
 
   .loading-spinner {
