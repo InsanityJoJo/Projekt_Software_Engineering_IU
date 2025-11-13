@@ -39,6 +39,40 @@
   --graph-background: var(--color-background);
   --graph-node-text: #ffffff;
 
+  /* Node Type Colors */
+  --node-AttackPattern: #ef4444;
+  --node-Campaign: #f59e0b;
+  --node-Identity: #8b5cf6;
+  --node-Incident: #ec4899;
+  --node-Indicator: #14b8a6;
+  --node-Malware: #dc2626;
+  --node-Observable: #06b6d4;
+  --node-Organization: #3b82f6;
+  --node-Report: #6366f1;
+  --node-ThreatActor: #b91c1c;
+  --node-Tool: #10b981;
+  --node-Vulnerability: #f97316;
+  --node-File: #84cc16;
+  --node-DomainName: #22d3ee;
+  --node-URL: #a855f7;
+  --node-EmailAddr: #f43f5e;
+  --node-IPv4Adress: #06b6d4;
+  --node-default: #497f76;
+
+  /* Edge/Relationship Type Colors */
+  --edge-USES: #3b82f6;
+  --edge-TARGETS: #ef4444;
+  --edge-DETECTS: #10b981;
+  --edge-BASED_ON: #8b5cf6;
+  --edge-RELATED_TO: #f59e0b;
+  --edge-INVOLVES: #ec4899;
+  --edge-LAUNCHED: #b91c1c;
+  --edge-EMPLOYES: #f97316;
+  --edge-DESCRIBES: #6366f1;
+  --edge-INDICATED_BY: #14b8a6;
+  --edge-HAS_IDENTITY: #a855f7;
+  --edge-default: #497f76;
+
   /* Apply base colors */
   color: var(--color-text);
   background-color: var(--color-background);
@@ -185,57 +219,58 @@ h1 {
 
 /* ========================================
    LABEL COLORS (Used in node info panel)
+   Uses CSS variables from :root
    ======================================== */
 .label-AttackPattern {
-  color: #ef4444;
+  color: var(--node-AttackPattern);
 }
 .label-Campaign {
-  color: #f59e0b;
+  color: var(--node-Campaign);
 }
 .label-Identity {
-  color: #8b5cf6;
+  color: var(--node-Identity);
 }
 .label-Incident {
-  color: #ec4899;
+  color: var(--node-Incident);
 }
 .label-Indicator {
-  color: #14b8a6;
+  color: var(--node-Indicator);
 }
 .label-Malware {
-  color: #dc2626;
+  color: var(--node-Malware);
 }
 .label-Observable {
-  color: #06b6d4;
+  color: var(--node-Observable);
 }
 .label-File {
-  color: #84cc16;
+  color: var(--node-File);
 }
 .label-DomainName {
-  color: #22d3ee;
+  color: var(--node-DomainName);
 }
 .label-URL {
-  color: #a855f7;
+  color: var(--node-URL);
 }
 .label-EmailAddr {
-  color: #f43f5e;
+  color: var(--node-EmailAddr);
 }
 .label-IPv4Adress {
-  color: #06b6d4;
+  color: var(--node-IPv4Adress);
 }
 .label-Organization {
-  color: #3b82f6;
+  color: var(--node-Organization);
 }
 .label-Report {
-  color: #6366f1;
+  color: var(--node-Report);
 }
 .label-ThreatActor {
-  color: #b91c1c;
+  color: var(--node-ThreatActor);
 }
 .label-Tool {
-  color: #10b981;
+  color: var(--node-Tool);
 }
 .label-Vulnerability {
-  color: #f97316;
+  color: var(--node-Vulnerability);
 }
 
 /* ========================================

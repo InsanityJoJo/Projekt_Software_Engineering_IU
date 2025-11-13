@@ -3,6 +3,15 @@
   import { onMount, onDestroy } from 'svelte';
   import cytoscape from 'cytoscape';
 
+  // DEBUG CONFIGURATION
+  // Set to false to disable console logs
+  const DEBUG = true;
+
+  function debugLog(...args) {
+    if (DEBUG) {
+      console.log(...args);
+    }
+  }
 
   /**
   * @type {{ n: any, connections: any[], edges?: any[], nodes?: any[] } | null}
@@ -12,75 +21,130 @@
   let cy;
   let containerElement;
 
-  // ============================================
-  // COLOR MAPPINGS 
-  // Change colors here to update graph appearance
-  // ============================================
+  // COLOR HELPERS
+  // Read colors from CSS variables in :root
   
-  const NODE_COLORS = {
-    'AttackPattern': '#ef4444',    // Red
-    'Campaign': '#f59e0b',         // Orange
-    'Identity': '#8b5cf6',         // Purple
-    'Incident': '#ec4899',         // Pink
-    'Indicator': '#14b8a6',        // Teal
-    'Malware': '#dc2626',          // Dark Red
-    'Observable': '#06b6d4',       // Cyan
-    'Organization': '#3b82f6',     // Blue
-    'Report': '#6366f1',           // Indigo
-    'ThreatActor': '#b91c1c',      // Crimson
-    'Tool': '#10b981',             // Green
-    'Vulnerability': '#f97316',    // Orange-Red
-    'File': '#84cc16',             // Lime
-    'DomainName': '#22d3ee',       // Light Cyan
-    'URL': '#a855f7',              // Violet
-    'EmailAddr': '#f43f5e',        // Rose
-    'IPv4Adress': '#06b6d4',       // Cyan
-    'default': '#497f76'           // Fallback color
-  };
-  
-  const EDGE_COLORS = {
-    'USES': '#3b82f6',             // Blue
-    'TARGETS': '#ef4444',          // Red
-    'DETECTS': '#10b981',          // Green
-    'BASED_ON': '#8b5cf6',         // Purple
-    'RELATED_TO': '#f59e0b',       // Orange
-    'INVOLVES': '#ec4899',         // Pink
-    'LAUNCHED': '#b91c1c',         // Crimson
-    'EMPLOYES': '#f97316',         // Orange-Red
-    'DESCRIBES': '#6366f1',        // Indigo
-    'INDICATED_BY': '#14b8a6',     // Teal
-    'HAS_IDENTITY': '#a855f7',     // Violet
-    'default': '#497f76'           // Fallback color
-  };
+  /**
+   * Get computed CSS variable value from :root
+   * @param {string} varName - CSS variable name (e.g., '--node-Malware')
+   * @returns {string} - Color value
+   */
+  function getCSSVariable(varName) {
+    return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+  }
 
   /**
-   * Get color for a node type
+   * Get color for a node type from CSS variables
+   * @param {string} type - Node type (e.g., 'Malware', 'ThreatActor')
+   * @returns {string} - Hex color code
    */
   function getNodeColor(type) {
-    return NODE_COLORS[type] || NODE_COLORS['default'];
+    const color = getCSSVariable(`--node-${type}`);
+    return color || getCSSVariable('--node-default');
   }
   
   /**
-   * Get color for an edge/relationship type
+   * Get color for an edge/relationship type from CSS variables
+   * @param {string} relType - Relationship type (e.g., 'USES', 'TARGETS')
+   * @returns {string} - Hex color code
    */
   function getEdgeColor(relType) {
-    return EDGE_COLORS[relType] || EDGE_COLORS['default'];
+    const color = getCSSVariable(`--edge-${relType}`);
+    return color || getCSSVariable('--edge-default');
   }
 
+  // HELPER FUNCTIONS
+
+  /**
+   * Extract relationship type as string from various formats
+   * @param {string|object} rel - Relationship in various formats
+   * @returns {string} - Relationship type as string
+   */
   function getRelationshipString(rel) {
-    // Handle different relationship formats
-    if (typeof rel === 'string') {
-      return rel;
-    }
-    if (rel && rel.type) {
-      return rel.type;
-    }
-    if (rel && typeof rel === 'object') {
-      // Neo4j relationship object - convert to string
-      return String(rel);
-    }
+    if (typeof rel === 'string') return rel;
+    if (rel && rel.type) return rel.type;
+    if (rel && typeof rel === 'object') return String(rel);
     return 'CONNECTED';
   }
+
+  /**
+   * Create style data object for a node
+   * @param {object} nodeData - Node data from backend
+   * @param {boolean} isMainNode - Whether this is the main/central node
+   * @returns {object} - Pre-computed style properties
+   */
+  function createNodeStyleData(nodeData, isMainNode = false) {
+    return {
+      color: getNodeColor(nodeData.label),
+      size: isMainNode ? 80 : 60,
+      fontSize: isMainNode ? 14 : 12,
+      fontWeight: isMainNode ? 'bold' : 'normal',
+      borderWidth: isMainNode ? 3 : 0,
+      borderColor: '#f8fafc'
+    };
+  }
+
+  /**
+   * Create style data object for an edge
+   * @param {string} relType - Relationship type
+   * @returns {object} - Pre-computed style properties
+   */
+  function createEdgeStyleData(relType) {
+    return {
+      color: getEdgeColor(relType),
+      width: 2,
+      arrowShape: 'triangle'
+    };
+  }
+
+  /**
+   * Create a Cytoscape node object
+   * @param {string} id - Node ID
+   * @param {string} label - Display label
+   * @param {object} properties - Node properties
+   * @param {string} type - Node type
+   * @param {boolean} isMainNode - Is this the main node?
+   * @returns {object} - Cytoscape node object
+   */
+  function createCytoscapeNode(id, label, properties, type, isMainNode = false) {
+    const styleData = createNodeStyleData(properties, isMainNode);
+    
+    return {
+      data: {
+        id,
+        label,
+        properties,
+        type,
+        isMainNode,
+        ...styleData  // Spread pre-computed style properties
+      }
+    };
+  }
+
+  /**
+   * Create a Cytoscape edge object
+   * @param {string} id - Edge ID
+   * @param {string} source - Source node ID
+   * @param {string} target - Target node ID
+   * @param {string} relType - Relationship type
+   * @returns {object} - Cytoscape edge object
+   */
+  function createCytoscapeEdge(id, source, target, relType) {
+    const styleData = createEdgeStyleData(relType);
+    
+    return {
+      data: {
+        id,
+        source,
+        target,
+        label: relType,
+        relationshipType: relType,
+        ...styleData  // Spread pre-computed style properties
+      }
+    };
+  }
+
+  // DATA CONVERSION
 
   /**
    * Convert backend node data to Cytoscape format with pre-computed colors
@@ -93,191 +157,81 @@
    */
   function nodeDataToCytoscape(nodeData) {
     if (!nodeData || !nodeData.n) {
-      console.warn('No node data provided to GraphView');
+      debugLog('No node data provided to GraphView');
       return { nodes: [], edges: [] };
     }
 
-    console.log('=== nodeDataToCytoscape called ===');
-    console.log('Input nodeData:', nodeData);
+    debugLog('=== nodeDataToCytoscape called ===');
+    debugLog('Input nodeData:', nodeData);
 
     // Create the main node with PRE-COMPUTED styling data
-    const mainNode = {
-      data: {
-        id: nodeData.n.name || 'unknown',
-        label: nodeData.n.name || 'Unknown',
-        properties: nodeData.n,
-        type: nodeData.n.label || 'Unknown',
-        isMainNode: true,
-        // PRE-COMPUTE styling properties:
-        color: getNodeColor(nodeData.n.label),  // Pre-compute color
-        size: 80,                                 // Main node is bigger
-        fontSize: 14,                             // Main node has larger text
-        fontWeight: 'bold',                       // Main node is bold
-        borderWidth: 3,                           // Main node has border
-        borderColor: '#f8fafc'                    // Border color
-      }
-    };
-    console.log('Main node color:', mainNode.data.color);
+    const mainNode = createCytoscapeNode(
+      nodeData.n.name || 'unknown',
+      nodeData.n.name || 'Unknown',
+      nodeData.n,
+      nodeData.n.label || 'Unknown',
+      true  // isMainNode
+    );
+    
+    debugLog('Main node created:', mainNode.data.id, 'Color:', mainNode.data.color);
+    
     const nodes = [mainNode];
     const edges = [];
     const processedNodes = new Set([mainNode.data.id]);
 
-    // Check if we have full path information (new format with nodes and edges arrays)
-    if (nodeData.edges && nodeData.nodes) {
-      console.log('Processing full path information');
-      console.log(`Found ${nodeData.nodes.length} nodes and ${nodeData.edges.length} edges`);
-      
-      // Add all nodes with pre-computed styling
-	nodeData.nodes.forEach(nodeInfo => {
-  	console.log('Raw nodeInfo:', nodeInfo);
-  	console.log('nodeInfo.data:', nodeInfo.data);
-  	console.log('nodeInfo.data keys:', Object.keys(nodeInfo.data));
-  
-  	const nodeId = nodeInfo.id || nodeInfo.data.name;
-  
-  	if (!processedNodes.has(nodeId)) {
-    	  const isMain = nodeInfo.isMainNode || false;
-    
-    	  // Add this to see what label value we're getting
-    	  console.log('Node label from nodeInfo.data.label:', nodeInfo.data.label);
-    
-    	  nodes.push({
-      	  data: {
-        	id: nodeId,
-        	label: nodeInfo.data.name || nodeId,
-        	properties: nodeInfo.data,
-        	type: nodeInfo.data.label || 'Unknown',
-        	isMainNode: isMain,
-        	color: getNodeColor(nodeInfo.data.label),
-        	size: isMain ? 80 : 60,
-        	fontSize: isMain ? 14 : 12,
-        	fontWeight: isMain ? 'bold' : 'normal',
-        	borderWidth: isMain ? 3 : 0,
-        	borderColor: '#f8fafc'
-      	  }
-    	});
-    	processedNodes.add(nodeId);
-       }
-      });
-            // Add all edges with pre-computed styling (preserves path structure!)
-      nodeData.edges.forEach((edge, idx) => {
-        const relType = getRelationshipString(edge.relationship);
-        
-        edges.push({
-          data: {
-            id: edge.id || `edge-${idx}`,
-            source: edge.source,
-            target: edge.target,
-            label: relType,
-            relationshipType: relType,
-            // PRE-COMPUTE styling properties:
-            color: getEdgeColor(relType),
-            width: 2,
-            arrowShape: 'triangle'
-          }
-        });
-      });
-      
-      console.log(`Created ${nodes.length} nodes and ${edges.length} edges from paths`);
-    } 
-    // Fallback: old format (connections array - star topology)
-    else if (nodeData.connections && Array.isArray(nodeData.connections)) {
-      console.log(`Processing connections (star topology): ${nodeData.connections.length} items`);
-      
-      nodeData.connections.forEach((conn, idx) => {
-        if (!conn.node || !conn.node.name) {
-          console.warn('Invalid connection data:', conn);
-          return;
-        }
-
-        const connectedNodeId = conn.node.name;
-        const relType = getRelationshipString(conn.relationship);
-
-        // Check if we have source/target info (path-aware format)
-        if (conn.source && conn.target) {
-          // Path-aware: use actual source and target
-          const sourceId = conn.source;
-          const targetId = conn.target;
-          
-          if (!processedNodes.has(targetId)) {
-            nodes.push({
-              data: {
-                id: targetId,
-                label: conn.node.name || targetId,
-                properties: conn.node,
-                type: conn.node.label || 'Unknown',
-                isMainNode: false,
-                // PRE-COMPUTE styling:
-                color: getNodeColor(conn.node.label),
-                size: 60,
-                fontSize: 12,
-                fontWeight: 'normal',
-                borderWidth: 0,
-		borderColor: '#f8fafc',
-              }
-            });
-            processedNodes.add(targetId);
-          }
-          
-          // Add edge with correct source and target
-          edges.push({
-            data: {
-              id: `edge-${idx}`,
-              source: sourceId,
-              target: targetId,
-              label: relType,
-              relationshipType: relType,
-              // PRE-COMPUTE styling:
-              color: getEdgeColor(relType),
-              width: 2,
-              arrowShape: 'triangle'
-            }
-          });
-        } else {
-          // Old format: star topology (all edges from main node)
-          if (!processedNodes.has(connectedNodeId)) {
-            nodes.push({
-              data: {
-                id: connectedNodeId,
-                label: connectedNodeId,
-                properties: conn.node,
-                type: conn.node.label || 'Unknown',
-                isMainNode: false,
-                // PRE-COMPUTE styling:
-                color: getNodeColor(conn.node.label),
-                size: 60,
-                fontSize: 12,
-                fontWeight: 'normal',
-                borderWidth: 0,
-		borderColor: '#f8fafc',
-              }
-            });
-            processedNodes.add(connectedNodeId);
-          }
-
-          edges.push({
-            data: {
-              id: `edge-${idx}`,
-              source: mainNode.data.id,
-              target: connectedNodeId,
-              label: relType,
-              relationshipType: relType,
-              // PRE-COMPUTE styling:
-              color: getEdgeColor(relType),
-              width: 3,
-              arrowShape: 'triangle'
-            }
-          });
-        }
-      });
-
-      console.log(`Created ${nodes.length} nodes and ${edges.length} edges`);
-    } else {
-      console.log('No connections to display - showing single node');
+    // Process the nodes and edges arrays from backend
+    // Backend ALWAYS provides these in the correct format with source/target
+    if (!nodeData.edges || !nodeData.nodes) {
+      console.error('Missing edges or nodes array in data - cannot display graph');
+      return { nodes: [mainNode], edges: [] };
     }
+    
+    debugLog('Processing path information');
+    debugLog(`Found ${nodeData.nodes.length} nodes and ${nodeData.edges.length} edges`);
+    
+    // Add all nodes with pre-computed styling
+    nodeData.nodes.forEach(nodeInfo => {
+      debugLog('Processing node:', nodeInfo.data?.name);
+      
+      const nodeId = nodeInfo.id || nodeInfo.data.name;
+      
+      if (!processedNodes.has(nodeId)) {
+        const isMain = nodeInfo.isMainNode || false;
+        
+        const cytoscapeNode = createCytoscapeNode(
+          nodeId,
+          nodeInfo.data.name || nodeId,
+          nodeInfo.data,
+          nodeInfo.data.label || 'Unknown',
+          isMain
+        );
+        
+        nodes.push(cytoscapeNode);
+        processedNodes.add(nodeId);
+      }
+    });
+    
+    // Add all edges with pre-computed styling (preserves actual path structure!)
+    nodeData.edges.forEach((edge, idx) => {
+      const relType = getRelationshipString(edge.relationship);
+      
+      const cytoscapeEdge = createCytoscapeEdge(
+        edge.id || `edge-${idx}`,
+        edge.source,
+        edge.target,
+        relType
+      );
+      
+      edges.push(cytoscapeEdge);
+    });
+    
+    debugLog(`Created ${nodes.length} nodes and ${edges.length} edges`);
+    debugLog('Graph will show ACTUAL relationships, not artificial star topology');
 
     return { nodes, edges };
   }
+
+  // GRAPH INITIALIZATION
 
   /**
    * Initialize or update the graph
@@ -287,14 +241,13 @@
    */
   function initializeGraph() {
     if (!containerElement) {
-      console.warn('Container element not ready');
+      debugLog('Container element not ready');
       return;
     }
 
-    // Get CSS variables for consistent theming (only for background/text colors)
-    const rootStyles = getComputedStyle(document.documentElement);
-    const bgColor = rootStyles.getPropertyValue('--graph-background').trim() || '#0f172a';
-    const nodeTextColor = rootStyles.getPropertyValue('--graph-node-text').trim() || '#f8fafc';
+    // Get CSS variables for consistent theming (background/text colors)
+    const bgColor = getCSSVariable('--graph-background') || '#0f172a';
+    const nodeTextColor = getCSSVariable('--graph-node-text') || '#f8fafc';
 
     // Convert node data to Cytoscape format
     const graphData = nodeDataToCytoscape(node);
@@ -306,47 +259,40 @@
 
     // If graph instance exists, update it
     if (cy) {
-      console.log('Updating existing graph');
+      debugLog('Updating existing graph');
       cy.elements().remove(); // Clear existing elements
       cy.add(graphData.nodes);
       cy.add(graphData.edges);
       
-      // Choose layout based on number of nodes
-      const layoutName = graphData.nodes.length > 20 ? 'grid' : 'cose';
-      cy.layout({ 
-        name: layoutName,
-        animate: true,
-        animationDuration: 500,
-      }).run();
+      // Apply cose layout for natural node spacing
+      cy.layout(getCoseLayoutConfig()).run();
       return;
     }
 
-    console.log('Creating new Cytoscape instance');
+    debugLog('Creating new Cytoscape instance');
 
     // Create new Cytoscape instance
     cy = cytoscape({
       container: containerElement,
       elements: [...graphData.nodes, ...graphData.edges],
       
-      // ============================================
       // CYTOSCAPE STYLESHEET
       // Using data mappers: 'data(propertyName)' 
-      // No functions needed - just reads pre-computed values!
-      // ============================================
+      // reads pre-computed values
       style: [
         {
           selector: 'node',
           style: {
             // All styling from pre-computed data properties:
-            'label': 'data(label)',                    // Node name
-            'background-color': 'data(color)',         // Pre-computed color
-            'width': 'data(size)',                     // Pre-computed size
-            'height': 'data(size)',                    // Pre-computed size
-            'font-size': 'data(fontSize)',             // Pre-computed font size
-            'font-weight': 'data(fontWeight)',         // Pre-computed weight
-            'border-width': 'data(borderWidth)',       // Pre-computed border
-            'border-color': 'data(borderColor)',       // Pre-computed border color
-            'color': nodeTextColor,                    // Text color from CSS
+            'label': 'data(label)',
+            'background-color': 'data(color)',
+            'width': 'data(size)',
+            'height': 'data(size)',
+            'font-size': 'data(fontSize)',
+            'font-weight': 'data(fontWeight)',
+            'border-width': 'data(borderWidth)',
+            'border-color': 'data(borderColor)',
+            'color': nodeTextColor,
             'text-valign': 'center',
             'text-halign': 'center',
             'text-wrap': 'wrap',
@@ -356,13 +302,13 @@
         {
           selector: 'edge',
           style: {
-            //  All styling from pre-computed data properties:
-            'width': 'data(width)',                    // Pre-computed width
-            'line-color': 'data(color)',               // Pre-computed color
-            'target-arrow-color': 'data(color)',       // Pre-computed color
-            'target-arrow-shape': 'data(arrowShape)',  // Pre-computed shape
+            // All styling from pre-computed data properties:
+            'width': 'data(width)',
+            'line-color': 'data(color)',
+            'target-arrow-color': 'data(color)',
+            'target-arrow-shape': 'data(arrowShape)',
             'curve-style': 'bezier',
-            'label': 'data(label)',                    // Relationship type
+            'label': 'data(label)',
             'font-size': 10,
             'text-rotation': 'autorotate',
             'color': nodeTextColor,
@@ -383,21 +329,7 @@
         }
       ],
       
-      layout: {
-        name: graphData.nodes.length > 20 ? 'circle' : 'cose',
-        animate: true,
-        animationDuration: 500,
-        // For cose layout (spring-based physics)
-        nodeRepulsion: 400000,
-        idealEdgeLength: 100,
-        edgeElasticity: 100,
-        nestingFactor: 5,
-      },
-
-      // User interaction settings
-      userZoomingEnabled: true,
-      userPanningEnabled: true,
-      boxSelectionEnabled: false,
+      layout: getCoseLayoutConfig()
     });
 
     // Set background color
@@ -406,7 +338,7 @@
     // Add click handler for nodes
     cy.on('tap', 'node', function(evt) {
       const clickedNode = evt.target;
-      console.log('Clicked node:', clickedNode.data());
+      debugLog('Clicked node:', clickedNode.data());
       // Future: Could expand this node's connections
     });
 
@@ -415,15 +347,48 @@
   }
 
   /**
+   * Get CoSE (Compound Spring Embedder) layout configuration
+   * CoSE is great for organic, force-directed layouts with good node spacing
+   * 
+   * @returns {object} - Cytoscape layout configuration
+   */
+  function getCoseLayoutConfig() {
+    return {
+      name: 'cose',
+      
+      // Physics simulation
+      idealEdgeLength: 100,         // Preferred edge length
+      nodeOverlap: 20,              // Min space between nodes
+      refresh: 20,                  // Refresh rate (ms)
+      fit: true,
+      padding: 50,
+      randomize: false,             // Start from current positions
+      
+      // Forces
+      nodeRepulsion: 400000,        // Nodes push each other away
+      edgeElasticity: 100,          // Edges pull nodes together
+      nestingFactor: 5,             // How much to nest clusters
+      gravity: 80,                  // Pull toward center
+      
+      // Incremental layout
+      numIter: 1000,                // Max iterations
+      initialTemp: 200,             // Initial temperature
+      coolingFactor: 0.95,          // Cooling rate
+      minTemp: 1.0,                 // Stop temperature
+      
+      animate: true,
+      animationDuration: 500
+    };
+  }
+
+  // LIFECYCLE HOOKS
+
+  /**
    * Lifecycle: Component mounted
    */
   onMount(() => {
-    console.log('=== GraphView MOUNTED ===');
-    console.log('Node prop on mount:', node);
-    if (node) {
-      console.log('Node has n?', 'n' in node);
-      console.log('Node.n:', node.n);
-    }
+    debugLog('=== GraphView MOUNTED ===');
+    debugLog('Node prop on mount:', node);
     initializeGraph();
   });
 
@@ -431,7 +396,7 @@
    * Lifecycle: Clean up when component is destroyed
    */
   onDestroy(() => {
-    console.log('GraphView destroyed');
+    debugLog('GraphView destroyed');
     if (cy) {
       cy.destroy();
       cy = null;
@@ -445,14 +410,11 @@
    * - Updates the graph with new data
    */
   $: {
-    console.log('=== Reactive: node prop changed ===');
-    console.log('New node value:', node);
-    if (node) {
-      console.log('Node keys:', Object.keys(node));
-      console.log('Has n property?', 'n' in node);
-    }
+    debugLog('=== Reactive: node prop changed ===');
+    debugLog('New node value:', node);
+    
     if (cy && node) {
-      console.log('Updating graph because node changed');
+      debugLog('Updating graph because node changed');
       initializeGraph();
     }
   }
