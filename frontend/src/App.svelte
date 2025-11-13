@@ -12,28 +12,70 @@
 	import { getAutocompleteSuggestions, getNodeByName } from "./api.js";
 	import { contextDepth } from "./stores.js";
 	
-	// State management
+	// ============================================
+	// DEBUG CONFIGURATION
+	// ============================================
+	const DEBUG = true;
+	
+	/**
+	 * Debug logging wrapper
+	 * Only logs when DEBUG is enabled
+	 * 
+	 * @param {...any} args - Arguments to log
+	 */
+	function debugLog(...args) {
+		if (DEBUG) {
+			console.log(...args);
+		}
+	}
+	
+	// ============================================
+	// STATE MANAGEMENT
+	// ============================================
+	
+	/** @type {string} Search query input */
 	let query = "";
+	
+	/** @type {boolean} Whether to show the graph view */
 	let showGraph = false;
+	
+	/** @type {Array} Autocomplete suggestions */
 	let suggestions = [];
+	
+	/** @type {boolean} Whether to show suggestions dropdown */
 	let showSuggestions = false;
+	
+	/** @type {boolean} Loading state for API calls */
 	let isLoading = false;
+	
+	/** @type {string|null} Error message */
 	let error = null;
+	
+	/** @type {Object|null} Selected node data from API */
 	let selectedNode = null;
+	
+	/** @type {number|null} Debounce timer for autocomplete */
 	let debounceTimer = null;
+	
+	/** @type {boolean} Whether settings menu is visible */
 	let showSettings = false;
 	
-	// Reference to GraphView component for report generation
+	/** @type {GraphView} Reference to GraphView component for report generation */
 	let graphViewComponent;
 
-
+	// ============================================
+	// AUTOCOMPLETE & SEARCH HANDLERS
+	// ============================================
 
 	/**
 	 * Handle input changes and trigger autocomplete
-	 * Wait 300 ms before making request after keystroke
+	 * 
+	 * Debounces requests to avoid excessive API calls.
+	 * Only triggers autocomplete when query is 3+ characters.
+	 * Waits 300ms after last keystroke before making request.
 	 */
 	function handleInputChange() {
-		// Clear previous timer
+		// Clear previous debounce timer
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
 		}
@@ -73,67 +115,63 @@
 	}
 
 	/**
-	 * Handle suggestion selection
+	 * Handle suggestion selection from autocomplete dropdown
 	 * 
-	 * When user clicks on a suggestion:
-	 * 1. Close the suggestions dropdown
-	 * 2. Fetch the full node details
-	 * 3. Pass data to GraphView component
+	 * Fetches full node details from API and displays graph.
+	 * 
+	 * @param {Object} suggestion - Selected suggestion object
+	 * @param {string} suggestion.name - Entity name
+	 * @param {string} suggestion.label - Entity type
 	 */
 	async function handleSuggestionSelect(suggestion) {
 		try {
 			isLoading = true;
 			error = null;
 			
-			// Update search input
+			// Update search input and close dropdown
 			query = suggestion.name;
 			showSuggestions = false;
 
-			console.log(`Calling getNodeByName("${suggestion.name}", "${suggestion.label}")`);
+			debugLog(`Fetching node: "${suggestion.name}" (${suggestion.label})`);
 			const result = await getNodeByName(suggestion.name, suggestion.label);
 			
-			console.log('=== API RESPONSE ===');
-			console.log('Full result:', result);
-			console.log('result.success:', result.success);
-			console.log('result.data:', result.data);
-			console.log('result.data type:', typeof result.data);
-			console.log('result.data is Array?', Array.isArray(result.data));
-						
-						if (result.data && result.data.length > 0) {
-				console.log('First data item:', result.data[0]);
-				console.log('First data item keys:', Object.keys(result.data[0]));
-				console.log('Has n property?', 'n' in result.data[0]);
-				console.log('Has connections property?', 'connections' in result.data[0]);
+			debugLog('=== API RESPONSE ===');
+			debugLog('Success:', result.success);
+			debugLog('Data length:', result.data?.length);
+			
+			if (result.data && result.data.length > 0) {
+				debugLog('First item keys:', Object.keys(result.data[0]));
+				debugLog('Has required properties:', {
+					n: 'n' in result.data[0],
+					connections: 'connections' in result.data[0]
+				});
 			}
 			
 			if (result.success && result.data && result.data.length > 0) {
 				selectedNode = result.data[0];
 				showGraph = true;
 				
-				console.log('=== SETTING selectedNode ===');
-				console.log('selectedNode:', selectedNode);
-				console.log('selectedNode keys:', Object.keys(selectedNode));
-				console.log('selectedNode.n:', selectedNode.n);
-				console.log('selectedNode.connections:', selectedNode.connections);
+				debugLog('=== Node Selected ===');
+				debugLog('Node name:', selectedNode.n?.name);
+				debugLog('Connections count:', selectedNode.connections?.length);
 			} else {
 				error = "Node not found";
 				showGraph = false;
-				console.error('Node not found or invalid response');
+				debugLog('Node not found or invalid response');
 			}
 		} catch (err) {
-			console.error("=== ERROR fetching node ===");
-			console.error("Error:", err);
-			console.error("Error message:", err.message);
-			console.error("Error stack:", err.stack);
+			console.error("Error fetching node:", err);
 			error = err.message;
 			showGraph = false;
 		} finally {
 			isLoading = false;
 		}
-	}	/**
+	}
+
+	/**
 	 * Handle search button click or Enter key
 	 * 
-	 * This allows users to search without selecting from autocomplete
+	 * Attempts to search by selecting first suggestion or direct name lookup.
 	 */
 	async function handleSearch() {
 		if (query.trim() === "") return;
@@ -147,14 +185,17 @@
 				isLoading = true;
 				error = null;
 				
+				debugLog(`Direct search for: "${query.trim()}"`);
 				const result = await getNodeByName(query.trim());
 				
 				if (result.success && result.data && result.data.length > 0) {
 					selectedNode = result.data[0];
 					showGraph = true;
+					debugLog('Direct search successful');
 				} else {
 					error = `No entity found with name "${query.trim()}"`;
 					showGraph = false;
+					debugLog('Direct search failed: no results');
 				}
 			} catch (err) {
 				console.error("Search error:", err);
@@ -167,7 +208,7 @@
 	}
 
 	/**
-	 * Clear the search and reset to initial state
+	 * Clear search and reset application to initial state
 	 */
 	function handleClearSearch() {
 		query = "";
@@ -176,11 +217,17 @@
 		showGraph = false;
 		selectedNode = null;
 		error = null;
+		
+		debugLog('Search cleared, app reset to initial state');
 	}
 
 	/**
-	 * Handle keyboard navigation
+	 * Handle keyboard navigation in search input
 	 * 
+	 * - Enter: Trigger search
+	 * - Escape: Close suggestions dropdown
+	 * 
+	 * @param {KeyboardEvent} event - Keyboard event
 	 */
 	function handleKeyDown(event) {
 		if (event.key === 'Enter') {
@@ -188,61 +235,104 @@
 		} else if (event.key === 'Escape') {
 			showSuggestions = false;
 		}
-		// All other keys pass through normally - user can keep typing
 	}
 
+	// ============================================
+	// UI INTERACTION HANDLERS
+	// ============================================
+
 	/**
-	 * Close suggestions when clicking outside
+	 * Handle clicks outside of dropdowns and menus
+	 * 
+	 * Closes suggestions dropdown and settings menu when clicking outside.
+	 * 
+	 * @param {MouseEvent} event - Click event
 	 */
 	function handleClickOutside(event) {
-		// Check if click was outside search wrapper (for suggestions)
+		// Close suggestions if click was outside search wrapper
 		if (!event.target.closest('.search-wrapper')) {
 			showSuggestions = false;
 		}
 		
-		// Check if click was outside settings wrapper (for settings menu)
-		// Only close if settings is open AND click was outside
+		// Close settings menu if click was outside settings wrapper
 		if (showSettings && !event.target.closest('.settings-wrapper')) {
 			showSettings = false;
 		}
 	}
-	
+
+	// ============================================
+	// FEATURE HANDLERS
+	// ============================================
+
 	/**
-	 * Generate report from current graph state
-	 * Calls the exposed function from GraphView component
+	 * Generate HTML report from current graph state
+	 * 
+	 * Calls the exposed function from GraphView component to generate
+	 * a printable HTML report with all visible nodes and relationships.
 	 */
 	function handleGenerateReport() {
 		if (graphViewComponent) {
-			console.log('Generating report...');
+			debugLog('Generating report from current graph state');
 			graphViewComponent.generateReportFromGraph();
 		} else {
-			console.error('GraphView component not ready');
+			console.error('GraphView component not initialized');
 		}
 	}
-	
-	// Reactive logging
+
+	/**
+	 * Open time analysis view
+	 * 
+	 * Shows temporal analysis of all visible nodes with date properties.
+	 * Displays timeline visualization of entity activity periods.
+	 * 
+	 * @todo Implement TimelineAnalysis component
+	 */
+	function handleTimeAnalysis() {
+		debugLog('Time analysis requested (not yet implemented)');
+		// TODO: Implementation coming soon
+	}
+
+	// ============================================
+	// REACTIVE STATEMENTS
+	// ============================================
+
+	/**
+	 * React to selectedNode changes
+	 * Logs node information for debugging
+	 */
 	$: {
-		console.log('=== REACTIVE: selectedNode changed ===');
-		console.log('New selectedNode:', selectedNode);
-		if (selectedNode) {
-			console.log('selectedNode type:', typeof selectedNode);
-			console.log('selectedNode keys:', Object.keys(selectedNode));
+		if (DEBUG && selectedNode) {
+			debugLog('=== Selected Node Changed ===');
+			debugLog('Node type:', typeof selectedNode);
+			debugLog('Available keys:', Object.keys(selectedNode));
+			debugLog('Main entity:', selectedNode.n?.name);
 		}
 	}
-	
+
+	/**
+	 * React to showGraph changes
+	 * Logs graph visibility state
+	 */
 	$: {
-		console.log('=== REACTIVE: showGraph changed ===');
-		console.log('showGraph:', showGraph);
+		if (DEBUG) {
+			debugLog('=== Graph Visibility Changed ===');
+			debugLog('showGraph:', showGraph);
+		}
 	}
 </script>
 
 <svelte:window on:click={handleClickOutside} />
 
 <div class="app-container">
+	<!-- ============================================ -->
+	<!-- HEADER: Search and Controls                 -->
+	<!-- ============================================ -->
 	<header class:compact={showGraph} class="search-container">
 		<h1>Threat Intelligence Platform</h1>
+		
 		<div class="search-wrapper">
 			<div class="search-button">
+				<!-- Search Input -->
 				<input
 					type="text"
 					class="searchbar"
@@ -252,8 +342,10 @@
 					placeholder="Search for entities (min. 3 characters)..."
 					disabled={isLoading}
 				/>
+				
+				<!-- Action Buttons -->
 				<div class="button-group">
-					<!-- Clear button - shows when there's text -->
+					<!-- Clear Button (shown when query exists) -->
 					{#if query.length > 0}
 						<button 
 							on:click={handleClearSearch} 
@@ -264,28 +356,41 @@
 							<X size={20} />
 						</button>
 					{/if}
-					<button on:click={handleSearch} disabled={isLoading} title="Search">
+					
+					<!-- Search Button -->
+					<button 
+						on:click={handleSearch} 
+						disabled={isLoading} 
+						title="Search"
+					>
 						<Search size={20} />
 					</button>
-				<div class="settings-wrapper">
+					
+					<!-- Settings Button and Menu -->
+					<div class="settings-wrapper">
 						<button 
 							class="settings-btn"
 							on:click={() => showSettings = !showSettings} 
-							title="Einstellungen"
+							title="Settings"
 						>
 							<Settings size={20} />
 						</button>
 						
-						<!-- Settings Menu Component -->
 						<SettingsMenu 
 							show={showSettings} 
 							onClose={() => showSettings = false} 
 						/>
 					</div>
+					
+					<!-- Feature Buttons (shown when graph is visible) -->
 					{#if showGraph}
-						<button title="Zeitanalyse">
+						<button 
+							on:click={handleTimeAnalysis}
+							title="Time Analysis"
+						>
 							<ChartNoAxesCombined size={20} />
 						</button>
+						
 						<button 
 							on:click={handleGenerateReport}
 							title="Generate Report"
@@ -326,29 +431,39 @@
 		</div>
 	</header>
 
-	<!-- Debug info panel -->
-	<div class="debug-panel">
-		<details>
-			<summary>Debug Info (click to expand)</summary>
-			<div class="debug-content">
-				<p><strong>showGraph:</strong> {showGraph}</p>
-				<p><strong>selectedNode exists:</strong> {selectedNode !== null}</p>
-				{#if selectedNode}
-					<p><strong>selectedNode keys:</strong> {Object.keys(selectedNode).join(', ')}</p>
-					<p><strong>Has 'n' property:</strong> {'n' in selectedNode}</p>
-					<p><strong>Has 'connections' property:</strong> {'connections' in selectedNode}</p>
-				{/if}
-				<p><strong>Current hops setting:</strong> {$contextDepth}</p>
-			</div>
-		</details>
-	</div>
+	<!-- ============================================ -->
+	<!-- DEBUG PANEL (Development Only)              -->
+	<!-- ============================================ -->
+	{#if DEBUG}
+		<div class="debug-panel">
+			<details>
+				<summary>Debug Info (click to expand)</summary>
+				<div class="debug-content">
+					<p><strong>showGraph:</strong> {showGraph}</p>
+					<p><strong>selectedNode exists:</strong> {selectedNode !== null}</p>
+					{#if selectedNode}
+						<p><strong>selectedNode keys:</strong> {Object.keys(selectedNode).join(', ')}</p>
+						<p><strong>Has 'n' property:</strong> {'n' in selectedNode}</p>
+						<p><strong>Has 'connections' property:</strong> {'connections' in selectedNode}</p>
+					{/if}
+					<p><strong>Current hops setting:</strong> {$contextDepth}</p>
+				</div>
+			</details>
+		</div>
+	{/if}
 
+	<!-- ============================================ -->
+	<!-- MAIN CONTENT: Graph View                    -->
+	<!-- ============================================ -->
 	{#if showGraph && selectedNode}
 		<div class="graph-container">
-			<GraphView bind:this={graphViewComponent} node={selectedNode} />
+			<GraphView 
+				bind:this={graphViewComponent} 
+				node={selectedNode} 
+			/>
 		</div>
 	{:else if showGraph && !selectedNode}
-		<!-- Loading state for graph -->
+		<!-- Loading State -->
 		<div class="graph-container">
 			<div class="graph-loading">
 				<p>Loading graph...</p>
@@ -356,9 +471,13 @@
 		</div>
 	{/if}
 
+	<!-- ============================================ -->
+	<!-- FOOTER                                       -->
+	<!-- ============================================ -->
 	<footer class="footer">
-		<Copyright size={13} /> 2025 Johannes Liebscher â€" CTI Platform Version
-		0.21 Prototype
+		<p>
+			<Copyright size={13} /> 2025 Johannes Liebscher — CTI Platform Version 0.21 Prototype
+		</p>
 		<p>Impressum</p>
 	</footer>
 </div>
