@@ -2,9 +2,12 @@
 <script>
   import { onMount, onDestroy } from 'svelte';
   import cytoscape from 'cytoscape';
+  import { getNodeByName } from './api.js';
+  import ContextMenu from './ContextMenu.svelte';
 
+  // ============================================
   // DEBUG CONFIGURATION
-  // Set to false to disable console logs
+  // ============================================
   const DEBUG = true;
 
   function debugLog(...args) {
@@ -20,14 +23,31 @@
 
   let cy;
   let containerElement;
+  
+  // ============================================
+  // STATE FOR INTERACTIVE FEATURES
+  // ============================================
+  
+  // Context menu state
+  let contextMenuVisible = false;
+  let contextMenuPosition = null;
+  let contextMenuTargetNode = null;
+  
+  // Selected node for info display
+  let selectedNodeData = null;
+  
+  // Main node reference (protected from deletion)
+  let mainNodeId = null;
+  
+  // Loading state for extend operation
+  let isExtending = false;
 
+  // ============================================
   // COLOR HELPERS
-  // Read colors from CSS variables in :root
+  // ============================================
   
   /**
    * Get computed CSS variable value from :root
-   * @param {string} varName - CSS variable name (e.g., '--node-Malware')
-   * @returns {string} - Color value
    */
   function getCSSVariable(varName) {
     return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
@@ -35,8 +55,6 @@
 
   /**
    * Get color for a node type from CSS variables
-   * @param {string} type - Node type (e.g., 'Malware', 'ThreatActor')
-   * @returns {string} - Hex color code
    */
   function getNodeColor(type) {
     const color = getCSSVariable(`--node-${type}`);
@@ -45,20 +63,18 @@
   
   /**
    * Get color for an edge/relationship type from CSS variables
-   * @param {string} relType - Relationship type (e.g., 'USES', 'TARGETS')
-   * @returns {string} - Hex color code
    */
   function getEdgeColor(relType) {
     const color = getCSSVariable(`--edge-${relType}`);
     return color || getCSSVariable('--edge-default');
   }
 
+  // ============================================
   // HELPER FUNCTIONS
+  // ============================================
 
   /**
    * Extract relationship type as string from various formats
-   * @param {string|object} rel - Relationship in various formats
-   * @returns {string} - Relationship type as string
    */
   function getRelationshipString(rel) {
     if (typeof rel === 'string') return rel;
@@ -69,9 +85,6 @@
 
   /**
    * Create style data object for a node
-   * @param {object} nodeData - Node data from backend
-   * @param {boolean} isMainNode - Whether this is the main/central node
-   * @returns {object} - Pre-computed style properties
    */
   function createNodeStyleData(nodeData, isMainNode = false) {
     return {
@@ -86,8 +99,6 @@
 
   /**
    * Create style data object for an edge
-   * @param {string} relType - Relationship type
-   * @returns {object} - Pre-computed style properties
    */
   function createEdgeStyleData(relType) {
     return {
@@ -99,12 +110,6 @@
 
   /**
    * Create a Cytoscape node object
-   * @param {string} id - Node ID
-   * @param {string} label - Display label
-   * @param {object} properties - Node properties
-   * @param {string} type - Node type
-   * @param {boolean} isMainNode - Is this the main node?
-   * @returns {object} - Cytoscape node object
    */
   function createCytoscapeNode(id, label, properties, type, isMainNode = false) {
     const styleData = createNodeStyleData(properties, isMainNode);
@@ -116,20 +121,15 @@
         properties,
         type,
         isMainNode,
-        ...styleData  // Spread pre-computed style properties
+        ...styleData
       }
     };
   }
 
   /**
    * Create a Cytoscape edge object
-   * @param {string} id - Edge ID
-   * @param {string} source - Source node ID
-   * @param {string} target - Target node ID
-   * @param {string} relType - Relationship type
-   * @returns {object} - Cytoscape edge object
    */
-  function createCytoscapeEdge(id, source, target, relType) {
+  function createCytoscapeEdge(id, source, target, relType, properties = {}) {
     const styleData = createEdgeStyleData(relType);
     
     return {
@@ -139,21 +139,18 @@
         target,
         label: relType,
         relationshipType: relType,
-        ...styleData  // Spread pre-computed style properties
+        properties,
+        ...styleData
       }
     };
   }
 
+  // ============================================
   // DATA CONVERSION
+  // ============================================
 
   /**
    * Convert backend node data to Cytoscape format with pre-computed colors
-   * 
-   * Backend returns: { n: {...}, connections: [...], nodes: [...], edges: [...] }
-   * Cytoscape expects: { nodes: [...], edges: [...] }
-   * 
-   * Pre-compute all styling data (color, size, etc.) and store in node.data
-   * Then Cytoscape just reads from data using 'data(property)'
    */
   function nodeDataToCytoscape(nodeData) {
     if (!nodeData || !nodeData.n) {
@@ -170,8 +167,11 @@
       nodeData.n.name || 'Unknown',
       nodeData.n,
       nodeData.n.label || 'Unknown',
-      true  // isMainNode
+      true
     );
+    
+    // Store main node ID for protection
+    mainNodeId = mainNode.data.id;
     
     debugLog('Main node created:', mainNode.data.id, 'Color:', mainNode.data.color);
     
@@ -180,7 +180,6 @@
     const processedNodes = new Set([mainNode.data.id]);
 
     // Process the nodes and edges arrays from backend
-    // Backend ALWAYS provides these in the correct format with source/target
     if (!nodeData.edges || !nodeData.nodes) {
       console.error('Missing edges or nodes array in data - cannot display graph');
       return { nodes: [mainNode], edges: [] };
@@ -211,7 +210,7 @@
       }
     });
     
-    // Add all edges with pre-computed styling (preserves actual path structure!)
+    // Add all edges with pre-computed styling
     nodeData.edges.forEach((edge, idx) => {
       const relType = getRelationshipString(edge.relationship);
       
@@ -219,7 +218,8 @@
         edge.id || `edge-${idx}`,
         edge.source,
         edge.target,
-        relType
+        relType,
+        edge.properties || {}
       );
       
       edges.push(cytoscapeEdge);
@@ -231,13 +231,223 @@
     return { nodes, edges };
   }
 
+  // ============================================
+  // INTERACTIVE FEATURES
+  // ============================================
+
+  /**
+   * Show context menu at position
+   */
+  function showContextMenu(x, y, node) {
+    contextMenuPosition = { x, y };
+    contextMenuTargetNode = node;
+    contextMenuVisible = true;
+  }
+
+  /**
+   * Handle context menu action
+   */
+  async function handleContextMenuAction(event) {
+    const { action, node } = event.detail;
+    debugLog(`Context menu action: ${action}`, node);
+
+    switch (action) {
+      case 'info':
+        showNodeInfo(node);
+        break;
+      case 'extend':
+        await extendNode(node);
+        break;
+      case 'collapse':
+        collapseNode(node);
+        break;
+      case 'delete':
+        deleteNode(node);
+        break;
+    }
+  }
+
+  /**
+   * Show node information in the info panel
+   */
+  function showNodeInfo(node) {
+    selectedNodeData = {
+      name: node.data('label'),
+      type: node.data('type'),
+      properties: node.data('properties'),
+      isMainNode: node.data('isMainNode')
+    };
+    debugLog('Showing info for node:', selectedNodeData);
+  }
+
+  /**
+   * Clear selected node (return to main node display)
+   */
+  function clearSelectedNode() {
+    selectedNodeData = null;
+    debugLog('Cleared selected node, showing main node');
+  }
+
+  /**
+   * Extend node - fetch and add its connections
+   */
+  async function extendNode(node) {
+    const nodeName = node.data('label');
+    const nodeType = node.data('type');
+    
+    debugLog(`Extending node: ${nodeName} (${nodeType})`);
+    
+    isExtending = true;
+    
+    try {
+      // Fetch node data with hops=1 (immediate connections)
+      const response = await getNodeByName(nodeName, nodeType, 1);
+      
+      if (!response.success || !response.data || response.data.length === 0) {
+        console.error('Failed to fetch node connections');
+        return;
+      }
+      
+      const fetchedData = response.data[0];
+      debugLog('Fetched data for extend:', fetchedData);
+      
+      // Convert to Cytoscape format
+      const newGraphData = nodeDataToCytoscape(fetchedData);
+      
+      // Merge into existing graph (avoiding duplicates)
+      mergeGraphData(newGraphData);
+      
+      // Re-run layout to position new nodes
+      runLayout(true);
+      
+    } catch (error) {
+      console.error('Error extending node:', error);
+    } finally {
+      isExtending = false;
+    }
+  }
+
+  /**
+   * Merge new graph data into existing graph
+   * Avoids duplicates by checking if nodes/edges already exist
+   */
+  function mergeGraphData(newGraphData) {
+    let addedNodes = 0;
+    let addedEdges = 0;
+    
+    // Add new nodes (if they don't exist)
+    newGraphData.nodes.forEach(nodeObj => {
+      const existingNode = cy.getElementById(nodeObj.data.id);
+      if (existingNode.length === 0) {
+        cy.add(nodeObj);
+        addedNodes++;
+      }
+    });
+    
+    // Add new edges (if they don't exist)
+    newGraphData.edges.forEach(edgeObj => {
+      const existingEdge = cy.getElementById(edgeObj.data.id);
+      if (existingEdge.length === 0) {
+        // Check if edge between same nodes exists (even with different ID)
+        const duplicateEdge = cy.edges().filter(e => 
+          e.data('source') === edgeObj.data.source &&
+          e.data('target') === edgeObj.data.target &&
+          e.data('relationshipType') === edgeObj.data.relationshipType
+        );
+        
+        if (duplicateEdge.length === 0) {
+          cy.add(edgeObj);
+          addedEdges++;
+        }
+      }
+    });
+    
+    debugLog(`Merged: ${addedNodes} new nodes, ${addedEdges} new edges`);
+  }
+
+  /**
+   * Collapse node - remove leaf nodes connected only to this node
+   */
+  function collapseNode(node) {
+    const nodeId = node.id();
+    debugLog(`Collapsing node: ${nodeId}`);
+    
+    // Find all directly connected nodes
+    const connectedEdges = node.connectedEdges();
+    const connectedNodes = node.neighborhood('node');
+    
+    let removedCount = 0;
+    
+    // Check each connected node
+    connectedNodes.forEach(connectedNode => {
+      // Skip if it's the main node (protected)
+      if (connectedNode.data('isMainNode')) {
+        return;
+      }
+      
+      // Check if this node is only connected to our target node
+      const allEdges = connectedNode.connectedEdges();
+      const isLeaf = allEdges.every(edge => 
+        edge.data('source') === nodeId || edge.data('target') === nodeId
+      );
+      
+      if (isLeaf) {
+        // Remove the leaf node (edges will be removed automatically)
+        cy.remove(connectedNode);
+        removedCount++;
+      }
+    });
+    
+    debugLog(`Collapsed: removed ${removedCount} leaf nodes`);
+    
+    // Re-run layout to adjust positions
+    if (removedCount > 0) {
+      runLayout(true);
+    }
+  }
+
+  /**
+   * Delete node and its connected edges
+   */
+  function deleteNode(node) {
+    const nodeId = node.id();
+    
+    // Protect main node from deletion
+    if (node.data('isMainNode')) {
+      debugLog('Cannot delete main node (protected)');
+      console.warn('Main node is protected and cannot be deleted');
+      return;
+    }
+    
+    debugLog(`Deleting node: ${nodeId}`);
+    
+    // If this node is currently selected, clear selection
+    if (selectedNodeData && selectedNodeData.name === node.data('label')) {
+      clearSelectedNode();
+    }
+    
+    // Remove node (edges will be removed automatically by Cytoscape)
+    cy.remove(node);
+    
+    // Re-run layout
+    runLayout(true);
+  }
+
+  /**
+   * Run layout algorithm
+   */
+  function runLayout(animate = false) {
+    const layoutConfig = getCoseLayoutConfig();
+    layoutConfig.animate = animate;
+    cy.layout(layoutConfig).run();
+  }
+
+  // ============================================
   // GRAPH INITIALIZATION
+  // ============================================
 
   /**
    * Initialize or update the graph
-   * 
-   * - Call this when component mounts
-   * - Also call it when node prop changes
    */
   function initializeGraph() {
     if (!containerElement) {
@@ -245,11 +455,9 @@
       return;
     }
 
-    // Get CSS variables for consistent theming (background/text colors)
     const bgColor = getCSSVariable('--graph-background') || '#0f172a';
     const nodeTextColor = getCSSVariable('--graph-node-text') || '#f8fafc';
 
-    // Convert node data to Cytoscape format
     const graphData = nodeDataToCytoscape(node);
 
     if (graphData.nodes.length === 0) {
@@ -260,12 +468,11 @@
     // If graph instance exists, update it
     if (cy) {
       debugLog('Updating existing graph');
-      cy.elements().remove(); // Clear existing elements
+      cy.elements().remove();
       cy.add(graphData.nodes);
       cy.add(graphData.edges);
       
-      // Apply cose layout for natural node spacing
-      cy.layout(getCoseLayoutConfig()).run();
+      runLayout(true);
       return;
     }
 
@@ -276,14 +483,10 @@
       container: containerElement,
       elements: [...graphData.nodes, ...graphData.edges],
       
-      // CYTOSCAPE STYLESHEET
-      // Using data mappers: 'data(propertyName)' 
-      // reads pre-computed values
       style: [
         {
           selector: 'node',
           style: {
-            // All styling from pre-computed data properties:
             'label': 'data(label)',
             'background-color': 'data(color)',
             'width': 'data(size)',
@@ -302,7 +505,6 @@
         {
           selector: 'edge',
           style: {
-            // All styling from pre-computed data properties:
             'width': 'data(width)',
             'line-color': 'data(color)',
             'target-arrow-color': 'data(color)',
@@ -326,75 +528,118 @@
             'overlay-padding': 5,
             'overlay-opacity': 0.3,
           }
+        },
+        {
+          selector: 'edge:selected',
+          style: {
+            'width': 4,
+            'line-color': '#fff',
+            'target-arrow-color': '#fff',
+          }
         }
       ],
       
       layout: getCoseLayoutConfig()
     });
 
-    // Set background color
     containerElement.style.backgroundColor = bgColor;
 
-    // Add click handler for nodes
+    // ============================================
+    // EVENT HANDLERS
+    // ============================================
+
+    // Single click on node - show info
     cy.on('tap', 'node', function(evt) {
       const clickedNode = evt.target;
-      debugLog('Clicked node:', clickedNode.data());
-      // Future: Could expand this node's connections
+      showNodeInfo(clickedNode);
     });
 
-    // Fit the graph to the container
-    cy.fit(null, 50); // 50px padding
+    // Double click on node - extend
+    cy.on('dbltap', 'node', function(evt) {
+      const clickedNode = evt.target;
+      extendNode(clickedNode);
+    });
+
+    // Right click on node - context menu
+    cy.on('cxttap', 'node', function(evt) {
+      const clickedNode = evt.target;
+      const position = evt.renderedPosition || evt.position;
+      
+      // Convert Cytoscape position to screen coordinates
+      const container = containerElement.getBoundingClientRect();
+      showContextMenu(
+        container.left + position.x,
+        container.top + position.y,
+        clickedNode
+      );
+    });
+
+    // Click on edge - show edge info
+    cy.on('tap', 'edge', function(evt) {
+      const clickedEdge = evt.target;
+      showEdgeInfo(clickedEdge);
+    });
+
+    // Click on background - deselect
+    cy.on('tap', function(evt) {
+      if (evt.target === cy) {
+        clearSelectedNode();
+      }
+    });
+
+    cy.fit(null, 50);
   }
 
   /**
-   * Get CoSE (Compound Spring Embedder) layout configuration
-   * CoSE is great for organic, force-directed layouts with good node spacing
-   * 
-   * @returns {object} - Cytoscape layout configuration
+   * Show edge information
+   */
+  function showEdgeInfo(edge) {
+    selectedNodeData = {
+      name: edge.data('label'),
+      type: 'Relationship',
+      properties: edge.data('properties'),
+      isEdge: true,
+      source: edge.source().data('label'),
+      target: edge.target().data('label')
+    };
+    debugLog('Showing info for edge:', selectedNodeData);
+  }
+
+  /**
+   * Get CoSE layout configuration
    */
   function getCoseLayoutConfig() {
     return {
       name: 'cose',
-      
-      // Physics simulation
-      idealEdgeLength: 100,         // Preferred edge length
-      nodeOverlap: 20,              // Min space between nodes
-      refresh: 20,                  // Refresh rate (ms)
+      idealEdgeLength: 100,
+      nodeOverlap: 20,
+      refresh: 20,
       fit: true,
       padding: 50,
-      randomize: false,             // Start from current positions
-      
-      // Forces
-      nodeRepulsion: 400000,        // Nodes push each other away
-      edgeElasticity: 100,          // Edges pull nodes together
-      nestingFactor: 5,             // How much to nest clusters
-      gravity: 80,                  // Pull toward center
-      
-      // Incremental layout
-      numIter: 1000,                // Max iterations
-      initialTemp: 200,             // Initial temperature
-      coolingFactor: 0.95,          // Cooling rate
-      minTemp: 1.0,                 // Stop temperature
-      
+      randomize: false,
+      nodeRepulsion: 400000,
+      edgeElasticity: 100,
+      nestingFactor: 5,
+      gravity: 80,
+      numIter: 1000,
+      initialTemp: 200,
+      coolingFactor: 0.95,
+      minTemp: 1.0,
       animate: true,
       animationDuration: 500
     };
   }
 
+  // ============================================
   // LIFECYCLE HOOKS
+  // ============================================
 
-  /**
-   * Lifecycle: Component mounted
-   */
   onMount(() => {
     debugLog('=== GraphView MOUNTED ===');
     debugLog('Node prop on mount:', node);
     initializeGraph();
   });
 
-  /**
-   * Lifecycle: Clean up when component is destroyed
-   */
   onDestroy(() => {
     debugLog('GraphView destroyed');
     if (cy) {
@@ -403,12 +648,6 @@
     }
   });
 
-  /**
-   * Reactive statement: runs when 'node' prop changes
-   * 
-   * - Whenever 'node' changes, this runs
-   * - Updates the graph with new data
-   */
   $: {
     debugLog('=== Reactive: node prop changed ===');
     debugLog('New node value:', node);
@@ -423,8 +662,47 @@
 <div class="graph-wrapper">
   <div bind:this={containerElement} id="cy" class="graph-canvas"></div>
   
-  {#if node && node.n}
-    <div class="node-info">
+  <!-- Loading indicator for extend operation -->
+  {#if isExtending}
+    <div class="loading-overlay">
+      <div class="loading-spinner"></div>
+      <p>Loading connections...</p>
+    </div>
+  {/if}
+  
+  <!-- Node/Edge Info Panel -->
+  <div class="node-info">
+    {#if selectedNodeData}
+      <!-- Showing selected node/edge info -->
+      <h3>{selectedNodeData.name}</h3>
+      <span class="node-type label-{selectedNodeData.type}">
+        {selectedNodeData.type}
+      </span>
+      
+      {#if selectedNodeData.isEdge}
+        <div class="edge-connection">
+          <strong>From:</strong> {selectedNodeData.source}<br>
+          <strong>To:</strong> {selectedNodeData.target}
+        </div>
+      {/if}
+      
+      <div class="properties">
+        <h4>Properties:</h4>
+        {#if selectedNodeData.properties && Object.keys(selectedNodeData.properties).length > 0}
+          {#each Object.entries(selectedNodeData.properties) as [key, value]}
+            {#if key !== 'name' && key !== 'label'}
+              <div class="property">
+                <span class="key">{key}:</span>
+                <span class="value">{value}</span>
+              </div>
+            {/if}
+          {/each}
+        {:else}
+          <p class="no-properties">No additional properties</p>
+        {/if}
+      </div>
+    {:else if node && node.n}
+      <!-- Showing main node info (default) -->
       <h3>{node.n.name}</h3>
       <span class="node-type label-{node.n.label}">
         {node.n.label}
@@ -437,6 +715,7 @@
       {/if}
       
       <div class="properties">
+        <h4>Properties:</h4>
         {#each Object.entries(node.n) as [key, value]}
           {#if key !== 'name' && key !== 'label'}
             <div class="property">
@@ -446,9 +725,17 @@
           {/if}
         {/each}
       </div>
-    </div>
-  {/if}
+    {/if}
+  </div>
 </div>
+
+<!-- Context Menu Component -->
+<ContextMenu
+  bind:visible={contextMenuVisible}
+  bind:position={contextMenuPosition}
+  bind:targetNode={contextMenuTargetNode}
+  on:action={handleContextMenuAction}
+/>
 
 <style>
   .connections-count {
@@ -457,5 +744,63 @@
     background: rgba(255, 255, 255, 0.05);
     border-radius: 0.25rem;
     font-size: 0.85rem;
+  }
+
+  .loading-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 2rem;
+    border-radius: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    z-index: 100;
+  }
+
+  .loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid var(--color-border);
+    border-top-color: var(--color-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .loading-overlay p {
+    color: var(--color-text);
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .edge-connection {
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 0.25rem;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .properties h4 {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .no-properties {
+    color: var(--color-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin: 0.5rem 0;
   }
 </style>
