@@ -12,12 +12,19 @@
  * @param {Object} reportData.mainNode - Main node information
  * @param {Array} reportData.nodes - All visible nodes
  * @param {Array} reportData.edges - All visible edges
- * @param {string} reportData.graphImage - Base64 PNG image
+ * @param {string} reportData.graphImage - Base64 PNG image of graph
+ * @param {string|null} reportData.timelineImage - Optional base64 PNG image of timeline
  */
 export function generateReport(reportData) {
-  const { mainNode, nodes, edges, graphImage } = reportData;
+  const { mainNode, nodes, edges, graphImage, timelineImage } = reportData;
 
-  const html = buildHTMLReport(mainNode, nodes, edges, graphImage);
+  const html = buildHTMLReport(
+    mainNode,
+    nodes,
+    edges,
+    graphImage,
+    timelineImage,
+  );
 
   // Open in new window
   const reportWindow = window.open("", "_blank");
@@ -33,7 +40,13 @@ export function generateReport(reportData) {
 /**
  * Build complete HTML report
  */
-function buildHTMLReport(mainNode, nodes, edges, graphImage) {
+function buildHTMLReport(
+  mainNode,
+  nodes,
+  edges,
+  graphImage,
+  timelineImage = null,
+) {
   const metadata = {
     generatedDate: new Date().toLocaleString("en-US", {
       year: "numeric",
@@ -64,6 +77,7 @@ function buildHTMLReport(mainNode, nodes, edges, graphImage) {
     ${buildMetadataSection(metadata)}
     ${buildMainNodeSection(mainNode)}
     ${buildGraphVisualizationSection(graphImage)}
+    ${timelineImage ? buildTimelineSection(timelineImage) : ""}
     ${buildConnectionsSection(nodes, edges, mainNode)}
     ${buildFooter()}
   </div>
@@ -328,7 +342,7 @@ function getReportStyles() {
     
     /* Node type colors */
     .type-ThreatActor { background: #ef4444; color: white; }
-    .type-Malware { background: #dc2626; color: white; }
+    .type-Malware { background: #0d0c0c; color: white; }
     .type-Tool { background: #10b981; color: white; }
     .type-Vulnerability { background: #f97316; color: white; }
     .type-Campaign { background: #f59e0b; color: white; }
@@ -337,6 +351,8 @@ function getReportStyles() {
     .type-Observable { background: #06b6d4; color: white; }
     .type-Organization { background: #3b82f6; color: white; }
     .type-Report { background: #6366f1; color: white; }
+
+    .type-AttackPattern { background: #477e00; color: white; }
     .type-default { background: #6b7280; color: white; }
     
     .node-card-body {
@@ -554,6 +570,21 @@ function buildGraphVisualizationSection(graphImage) {
       <p>Visual representation of the threat intelligence relationships</p>
       <div class="graph-visualization">
         <img src="${graphImage}" alt="Threat Intelligence Graph" />
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Build timeline analysis section
+ */
+function buildTimelineSection(timelineImage) {
+  return `
+    <section class="timeline-section">
+      <h2>Temporal Analysis</h2>
+      <p>Timeline visualization showing entity activity periods and key dates</p>
+      <div class="graph-visualization">
+        <img src="${timelineImage}" alt="Timeline Analysis" />
       </div>
     </section>
   `;

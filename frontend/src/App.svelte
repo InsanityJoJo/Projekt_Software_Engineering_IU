@@ -9,6 +9,7 @@
 	} from "lucide-svelte";
 	import GraphView from "./GraphView.svelte";
 	import SettingsMenu from "./SettingsMenu.svelte";
+	import TimelineAnalysis from "./TimelineAnalysis.svelte";
 	import { getAutocompleteSuggestions, getNodeByName } from "./api.js";
 	import { contextDepth } from "./stores.js";
 	
@@ -62,6 +63,18 @@
 	
 	/** @type {GraphView} Reference to GraphView component for report generation */
 	let graphViewComponent;
+	
+	/** @type {TimelineAnalysis} Reference to TimelineAnalysis component */
+	let timelineComponent;
+	
+	/** @type {boolean} Whether timeline analysis is visible */
+	let showTimeline = false;
+	
+	/** @type {string|null} Currently highlighted node ID for timeline sync */
+	let highlightedNodeId = null;
+	
+	/** @type {Array} Visible nodes to pass to timeline */
+	let visibleNodes = [];
 
 	// ============================================
 	// AUTOCOMPLETE & SEARCH HANDLERS
@@ -269,27 +282,79 @@
 	 * 
 	 * Calls the exposed function from GraphView component to generate
 	 * a printable HTML report with all visible nodes and relationships.
+	 * Also includes timeline if visible.
 	 */
 	function handleGenerateReport() {
 		if (graphViewComponent) {
 			debugLog('Generating report from current graph state');
-			graphViewComponent.generateReportFromGraph();
+			
+			// Get timeline image if timeline is visible
+			let timelineImage = null;
+			if (showTimeline && timelineComponent) {
+				timelineImage = timelineComponent.exportAsImage();
+				debugLog('Timeline image exported for report');
+			}
+			
+			// Pass timeline image to GraphView report generation
+			graphViewComponent.generateReportFromGraph(timelineImage);
 		} else {
 			console.error('GraphView component not initialized');
 		}
 	}
 
 	/**
-	 * Open time analysis view
+	 * Toggle time analysis view
 	 * 
-	 * Shows temporal analysis of all visible nodes with date properties.
+	 * Shows/hides temporal analysis of all visible nodes with date properties.
 	 * Displays timeline visualization of entity activity periods.
-	 * 
-	 * @todo Implement TimelineAnalysis component
 	 */
 	function handleTimeAnalysis() {
-		debugLog('Time analysis requested (not yet implemented)');
-		// TODO: Implementation coming soon
+		showTimeline = !showTimeline;
+		debugLog('Timeline visibility toggled:', showTimeline);
+	}
+	
+	/**
+	 * Handle node selection from timeline
+	 * Highlights the corresponding node in the graph
+	 * 
+	 * @param {CustomEvent} event - Event with nodeId and nodeName
+	 */
+	function handleTimelineNodeSelected(event) {
+		const { nodeId, nodeName } = event.detail;
+		debugLog('Timeline node selected:', nodeName);
+		
+		// Update highlighted node
+		highlightedNodeId = nodeId;
+		
+		// Tell GraphView to highlight this node
+		if (graphViewComponent) {
+			graphViewComponent.highlightNode(nodeId);
+		}
+	}
+	
+	/**
+	 * Handle node selection from graph
+	 * Highlights the corresponding bar in timeline
+	 * 
+	 * @param {CustomEvent} event - Event with nodeId
+	 */
+	function handleGraphNodeSelected(event) {
+		const { nodeId } = event.detail;
+		debugLog('Graph node selected:', nodeId);
+		
+		// Update highlighted node for timeline
+		highlightedNodeId = nodeId;
+	}
+	
+	/**
+	 * Update visible nodes when graph changes
+	 * Called after graph is rendered or modified
+	 */
+	function updateVisibleNodes() {
+		if (graphViewComponent && showGraph) {
+			visibleNodes = graphViewComponent.getVisibleNodes();
+			debugLog('Updated visible nodes:', visibleNodes.length);
+		}
 	}
 
 	// ============================================
@@ -317,6 +382,18 @@
 		if (DEBUG) {
 			debugLog('=== Graph Visibility Changed ===');
 			debugLog('showGraph:', showGraph);
+		}
+	}
+	
+	/**
+	 * React to selectedNode changes - update visible nodes
+	 */
+	$: {
+		if (selectedNode && graphViewComponent) {
+			// Wait for graph to render, then update visible nodes
+			setTimeout(() => {
+				updateVisibleNodes();
+			}, 500);
 		}
 	}
 </script>
@@ -459,7 +536,8 @@
 		<div class="graph-container">
 			<GraphView 
 				bind:this={graphViewComponent} 
-				node={selectedNode} 
+				node={selectedNode}
+				on:nodeSelected={handleGraphNodeSelected}
 			/>
 		</div>
 	{:else if showGraph && !selectedNode}
@@ -468,6 +546,20 @@
 			<div class="graph-loading">
 				<p>Loading graph...</p>
 			</div>
+		</div>
+	{/if}
+
+	<!-- ============================================ -->
+	<!-- TIMELINE ANALYSIS                           -->
+	<!-- ============================================ -->
+	{#if showTimeline && showGraph && visibleNodes.length > 0}
+		<div class="timeline-section">
+			<TimelineAnalysis
+				bind:this={timelineComponent}
+				nodes={visibleNodes}
+				highlightedNodeId={highlightedNodeId}
+				on:nodeSelected={handleTimelineNodeSelected}
+			/>
 		</div>
 	{/if}
 

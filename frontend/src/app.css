@@ -1,6 +1,5 @@
 /* ========================================
    THREAT INTELLIGENCE GRAPH - STYLES
-   Clean, minimal CSS with only used styles
    ======================================== */
 
 :root {
@@ -40,12 +39,12 @@
   --graph-node-text: #ffffff;
 
   /* Node Type Colors */
-  --node-AttackPattern: #ef4444;
+  --node-AttackPattern: #477e00;
   --node-Campaign: #f59e0b;
   --node-Identity: #8b5cf6;
   --node-Incident: #ec4899;
   --node-Indicator: #14b8a6;
-  --node-Malware: #dc2626;
+  --node-Malware: #0d0c0c;
   --node-Observable: #06b6d4;
   --node-Organization: #3b82f6;
   --node-Report: #6366f1;
@@ -357,6 +356,12 @@ button:disabled {
   overflow: hidden;
 }
 
+/* Timeline section matches graph container width */
+.timeline-section {
+  width: 100%;
+  margin-top: 2rem;
+}
+
 .graph-wrapper {
   position: relative;
   width: 100%;
@@ -665,6 +670,9 @@ input[type="range"]::-moz-range-thumb:hover {
   .graph-container {
     height: 400px;
   }
+
+  /* Timeline section inherits correct width from parent */
+  /* Removed duplicate .timeline-container rules to prevent width conflicts */
 
   .node-info {
     position: relative;

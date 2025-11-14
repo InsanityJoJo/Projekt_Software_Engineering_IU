@@ -1,10 +1,12 @@
 <!-- GraphView.svelte -->
 <script>
-  import { onMount, onDestroy } from 'svelte';
+  import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import cytoscape from 'cytoscape';
   import { getNodeByName } from './api.js';
   import ContextMenu from './ContextMenu.svelte';
   import { generateReport } from './ReportGenerator.js';
+
+  const dispatch = createEventDispatcher();
 
   // ============================================
   // DEBUG CONFIGURATION
@@ -537,6 +539,17 @@
             'line-color': '#fff',
             'target-arrow-color': '#fff',
           }
+        },
+        {
+          selector: 'node.highlighted',
+          style: {
+            'border-width': 4,
+            'border-color': '#fbbf24',
+            'border-style': 'solid',
+            'overlay-color': '#fbbf24',
+            'overlay-padding': 8,
+            'overlay-opacity': 0.4,
+          }
         }
       ],
       
@@ -553,6 +566,11 @@
     cy.on('tap', 'node', function(evt) {
       const clickedNode = evt.target;
       showNodeInfo(clickedNode);
+      
+      // Dispatch event for timeline synchronization
+      dispatch('nodeSelected', {
+        nodeId: clickedNode.id()
+      });
     });
 
     // Double click on node - extend
@@ -632,6 +650,61 @@
   }
 
   // ============================================
+  // PUBLIC API METHODS
+  // ============================================
+
+  /**
+   * Get all visible nodes for external use (e.g., timeline)
+   * 
+   * @public
+   * @returns {Array} Array of visible Cytoscape nodes in JSON format
+   */
+  export function getVisibleNodes() {
+    if (!cy) {
+      debugLog('Cannot get visible nodes: Cytoscape instance not initialized');
+      return [];
+    }
+    return cy.nodes().jsons();
+  }
+
+  /**
+   * Highlight a specific node in the graph
+   * Called from parent component when timeline bar is clicked
+   * 
+   * @public
+   * @param {string} nodeId - ID of node to highlight
+   */
+  export function highlightNode(nodeId) {
+    if (!cy) {
+      debugLog('Cannot highlight node: Cytoscape instance not initialized');
+      return;
+    }
+
+    debugLog(`Highlighting node: ${nodeId}`);
+
+    // Remove previous highlights
+    cy.nodes().removeClass('highlighted');
+
+    // Find and highlight the target node
+    const targetNode = cy.getElementById(nodeId);
+    if (targetNode && targetNode.length > 0) {
+      targetNode.addClass('highlighted');
+      
+      // Optionally center on the node
+      cy.animate({
+        center: { eles: targetNode },
+        zoom: cy.zoom()
+      }, {
+        duration: 300
+      });
+      
+      debugLog(`Node ${nodeId} highlighted successfully`);
+    } else {
+      debugLog(`Node ${nodeId} not found in graph`);
+    }
+  }
+
+  // ============================================
   // REPORT GENERATION
   // ============================================
 
@@ -640,8 +713,9 @@
    * Called from parent component (App.svelte)
    * 
    * @public
+   * @param {string|null} timelineImage - Optional base64 timeline image
    */
-  export function generateReportFromGraph() {
+  export function generateReportFromGraph(timelineImage = null) {
     if (!cy) {
       console.error('Cannot generate report: Cytoscape instance not initialized');
       return;
@@ -680,7 +754,8 @@
       mainNode: mainNodeInfo,
       nodes: visibleNodes,
       edges: visibleEdges,
-      graphImage: graphImage
+      graphImage: graphImage,
+      timelineImage: timelineImage  // Include timeline if provided
     };
 
     // Generate and open report
