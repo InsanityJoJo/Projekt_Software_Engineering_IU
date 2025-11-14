@@ -38,16 +38,20 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 /**
- * Get autocomplete suggestions
- *
- * This is called while the user types more than 3 characters
- * Returns a list of entity names that match the query
+ * Get autocomplete suggestions with optional filtering
  *
  * @param {string} query - Search query (minimum 3 characters)
- * @param {string} label - Optional: filter by entity type (e.g., 'ThreatActor')
+ * @param {string} label - Optional: filter by entity type
+ * @param {string} startDate - Optional: filter start date (ISO format)
+ * @param {string} endDate - Optional: filter end date (ISO format)
  * @returns {Promise<object>} - { success, suggestions, count }
  */
-export async function getAutocompleteSuggestions(query, label = null) {
+export async function getAutocompleteSuggestions(
+  query,
+  label = null,
+  startDate = null,
+  endDate = null,
+) {
   if (!query || query.length < 3) {
     return {
       success: true,
@@ -58,8 +62,17 @@ export async function getAutocompleteSuggestions(query, label = null) {
   }
 
   const params = new URLSearchParams({ q: query });
-  if (label) {
+
+  if (label && label !== "all") {
     params.append("label", label);
+  }
+
+  if (startDate) {
+    params.append("start_date", startDate);
+  }
+
+  if (endDate) {
+    params.append("end_date", endDate);
   }
 
   return apiRequest(`/api/autocomplete?${params.toString()}`);

@@ -28,17 +28,27 @@ class AutocompleteService:
         self.query_builder = SafeQueryBuilder(max_results=100)
 
     def suggest_node_names(
-        self, prefix: str, label: Optional[str] = None, limit: int = 10
+        self,
+        prefix: str,
+        label: Optional[str] = None,
+        limit: int = 10,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
     ) -> ResultWrapper:
-        """Get node name suggestions based on prefix.
+        """Get node name suggestions based on prefix with optional time filtering.
 
         This method performs case-insensitive prefix matching on node names.
         Returns: name, label, and id for each matching node.
+
+        When time filters are provided, only nodes with time properties that
+        overlap with the specified date range are returned.
 
         Args:
             prefix: The text prefix to match against node names.
             label: Optional node label to filter by (e.g., 'ThreatActor', 'Malware').
             limit: Maximum number of suggestions to return (default: 10).
+            start_date: Optional start of time filter range (ISO format: "2022-01-01").
+            end_date: Optional end of time filter range (ISO format: "2023-01-01").
 
         Returns:
             ResultWrapper: Contains list of matching names and metadata.
@@ -54,17 +64,29 @@ class AutocompleteService:
         prefix = prefix.strip()
 
         try:
-            # Use query builder for safe, validated query
-            # search_nodes with starts_with match type for prefix matching
-            # include_metadata=True to get labels and IDs
-            query, params = self.query_builder.search_nodes(
-                label=label,
-                search_property="name",
-                search_value=prefix,
-                match_type="starts_with",
-                limit=limit,
-                include_metadata=True,
-            )
+            # Check if time filtering is requested
+            if start_date and end_date:
+                # Use time-aware query
+                query, params = self.query_builder.search_nodes_with_time_filter(
+                    label=label,
+                    search_property="name",
+                    search_value=prefix,
+                    match_type="starts_with",
+                    start_date=start_date,
+                    end_date=end_date,
+                    limit=limit,
+                    include_metadata=True,
+                )
+            else:
+                # Use standard query without time filtering
+                query, params = self.query_builder.search_nodes(
+                    label=label,
+                    search_property="name",
+                    search_value=prefix,
+                    match_type="starts_with",
+                    limit=limit,
+                    include_metadata=True,
+                )
 
             # Execute query
             result = self.driver.run_safe_query(query, params)
@@ -75,9 +97,14 @@ class AutocompleteService:
             return ResultWrapper(success=False, error=f"Search failed: {str(e)}")
 
     def fuzzy_search(
-        self, search_term: str, label: Optional[str] = None, limit: int = 10
+        self,
+        search_term: str,
+        label: Optional[str] = None,
+        limit: int = 10,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
     ) -> ResultWrapper:
-        """Perform fuzzy search on node names.
+        """Perform fuzzy search on node names with optional time filtering.
 
         This uses CONTAINS for more flexible matching with relevance scoring.
 
@@ -85,6 +112,8 @@ class AutocompleteService:
             search_term: The text to search for (can appear anywhere in name).
             label: Optional node label to filter by.
             limit: Maximum number of results to return.
+            start_date: Optional start of time filter range (ISO format: "2022-01-01").
+            end_date: Optional end of time filter range (ISO format: "2023-01-01").
 
         Returns:
             ResultWrapper: Contains matching nodes with relevance scoring.
@@ -99,15 +128,28 @@ class AutocompleteService:
         search_term = search_term.strip()
 
         try:
-            # Use query builder for fuzzy search with relevance scoring
-            # fuzzy_search_nodes includes CONTAINS matching and automatic relevance scoring
-            query, params = self.query_builder.fuzzy_search_nodes(
-                label=label,
-                search_property="name",
-                search_value=search_term,
-                limit=limit,
-                include_metadata=True,
-            )
+            # Check if time filtering is requested
+            if start_date and end_date:
+                # Use time-aware query with CONTAINS matching
+                query, params = self.query_builder.search_nodes_with_time_filter(
+                    label=label,
+                    search_property="name",
+                    search_value=search_term,
+                    match_type="contains",
+                    start_date=start_date,
+                    end_date=end_date,
+                    limit=limit,
+                    include_metadata=True,
+                )
+            else:
+                # Use standard fuzzy search without time filtering
+                query, params = self.query_builder.fuzzy_search_nodes(
+                    label=label,
+                    search_property="name",
+                    search_value=search_term,
+                    limit=limit,
+                    include_metadata=True,
+                )
 
             # Execute query
             result = self.driver.run_safe_query(query, params)
@@ -184,3 +226,4 @@ class AutocompleteService:
 
         except Exception as e:
             return ResultWrapper(success=False, error=f"Get all names failed: {str(e)}")
+

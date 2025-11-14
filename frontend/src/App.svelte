@@ -11,7 +11,7 @@
 	import SettingsMenu from "./SettingsMenu.svelte";
 	import TimelineAnalysis from "./TimelineAnalysis.svelte";
 	import { getAutocompleteSuggestions, getNodeByName } from "./api.js";
-	import { contextDepth } from "./stores.js";
+	import { contextDepth, labelFilter, startDate, endDate } from "./stores.js";
 	
 	// ============================================
 	// DEBUG CONFIGURATION
@@ -106,8 +106,13 @@
 				isLoading = true;
 				error = null;
 
-				const result = await getAutocompleteSuggestions(query);
-				
+				// Get filter values from stores
+				const currentLabel = $labelFilter === "all" ? null : $labelFilter;
+				const currentStartDate = $startDate;
+				const currentEndDate = $endDate;
+
+				const result = await getAutocompleteSuggestions(query, currentLabel, currentStartDate, currentEndDate);
+
 				if (result.success) {
 					suggestions = result.suggestions || [];
 					showSuggestions = suggestions.length > 0;

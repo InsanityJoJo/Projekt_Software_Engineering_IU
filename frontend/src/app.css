@@ -500,57 +500,6 @@ button:disabled {
   border-color: var(--color-accent-strong);
 }
 
-.settings-menu {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
-  min-width: 300px;
-  z-index: 1000;
-}
-
-.settings-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 16px;
-  border-bottom: 1px solid var(--color-border);
-  padding-bottom: 12px;
-}
-
-.settings-header h3 {
-  margin: 0;
-  font-size: 16px;
-  color: var(--color-text);
-}
-
-.settings-header button {
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  color: var(--color-text);
-  padding: 0 4px;
-  line-height: 1;
-  transition: color 0.2s ease;
-}
-
-.settings-header button:hover {
-  color: var(--color-error);
-}
-
-.setting-item {
-  margin-bottom: 16px;
-}
-
-.setting-item label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 500;
-  color: var(--color-text);
-}
-
 /* Range Slider */
 input[type="range"] {
   width: 100%;

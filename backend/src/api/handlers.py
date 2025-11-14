@@ -129,7 +129,15 @@ def handle_execute_query(request):
 
 
 def handle_autocomplete(request):
-    """Handle autocomplete request."""
+    """Handle autocomplete request with optional time filtering.
+
+    Query parameters:
+        - q: Search query (minimum 3 characters)
+        - label: Optional label filter (e.g., 'Malware', 'ThreatActor')
+        - limit: Maximum results (default: 10, max: 20)
+        - start_date: Optional start of time range (ISO format: "2022-01-01")
+        - end_date: Optional end of time range (ISO format: "2023-01-01")
+    """
     try:
         if autocomplete_service is None:
             return jsonify(
@@ -139,6 +147,10 @@ def handle_autocomplete(request):
         query = request.args.get("q", "").strip()
         label = request.args.get("label", None)
         limit = min(int(request.args.get("limit", 10)), 20)
+
+        # Get optional time filter parameters
+        start_date = request.args.get("start_date", None)
+        end_date = request.args.get("end_date", None)
 
         if len(query) < 3:
             return jsonify(
@@ -150,15 +162,23 @@ def handle_autocomplete(request):
                 }
             ), 200
 
-        # Try prefix match first
+        # Try prefix match first (with time filtering if provided)
         result = autocomplete_service.suggest_node_names(
-            prefix=query, label=label, limit=limit
+            prefix=query,
+            label=label,
+            limit=limit,
+            start_date=start_date,
+            end_date=end_date,
         )
 
-        # If fewer than 3 results, try fuzzy search
+        # If fewer than 3 results, try fuzzy search (with time filtering if provided)
         if result.success and isinstance(result.data, list) and len(result.data) < 3:
             fuzzy_result = autocomplete_service.fuzzy_search(
-                search_term=query, label=label, limit=limit
+                search_term=query,
+                label=label,
+                limit=limit,
+                start_date=start_date,
+                end_date=end_date,
             )
             if fuzzy_result.success:
                 # Merge and deduplicate
