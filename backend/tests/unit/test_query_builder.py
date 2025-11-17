@@ -1593,3 +1593,764 @@ class TestGetNodeWithRelationshipsEnhanced:
         )
 
         assert params["limit"] == 10
+
+
+"""Additional test cases for query_builder.py - CORRECTED VERSION
+
+These tests match the actual function signatures in query_builder.py
+"""
+
+
+class TestAdminQueryBuilderValidation:
+    """Test AdminQueryBuilder validation methods."""
+
+    def test_admin_allows_write_operations(self):
+        """Test that AdminQueryBuilder doesn't block write operations."""
+        builder = AdminQueryBuilder()
+        # Should not raise for MERGE, CREATE, etc.
+        query_with_merge = "MERGE (n:Test) RETURN n"
+        builder.validate_query_safety(query_with_merge)  # Should pass
+
+    def test_admin_validate_properties_dict_valid(self):
+        """Test _validate_properties_dict with valid properties."""
+        builder = AdminQueryBuilder()
+        valid_props = {"name": "Test", "type": "example", "description": "A test"}
+        result = builder._validate_properties_dict(valid_props)
+        assert result == valid_props
+
+    def test_admin_validate_properties_dict_invalid_key(self):
+        """Test _validate_properties_dict rejects invalid property names."""
+        builder = AdminQueryBuilder()
+        invalid_props = {"name": "Test", "invalid_prop": "value"}
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder._validate_properties_dict(invalid_props)
+
+        assert "invalid_prop" in str(exc_info.value)
+
+    def test_admin_validate_properties_dict_empty(self):
+        """Test _validate_properties_dict with empty dict."""
+        builder = AdminQueryBuilder()
+        result = builder._validate_properties_dict({})
+        assert result == {}
+
+
+class TestMergeNode:
+    """Test AdminQueryBuilder merge_node method."""
+
+    def test_merge_node_basic(self):
+        """Test basic node merge."""
+        builder = AdminQueryBuilder()
+        # CORRECTED: match_properties is REQUIRED, set_properties is OPTIONAL
+        query, params = builder.merge_node(
+            label="ThreatActor",
+            match_properties={"name": "APT28"},
+            set_properties={"type": "APT"},
+        )
+
+        assert "MERGE" in query
+        assert ":ThreatActor" in query
+        assert "name: $match_name" in query
+
+    def test_merge_node_without_set_properties(self):
+        """Test node merge without set properties (just ensure exists)."""
+        builder = AdminQueryBuilder()
+        query, params = builder.merge_node(
+            label="ThreatActor",
+            match_properties={"name": "APT28"},
+        )
+
+        assert "MERGE" in query
+        assert ":ThreatActor" in query
+
+    def test_merge_node_invalid_label(self):
+        """Test merge_node rejects invalid label."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.merge_node(
+                label="InvalidLabel",
+                match_properties={"name": "Test"},
+            )
+
+    def test_merge_node_invalid_property_in_match(self):
+        """Test merge_node rejects invalid property in match_properties."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.merge_node(
+                label="ThreatActor",
+                match_properties={"invalid_prop": "value"},
+            )
+
+    def test_merge_node_invalid_property_in_set(self):
+        """Test merge_node rejects invalid property in set_properties."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.merge_node(
+                label="ThreatActor",
+                match_properties={"name": "APT28"},
+                set_properties={"invalid_prop": "value"},
+            )
+
+
+class TestMergeNodesBatch:
+    """Test AdminQueryBuilder merge_nodes_batch method."""
+
+    def test_merge_nodes_batch_single_label(self):
+        """Test batch merge with single label."""
+        builder = AdminQueryBuilder()
+        # CORRECTED: nodes must include 'label' field, no separate label parameter
+        nodes = [
+            {"label": "ThreatActor", "properties": {"name": "APT28", "type": "APT"}},
+            {"label": "ThreatActor", "properties": {"name": "APT29", "type": "APT"}},
+        ]
+
+        queries = builder.merge_nodes_batch(nodes=nodes)
+
+        assert len(queries) == 1  # Same label groups together
+        query, params = queries[0]
+        assert "UNWIND" in query
+
+    def test_merge_nodes_batch_multiple_labels(self):
+        """Test batch merge with multiple labels."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"label": "ThreatActor", "properties": {"name": "APT28", "type": "APT"}},
+            {"label": "Malware", "properties": {"name": "X-Agent", "type": "Backdoor"}},
+        ]
+
+        queries = builder.merge_nodes_batch(nodes=nodes)
+
+        assert len(queries) == 2  # Different labels = different queries
+
+    def test_merge_nodes_batch_empty_list(self):
+        """Test batch merge with empty node list."""
+        builder = AdminQueryBuilder()
+
+        queries = builder.merge_nodes_batch(nodes=[])
+        assert queries == []
+
+    def test_merge_nodes_batch_missing_label(self):
+        """Test batch merge with missing label field."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"name": "APT28"},  # Missing 'label'
+        ]
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_nodes_batch(nodes=nodes)
+
+        assert "label" in str(exc_info.value).lower()
+
+    def test_merge_nodes_batch_missing_match_property(self):
+        """Test batch merge with missing match property (name by default)."""
+        builder = AdminQueryBuilder()
+        nodes = [
+            {"label": "ThreatActor", "properties": {"description": "Missing name"}},
+        ]
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_nodes_batch(nodes=nodes, match_property="name")
+
+        assert (
+            "name" in str(exc_info.value).lower()
+            or "must have" in str(exc_info.value).lower()
+        )
+
+
+class TestDeleteNode:
+    """Test AdminQueryBuilder delete_node method."""
+
+    def test_delete_node_basic(self):
+        """Test basic node deletion."""
+        builder = AdminQueryBuilder()
+        # CORRECTED: property_name is required
+        query, params = builder.delete_node(
+            label="ThreatActor",
+            property_name="name",
+            property_value="APT28",
+        )
+
+        assert "MATCH (n:ThreatActor" in query
+        assert "DETACH DELETE n" in query
+        assert params["value"] == "APT28"
+
+    def test_delete_node_with_id(self):
+        """Test node deletion using id property."""
+        builder = AdminQueryBuilder()
+        query, params = builder.delete_node(
+            label="ThreatActor",
+            property_name="id",
+            property_value="123",
+        )
+
+        assert "{id: $value}" in query
+
+    def test_delete_node_invalid_label(self):
+        """Test delete_node rejects invalid label."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.delete_node(
+                label="InvalidLabel",
+                property_name="name",
+                property_value="test",
+            )
+
+    def test_delete_node_invalid_property_name(self):
+        """Test delete_node rejects invalid property name."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.delete_node(
+                label="ThreatActor",
+                property_name="invalid_prop",
+                property_value="test",
+            )
+
+
+class TestMergeRelationship:
+    """Test AdminQueryBuilder merge_relationship method."""
+
+    def test_merge_relationship_basic(self):
+        """Test basic relationship merge."""
+        builder = AdminQueryBuilder()
+        query, params = builder.merge_relationship(
+            from_label="ThreatActor",
+            from_value="APT28",
+            to_label="Malware",
+            to_value="X-Agent",
+            relationship_type="USES",
+        )
+
+        assert "MATCH (from:ThreatActor" in query
+        assert "MATCH (to:Malware" in query
+        assert "MERGE (from)-[r:USES]->(to)" in query
+
+    def test_merge_relationship_with_properties(self):
+        """Test relationship merge with properties."""
+        builder = AdminQueryBuilder()
+        query, params = builder.merge_relationship(
+            from_label="ThreatActor",
+            from_value="APT28",
+            to_label="Malware",
+            to_value="X-Agent",
+            relationship_type="USES",
+            properties={"source": "Report XYZ", "first_seen": "2020-01-01"},
+        )
+
+        assert "SET r +=" in query
+        assert "properties" in params
+        assert params["properties"]["source"] == "Report XYZ"
+
+    def test_merge_relationship_invalid_type(self):
+        """Test merge_relationship rejects invalid relationship type."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.merge_relationship(
+                from_label="ThreatActor",
+                from_value="APT28",
+                to_label="Malware",
+                to_value="X-Agent",
+                relationship_type="INVALID_REL",
+            )
+
+    def test_merge_relationship_invalid_property(self):
+        """Test merge_relationship rejects invalid properties."""
+        builder = AdminQueryBuilder()
+
+        with pytest.raises(QueryValidationError):
+            builder.merge_relationship(
+                from_label="ThreatActor",
+                from_value="APT28",
+                to_label="Malware",
+                to_value="X-Agent",
+                relationship_type="USES",
+                properties={"invalid_prop": "value"},
+            )
+
+
+class TestMergeRelationshipsBatch:
+    """Test AdminQueryBuilder merge_relationships_batch method."""
+
+    def test_merge_relationships_batch_single_pattern(self):
+        """Test batch merge with single relationship pattern."""
+        builder = AdminQueryBuilder()
+        relationships = [
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT28",
+                "to_label": "Malware",
+                "to_value": "X-Agent",
+                "type": "USES",
+            },
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT29",
+                "to_label": "Malware",
+                "to_value": "Y-Agent",
+                "type": "USES",
+            },
+        ]
+
+        queries = builder.merge_relationships_batch(relationships)
+
+        assert len(queries) == 1  # Same pattern groups together
+
+    def test_merge_relationships_batch_multiple_patterns(self):
+        """Test batch merge with multiple relationship patterns."""
+        builder = AdminQueryBuilder()
+        relationships = [
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT28",
+                "to_label": "Malware",
+                "to_value": "X-Agent",
+                "type": "USES",
+            },
+            {
+                "from_label": "Campaign",
+                "from_value": "Op1",
+                "to_label": "ThreatActor",
+                "to_value": "APT28",
+                "type": "LAUNCHED",  # CORRECTED: Use valid relationship type
+            },
+        ]
+
+        queries = builder.merge_relationships_batch(relationships)
+
+        assert len(queries) == 2  # Different patterns
+
+    def test_merge_relationships_batch_missing_fields(self):
+        """Test batch merge with missing required fields."""
+        builder = AdminQueryBuilder()
+        relationships = [
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT28",
+                # Missing to_label, to_value, type
+            }
+        ]
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.merge_relationships_batch(relationships)
+
+        assert "must have" in str(exc_info.value)
+
+    def test_merge_relationships_batch_with_properties(self):
+        """Test batch merge with relationship properties."""
+        builder = AdminQueryBuilder()
+        relationships = [
+            {
+                "from_label": "ThreatActor",
+                "from_value": "APT28",
+                "to_label": "Malware",
+                "to_value": "X-Agent",
+                "type": "USES",
+                "properties": {
+                    "source": "Intel Report"
+                },  # CORRECTED: Use valid property
+            }
+        ]
+
+        queries = builder.merge_relationships_batch(relationships)
+
+        assert len(queries) == 1
+        query, params = queries[0]
+        assert "SET r += relData.properties" in query
+
+
+class TestDeleteRelationship:
+    """Test AdminQueryBuilder delete_relationship method."""
+
+    def test_delete_relationship_specific_type(self):
+        """Test deletion of specific relationship type."""
+        builder = AdminQueryBuilder()
+        query, params = builder.delete_relationship(
+            from_label="ThreatActor",
+            from_value="APT28",
+            to_label="Malware",
+            to_value="X-Agent",
+            relationship_type="USES",
+        )
+
+        assert "[r:USES]" in query
+        assert "DELETE r" in query
+
+    def test_delete_relationship_all_types(self):
+        """Test deletion of all relationships between nodes."""
+        builder = AdminQueryBuilder()
+        query, params = builder.delete_relationship(
+            from_label="ThreatActor",
+            from_value="APT28",
+            to_label="Malware",
+            to_value="X-Agent",
+        )
+
+        assert "[r]" in query
+        assert "[r:USES]" not in query
+
+    def test_delete_relationship_custom_match_property(self):
+        """Test relationship deletion with custom match property."""
+        builder = AdminQueryBuilder()
+        query, params = builder.delete_relationship(
+            from_label="ThreatActor",
+            from_value="123",
+            to_label="Malware",
+            to_value="456",
+            match_property="id",
+        )
+
+        assert "{id: $from_value}" in query
+        assert "{id: $to_value}" in query
+
+
+class TestFuzzySearchNodes:
+    """Test fuzzy_search_nodes method."""
+
+    def test_fuzzy_search_basic(self):
+        """Test basic fuzzy search."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(
+            search_property="name",
+            search_value="shadow",
+        )
+
+        assert "CONTAINS" in query.upper()
+        assert "toLower" in query
+        assert params["search_value"] == "shadow"
+
+    def test_fuzzy_search_with_label(self):
+        """Test fuzzy search with label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(
+            label="ThreatActor",
+            search_property="name",
+            search_value="shadow",
+        )
+
+        assert ":ThreatActor" in query
+
+    def test_fuzzy_search_includes_metadata(self):
+        """Test fuzzy search includes metadata when requested."""
+        builder = SafeQueryBuilder()
+        query, params = builder.fuzzy_search_nodes(
+            search_property="name",
+            search_value="shadow",
+            include_metadata=True,
+        )
+
+        assert "labels(n)" in query
+
+
+class TestSearchNodesWithTimeFilter:
+    """Test search_nodes_with_time_filter method."""
+
+    def test_time_filter_with_both_dates(self):
+        """Test time filter with start and end dates."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            search_property="name",
+            search_value="shadow",
+            start_date="2020-01-01",
+            end_date="2023-12-31",
+        )
+
+        assert ">=" in query
+        assert "<=" in query
+        assert params["start_date"] == "2020-01-01"
+        assert params["end_date"] == "2023-12-31"
+        assert "n.first_seen <= $end_date AND n.last_seen >= $start_date" in query
+
+    def test_time_filter_start_only(self):
+        """Test time filter with only start date."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            search_property="name",
+            search_value="shadow",
+            start_date="2020-01-01",
+        )
+
+        assert "start_date" in params
+        assert "end_date" not in params
+        assert params["start_date"] == "2020-01-01"
+        assert ">=" in query
+        assert "n.published_date >= $start_date" in query
+        assert "n.last_seen >= $start_date" in query
+
+    def test_time_filter_end_only(self):
+        """Test time filter with only end date."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            search_property="name",
+            search_value="shadow",
+            end_date="2023-12-31",
+        )
+
+        assert "end_date" in params
+        assert "start_date" not in params
+        assert params["end_date"] == "2023-12-31"
+        assert "<=" in query
+        assert "n.published_date <= $end_date" in query
+        assert "n.first_seen <= $end_date" in query
+
+    def test_time_filter_no_dates(self):
+        """Test time filter with no dates performs regular search."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            search_property="name",
+            search_value="shadow",
+        )
+
+        assert "MATCH (n)" in query
+        assert "search_value" in params
+        assert "start_date" not in params
+        assert "end_date" not in params
+        # Should have text search but no time filtering
+        assert "toLower(n.name) STARTS WITH toLower($search_value)" in query
+        assert "published_date" not in query
+
+    def test_time_filter_with_label(self):
+        """Test time filter with label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            label="ThreatActor",
+            search_property="name",
+            search_value="shadow",
+            start_date="2020-01-01",
+        )
+
+        assert ":ThreatActor" in query
+        assert "start_date" in params
+
+    def test_time_filter_invalid_date_range(self):
+        """Test that start_date after end_date raises error."""
+        builder = SafeQueryBuilder()
+
+        with pytest.raises(QueryValidationError) as exc_info:
+            builder.search_nodes_with_time_filter(
+                search_property="name",
+                search_value="shadow",
+                start_date="2023-12-31",
+                end_date="2020-01-01",
+            )
+
+        assert "must be before" in str(exc_info.value)
+
+    def test_time_filter_exact_match_with_dates(self):
+        """Test exact match type with time filtering."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            search_property="name",
+            search_value="APT28",
+            match_type="exact",
+            start_date="2020-01-01",
+            end_date="2023-12-31",
+        )
+
+        assert "n.name = $search_value" in query
+        assert "start_date" in params
+        assert "end_date" in params
+
+    def test_time_filter_contains_with_start_date(self):
+        """Test contains match type with only start date."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes_with_time_filter(
+            search_property="name",
+            search_value="Ransomware",
+            match_type="contains",
+            start_date="2022-01-01",
+        )
+
+        assert "CONTAINS" in query
+        assert "start_date" in params
+        assert "end_date" not in params
+
+
+class TestCheckNodeExists:
+    """Test check_node_exists method."""
+
+    def test_check_exists_with_label(self):
+        """Test existence check with label."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="name",
+            property_value="APT28",
+            label="ThreatActor",
+        )
+
+        # CORRECTED: Check for actual query structure (count-based)
+        assert "count(n)" in query.lower()
+        assert ":ThreatActor" in query
+        assert params["value"] == "APT28"
+
+    def test_check_exists_without_label(self):
+        """Test existence check without label."""
+        builder = SafeQueryBuilder()
+        query, params = builder.check_node_exists(
+            property_name="name",
+            property_value="APT28",
+        )
+
+        # CORRECTED: Check for (n {property}) pattern without label
+        assert "MATCH (n {name:" in query or "MATCH (n" in query
+        assert params["value"] == "APT28"
+
+
+class TestGetAllNodeNames:
+    """Test get_all_node_names method."""
+
+    def test_get_all_names_with_label(self):
+        """Test getting all names with label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names(
+            label="ThreatActor",
+        )
+
+        assert ":ThreatActor" in query
+        assert "RETURN" in query
+
+    def test_get_all_names_without_label(self):
+        """Test getting all names without label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names()
+
+        assert "MATCH (n)" in query
+
+    def test_get_all_names_includes_metadata(self):
+        """Test getting names includes metadata when requested."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_node_names(
+            include_metadata=True,
+        )
+
+        assert "labels(n)" in query or "id(n)" in query
+
+    def test_get_all_names_custom_limit(self):
+        """Test getting names with custom limit."""
+        builder = SafeQueryBuilder()
+        # CORRECTED: Use 'limit' parameter, not 'max_nodes'
+        query, params = builder.get_all_node_names(
+            limit=500,
+        )
+
+        assert params["limit"] == 500
+
+    def test_get_all_names_custom_property(self):
+        """Test getting names with custom property."""
+        builder = SafeQueryBuilder()
+        # CORRECTED: Use 'property_name' parameter
+        query, params = builder.get_all_node_names(
+            property_name="description",
+        )
+
+        assert "n.description" in query
+
+
+class TestCountMethods:
+    """Test count_nodes and count_relationships methods."""
+
+    def test_count_nodes_all(self):
+        """Test counting all nodes."""
+        builder = SafeQueryBuilder()
+        query, params = builder.count_nodes()
+
+        assert "COUNT" in query.upper()
+        assert "MATCH (n)" in query
+
+    def test_count_nodes_with_label(self):
+        """Test counting nodes with specific label."""
+        builder = SafeQueryBuilder()
+        query, params = builder.count_nodes(label="ThreatActor")
+
+        assert ":ThreatActor" in query
+        assert "COUNT" in query.upper()
+
+    def test_count_relationships(self):
+        """Test counting all relationships."""
+        builder = SafeQueryBuilder()
+        query, params = builder.count_relationships()
+
+        assert "COUNT" in query.upper()
+        assert "-[r]-" in query
+
+
+class TestGetAllNodes:
+    """Test get_all_nodes method."""
+
+    def test_get_all_nodes_basic(self):
+        """Test getting all nodes."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_nodes()
+
+        assert "MATCH (n)" in query
+        assert "RETURN" in query
+        assert "LIMIT" in query
+
+    def test_get_all_nodes_with_label(self):
+        """Test getting all nodes with label filter."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_nodes(label="ThreatActor")
+
+        assert ":ThreatActor" in query
+
+    def test_get_all_nodes_custom_limit(self):
+        """Test getting all nodes with custom limit."""
+        builder = SafeQueryBuilder()
+        query, params = builder.get_all_nodes(limit=50)
+
+        assert params["limit"] == 50
+
+
+class TestEdgeCases:
+    """Test edge cases and boundary conditions."""
+
+    def test_empty_string_search(self):
+        """Test search with empty string."""
+        builder = SafeQueryBuilder()
+        query, params = builder.search_nodes(
+            search_property="name",
+            search_value="",
+            match_type="exact",
+        )
+
+        assert params["search_value"] == ""
+
+    def test_unicode_in_search(self):
+        """Test search with unicode characters."""
+        builder = SafeQueryBuilder()
+        unicode_value = "测试名称"
+        query, params = builder.search_nodes(
+            search_property="name",
+            search_value=unicode_value,
+            match_type="exact",
+        )
+
+        assert params["search_value"] == unicode_value
+
+    def test_very_long_limit(self):
+        """Test with very large limit value."""
+        builder = SafeQueryBuilder(max_results=10000)
+        query, params = builder.find_node_by_property(
+            label="ThreatActor",
+            property_name="name",
+            property_value="test",
+        )
+
+        assert params["limit"] == 10000
+
+    def test_special_characters_in_value(self):
+        """Test with special characters in property value."""
+        builder = SafeQueryBuilder()
+        special_value = "test@#$%^&*(){}[]"
+        query, params = builder.find_node_by_property(
+            label="ThreatActor",
+            property_name="name",
+            property_value=special_value,
+        )
+
+        assert params["value"] == special_value
+        assert special_value not in query  # Should be parameterized

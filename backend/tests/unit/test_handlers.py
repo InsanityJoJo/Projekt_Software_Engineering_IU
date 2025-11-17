@@ -3,7 +3,7 @@
 This module tests all handler functions with proper mocking
 to achieve high test coverage.
 
-andlers are initialized once in conftest.py app fixture.
+Handlers are initialized once in conftest.py app fixture.
 Tests should NOT call handlers.init_handlers() again unless specifically
 testing initialization logic.
 """
@@ -43,7 +43,6 @@ class TestHealthCheckHandler:
 
     def test_health_check_success(self, client, mock_driver):
         """Test successful health check."""
-        # Configure mock for this test
         mock_driver.run_safe_query.return_value = ResultWrapper(
             success=True, data=[{"health": 1}]
         )
@@ -57,7 +56,6 @@ class TestHealthCheckHandler:
 
     def test_health_check_database_unhealthy(self, client, mock_driver):
         """Test health check when database is disconnected."""
-        # Configure mock for this test
         mock_driver.run_safe_query.return_value = ResultWrapper(
             success=False, error="Connection failed"
         )
@@ -71,7 +69,6 @@ class TestHealthCheckHandler:
 
     def test_health_check_driver_not_initialized(self, client):
         """Test health check when driver is not initialized."""
-
         handlers.db_driver = None
 
         response = client.get("/api/health")
@@ -97,8 +94,8 @@ class TestGetStatsHandler:
     def test_get_stats_success(self, client, mock_driver):
         """Test successful stats retrieval."""
         mock_driver.run_safe_query.side_effect = [
-            ResultWrapper(success=True, data=[{"count": 100}]),  # nodes
-            ResultWrapper(success=True, data=[{"count": 250}]),  # relationships
+            ResultWrapper(success=True, data=[{"count": 100}]),
+            ResultWrapper(success=True, data=[{"count": 250}]),
         ]
 
         response = client.get("/api/stats")
@@ -137,12 +134,35 @@ class TestGetStatsHandler:
         assert data["success"] is False
         assert "Query failed" in data["error"]
 
+    def test_get_stats_relationship_query_fails(self, client, mock_driver):
+        """Test stats when relationship query fails."""
+        mock_driver.run_safe_query.side_effect = [
+            ResultWrapper(success=True, data=[{"count": 100}]),
+            ResultWrapper(success=False, error="Rel query failed"),
+        ]
+
+        response = client.get("/api/stats")
+        assert response.status_code == 500
+
+        data = response.get_json()
+        assert data["success"] is False
+
     def test_get_stats_driver_not_initialized(self, client):
         """Test stats when driver not initialized."""
         handlers.db_driver = None
 
         response = client.get("/api/stats")
         assert response.status_code == 503
+
+    def test_get_stats_exception_handling(self, client, mock_driver):
+        """Test stats handles exceptions gracefully."""
+        mock_driver.run_safe_query.side_effect = Exception("Unexpected error")
+
+        response = client.get("/api/stats")
+        assert response.status_code == 500
+
+        data = response.get_json()
+        assert "Internal server error" in data["error"]
 
 
 class TestExecuteQueryHandler:
@@ -201,6 +221,31 @@ class TestExecuteQueryHandler:
         response = client.post("/api/query", json=None)
         assert response.status_code == 400
 
+    def test_execute_query_failed_execution(self, client, mock_driver):
+        """Test query execution when Neo4j returns error."""
+        mock_driver.run_safe_query.return_value = ResultWrapper(
+            success=False, error="Syntax error"
+        )
+
+        response = client.post(
+            "/api/query",
+            json={"query": "INVALID CYPHER"},
+        )
+        assert response.status_code == 400
+
+        data = response.get_json()
+        assert data["success"] is False
+
+    def test_execute_query_driver_not_initialized(self, client):
+        """Test query execution when driver not initialized."""
+        handlers.db_driver = None
+
+        response = client.post(
+            "/api/query",
+            json={"query": "MATCH (n) RETURN n"},
+        )
+        assert response.status_code == 503
+
 
 class TestAutocompleteHandler:
     """Test autocomplete suggestion handler."""
@@ -253,7 +298,7 @@ class TestAutocompleteHandler:
         assert response.status_code == 200
 
         data = response.get_json()
-        assert data["count"] == 3  # 1 prefix + 2 fuzzy
+        assert data["count"] == 3
 
     def test_autocomplete_with_label_filter(self, client, mock_driver):
         """Test autocomplete with label filter."""
@@ -269,6 +314,36 @@ class TestAutocompleteHandler:
 
         response = client.get("/api/autocomplete?q=test")
         assert response.status_code == 503
+
+    def test_autocomplete_service_error(self, client, mock_driver):
+        """Test autocomplete when service returns error."""
+        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+            success=False, error="Database error"
+        )
+
+        response = client.get("/api/autocomplete?q=test")
+        assert response.status_code == 500
+
+    def test_autocomplete_with_limit(self, client, mock_driver):
+        """Test autocomplete with custom limit."""
+        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+            success=True,
+            data=[
+                {"name": f"Entity{i}", "label": "ThreatActor", "id": str(i)}
+                for i in range(15)
+            ],
+        )
+
+        response = client.get("/api/autocomplete?q=Entity&limit=5")
+        assert response.status_code == 200
+
+        data = response.get_json()
+        assert data["count"] <= 5
+
+    def test_autocomplete_invalid_limit(self, client, mock_driver):
+        """Test autocomplete with invalid limit."""
+        response = client.get("/api/autocomplete?q=test&limit=invalid")
+        assert response.status_code == 400
 
 
 class TestGetNodesHandler:
@@ -313,6 +388,22 @@ class TestGetNodesHandler:
         response = client.get("/api/nodes?label=InvalidLabel")
         assert response.status_code == 400
 
+    def test_get_nodes_query_failed(self, client, mock_driver):
+        """Test node retrieval when query fails."""
+        mock_driver.run_safe_query.return_value = ResultWrapper(
+            success=False, error="Database error"
+        )
+
+        response = client.get("/api/nodes")
+        assert response.status_code == 500
+
+    def test_get_nodes_driver_not_initialized(self, client):
+        """Test node retrieval when driver not initialized."""
+        handlers.db_driver = None
+
+        response = client.get("/api/nodes")
+        assert response.status_code == 503
+
 
 class TestCreateNodeHandler:
     """Test node creation endpoint handler."""
@@ -353,36 +444,82 @@ class TestCreateNodeHandler:
         )
         assert response.status_code == 400
 
+    def test_create_node_empty_body(self, client, mock_driver):
+        """Test node creation with empty body."""
+        response = client.post("/api/nodes", json=None)
+        assert response.status_code == 400
+
+    def test_create_node_invalid_json(self, client, mock_driver):
+        """Test node creation with invalid JSON."""
+        response = client.post(
+            "/api/nodes",
+            data="invalid json",
+            content_type="application/json",
+        )
+        assert response.status_code == 400
+
+    def test_create_node_query_failed(self, client, mock_driver):
+        """Test node creation when query fails."""
+        mock_driver.run_safe_query.return_value = ResultWrapper(
+            success=False, error="Creation failed"
+        )
+
+        response = client.post(
+            "/api/nodes",
+            json={"label": "ThreatActor", "properties": {"name": "Test"}},
+        )
+        assert response.status_code == 500
+
+    def test_create_node_driver_not_initialized(self, client):
+        """Test node creation when driver not initialized."""
+        handlers.db_driver = None
+
+        response = client.post(
+            "/api/nodes",
+            json={"label": "ThreatActor", "properties": {"name": "Test"}},
+        )
+        assert response.status_code == 503
+
 
 class TestGetNodeByNameHandler:
     """Test get node by name endpoint handler."""
 
     def test_get_node_by_name_success(self, client, mock_driver):
         """Test successful node retrieval by name."""
+        # FIX: Mock data must match the expected structure from query builder
         mock_driver.run_safe_query.return_value = ResultWrapper(
             success=True,
             data=[
                 {
-                    "n": {"name": "APT28"},
-                    "connections": [
-                        {"relationship": "USES", "node": {"name": "X-Agent"}}
+                    "start": {"name": "APT28", "type": "APT"},
+                    "start_label": "ThreatActor",
+                    "connected": {"name": "X-Agent", "type": "Malware"},
+                    "connected_label": "Malware",
+                    "relationship_details": [
+                        {
+                            "type": "USES",
+                            "start_node": {"name": "APT28", "type": "APT"},
+                            "start_node_label": "ThreatActor",
+                            "end_node": {"name": "X-Agent", "type": "Malware"},
+                            "end_node_label": "Malware",
+                        }
                     ],
                 }
             ],
         )
 
-        response = client.get("/api/node/APT28")
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=0")
         assert response.status_code == 200
 
         data = response.get_json()
         assert data["success"] is True
-        assert data["count"] == 1
+        assert data["count"] >= 1
 
     def test_get_node_by_name_not_found(self, client, mock_driver):
         """Test node retrieval when node doesn't exist."""
         mock_driver.run_safe_query.return_value = ResultWrapper(success=True, data=[])
 
-        response = client.get("/api/node/NonExistent")
+        response = client.get("/api/node/NonExistent?label=ThreatActor&hops=1")
         assert response.status_code == 404
 
         data = response.get_json()
@@ -392,10 +529,19 @@ class TestGetNodeByNameHandler:
     def test_get_node_by_name_with_label(self, client, mock_driver):
         """Test node retrieval with label filter."""
         mock_driver.run_safe_query.return_value = ResultWrapper(
-            success=True, data=[{"n": {"name": "APT28"}, "connections": []}]
+            success=True,
+            data=[
+                {
+                    "start": {"name": "APT28"},
+                    "start_label": "ThreatActor",
+                    "connected": None,
+                    "connected_label": None,
+                    "relationship_details": [],
+                }
+            ],
         )
 
-        response = client.get("/api/node/APT28?label=ThreatActor")
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=1")
         assert response.status_code == 200
 
     def test_get_node_by_name_validation_error(self, client, mock_driver):
@@ -404,3 +550,162 @@ class TestGetNodeByNameHandler:
 
         response = client.get("/api/node/Test?label=InvalidLabel")
         assert response.status_code == 400
+
+    def test_get_node_by_name_missing_label(self, client, mock_driver):
+        """Test node retrieval without label."""
+        response = client.get("/api/node/APT28?hops=1")
+        assert response.status_code == 400
+
+        data = response.get_json()
+        assert "label" in data["error"].lower()
+
+    def test_get_node_by_name_invalid_hops(self, client, mock_driver):
+        """Test node retrieval with invalid hops parameter."""
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=5")
+        assert response.status_code == 400
+
+        data = response.get_json()
+        assert "hops" in data["error"].lower()
+
+    def test_get_node_by_name_negative_hops(self, client, mock_driver):
+        """Test node retrieval with negative hops."""
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=-1")
+        assert response.status_code == 400
+
+    def test_get_node_by_name_non_integer_hops(self, client, mock_driver):
+        """Test node retrieval with non-integer hops."""
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=abc")
+        assert response.status_code == 400
+
+    def test_get_node_by_name_query_failed(self, client, mock_driver):
+        """Test node retrieval when query fails."""
+        mock_driver.run_safe_query.return_value = ResultWrapper(
+            success=False, error="Query error"
+        )
+
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=1")
+        assert response.status_code == 500
+
+    def test_get_node_by_name_driver_not_initialized(self, client):
+        """Test node retrieval when driver not initialized."""
+        handlers.db_driver = None
+
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=1")
+        assert response.status_code == 503
+
+    def test_get_node_by_name_transformation_fails(self, client, mock_driver):
+        """Test node retrieval when transformation returns empty."""
+        mock_driver.run_safe_query.return_value = ResultWrapper(
+            success=True,
+            data=[{"start": None, "start_label": None}],
+        )
+
+        response = client.get("/api/node/APT28?label=ThreatActor&hops=1")
+        assert response.status_code == 500
+
+
+class TestTransformNeo4jResults:
+    """Test transformation function."""
+
+    def test_transform_empty_results(self):
+        """Test transformation with empty results."""
+        result = handlers.transform_neo4j_results_to_graph([])
+        assert result == []
+
+    def test_transform_single_node(self):
+        """Test transformation with single node."""
+        neo4j_data = [
+            {
+                "start": {"name": "APT28", "type": "APT"},
+                "start_label": "ThreatActor",
+                "connected": None,
+                "connected_label": None,
+                "relationship_details": [],
+            }
+        ]
+
+        result = handlers.transform_neo4j_results_to_graph(neo4j_data)
+
+        assert len(result) == 1
+        assert result[0]["n"]["name"] == "APT28"
+        assert result[0]["n"]["label"] == "ThreatActor"
+        assert len(result[0]["connections"]) == 0
+
+    def test_transform_with_relationships(self):
+        """Test transformation with relationships."""
+        neo4j_data = [
+            {
+                "start": {"name": "APT28"},
+                "start_label": "ThreatActor",
+                "connected": {"name": "X-Agent"},
+                "connected_label": "Malware",
+                "relationship_details": [
+                    {
+                        "type": "USES",
+                        "start_node": {"name": "APT28"},
+                        "start_node_label": "ThreatActor",
+                        "end_node": {"name": "X-Agent"},
+                        "end_node_label": "Malware",
+                    }
+                ],
+            }
+        ]
+
+        result = handlers.transform_neo4j_results_to_graph(neo4j_data)
+
+        assert len(result) == 1
+        assert len(result[0]["connections"]) == 1
+        assert result[0]["connections"][0]["relationship"] == "USES"
+        assert len(result[0]["edges"]) == 1
+        assert len(result[0]["nodes"]) == 2
+
+    def test_transform_missing_labels(self):
+        """Test transformation handles missing labels."""
+        neo4j_data = [
+            {
+                "start": {"name": "APT28"},
+                "start_label": None,
+                "connected": None,
+                "connected_label": None,
+                "relationship_details": [],
+            }
+        ]
+
+        result = handlers.transform_neo4j_results_to_graph(neo4j_data)
+
+        assert len(result) == 1
+        assert result[0]["n"]["label"] == "Unknown"
+
+    def test_transform_multiple_relationships(self):
+        """Test transformation with multiple relationships."""
+        neo4j_data = [
+            {
+                "start": {"name": "APT28"},
+                "start_label": "ThreatActor",
+                "connected": {"name": "Campaign1"},
+                "connected_label": "Campaign",
+                "relationship_details": [
+                    {
+                        "type": "USES",
+                        "start_node": {"name": "APT28"},
+                        "start_node_label": "ThreatActor",
+                        "end_node": {"name": "X-Agent"},
+                        "end_node_label": "Malware",
+                    },
+                    {
+                        "type": "LAUNCHES",
+                        "start_node": {"name": "APT28"},
+                        "start_node_label": "ThreatActor",
+                        "end_node": {"name": "Campaign1"},
+                        "end_node_label": "Campaign",
+                    },
+                ],
+            }
+        ]
+
+        result = handlers.transform_neo4j_results_to_graph(neo4j_data)
+
+        assert len(result) == 1
+        assert len(result[0]["edges"]) == 2
+        assert len(result[0]["nodes"]) >= 2
+

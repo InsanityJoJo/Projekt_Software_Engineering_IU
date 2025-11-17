@@ -1,18 +1,17 @@
 """API Handlers - Request handling and business logic.
 
-FIXED: handle_get_node_by_name now properly fetches nodes with correct queries.
+This module contains all business logic for API endpoints.
+All handlers use SafeQueryBuilder and AdminQueryBuilder - no raw Cypher.
 """
 
-from flask import jsonify, request
+from flask import jsonify
 from werkzeug.exceptions import BadRequest, UnsupportedMediaType
 from src.logger import setup_logger
 from src.services.autocomplete_service import AutocompleteService
 from src.services.query_builder import QueryValidationError, SafeQueryBuilder
 
-# Initialize logger
 logger = setup_logger("Handlers", 10)
 
-# Service instances (will be injected from main.py)
 db_driver = None
 autocomplete_service = None
 
@@ -30,11 +29,9 @@ def init_handlers(driver, autocomplete_svc=None):
     if autocomplete_svc:
         autocomplete_service = autocomplete_svc
     else:
-        # Create autocomplete service if not provided
         autocomplete_service = AutocompleteService(driver)
 
 
-# Health & Status Handlers
 def handle_health_check():
     """Handle health check request."""
     try:
@@ -93,7 +90,6 @@ def handle_get_stats():
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
-# Query Handlers
 def handle_execute_query(request):
     """Handle Cypher query execution."""
     try:
@@ -133,10 +129,10 @@ def handle_autocomplete(request):
 
     Query parameters:
         - q: Search query (minimum 3 characters)
-        - label: Optional label filter (e.g., 'Malware', 'ThreatActor')
+        - label: Optional label filter
         - limit: Maximum results (default: 10, max: 20)
-        - start_date: Optional start of time range (ISO format: "2022-01-01")
-        - end_date: Optional end of time range (ISO format: "2023-01-01")
+        - start_date: Optional start of time range (ISO format)
+        - end_date: Optional end of time range (ISO format)
     """
     try:
         if autocomplete_service is None:
@@ -148,7 +144,6 @@ def handle_autocomplete(request):
         label = request.args.get("label", None)
         limit = min(int(request.args.get("limit", 10)), 20)
 
-        # Get optional time filter parameters
         start_date = request.args.get("start_date", None)
         end_date = request.args.get("end_date", None)
 
@@ -162,7 +157,6 @@ def handle_autocomplete(request):
                 }
             ), 200
 
-        # Try prefix match first (with time filtering if provided)
         result = autocomplete_service.suggest_node_names(
             prefix=query,
             label=label,
@@ -171,7 +165,6 @@ def handle_autocomplete(request):
             end_date=end_date,
         )
 
-        # If fewer than 3 results, try fuzzy search (with time filtering if provided)
         if result.success and isinstance(result.data, list) and len(result.data) < 3:
             fuzzy_result = autocomplete_service.fuzzy_search(
                 search_term=query,
@@ -181,7 +174,6 @@ def handle_autocomplete(request):
                 end_date=end_date,
             )
             if fuzzy_result.success:
-                # Merge and deduplicate
                 seen = {item["name"] for item in result.data}
                 for item in fuzzy_result.data:
                     if item["name"] not in seen:
@@ -207,7 +199,6 @@ def handle_autocomplete(request):
         return jsonify({"success": False, "error": "Internal server error"}), 500
 
 
-# Node Handlers
 def handle_get_nodes(request):
     """Handle get all nodes request."""
     try:
@@ -297,17 +288,15 @@ def handle_create_node(request):
 
 
 def transform_neo4j_results_to_graph(neo4j_results):
-    """
-    Transform Neo4j path results to graph format with full path preservation.
+    """Transform Neo4j path results to graph format with full path preservation.
 
     Args:
         neo4j_results: List of records from Neo4j query, each containing:
-            - start: Dict with node properties (already converted by driver)
+            - start: Dict with node properties
             - start_label: String label from Cypher
             - connected: Dict with node properties
             - connected_label: String label from Cypher
             - relationship_details: List of dicts with rel info and node labels
-            - pathNodes: List of all nodes in path (for reference)
 
     Returns:
         List with single dict containing:
@@ -319,8 +308,8 @@ def transform_neo4j_results_to_graph(neo4j_results):
     if not neo4j_results:
         return []
 
-    all_nodes = {}  # Key: node name, Value: {id, data, isMainNode}
-    all_edges = []  # List of {id, source, target, relationship}
+    all_nodes = {}
+    all_edges = []
     start_node_key = None
 
     logger.info("=" * 60)
@@ -328,25 +317,18 @@ def transform_neo4j_results_to_graph(neo4j_results):
     logger.info("=" * 60)
 
     for record_idx, record in enumerate(neo4j_results):
-        # Extract data from record
-        start = record.get("start")  # Dict like {'name': 'Rose Corp', ...}
-        start_label = record.get("start_label")  # String like 'Organization'
-        connected = record.get("connected")  # Dict
-        connected_label = record.get("connected_label")  # String
+        start = record.get("start")
+        start_label = record.get("start_label")
+        connected = record.get("connected")
+        connected_label = record.get("connected_label")
         relationship_details = record.get("relationship_details", [])
 
         if not start:
             logger.warning(f"Record {record_idx} missing 'start' node")
             continue
 
-        # ==========================================
-        # PROCESS START NODE (Main Node)
-        # ==========================================
+        start_dict = dict(start)
 
-        # start is already a dict, just add the label
-        start_dict = dict(start)  # Make a copy
-
-        # Add label from Cypher query result
         if start_label:
             start_dict["label"] = start_label
             logger.debug(
@@ -358,7 +340,6 @@ def transform_neo4j_results_to_graph(neo4j_results):
 
         start_node_key = start_dict.get("name", str(id(start)))
 
-        # Add start node to collection (only once)
         if start_node_key not in all_nodes:
             all_nodes[start_node_key] = {
                 "id": start_node_key,
@@ -369,13 +350,8 @@ def transform_neo4j_results_to_graph(neo4j_results):
                 f"Added main node: {start_node_key} with label: {start_dict['label']}"
             )
 
-        # ==========================================
-        # PROCESS RELATIONSHIPS AND CONNECTED NODES
-        # ==========================================
-
-        # Add the connected node (endpoint of path)
         if connected:
-            connected_dict = dict(connected)  # Make a copy
+            connected_dict = dict(connected)
 
             if connected_label:
                 connected_dict["label"] = connected_label
@@ -397,21 +373,10 @@ def transform_neo4j_results_to_graph(neo4j_results):
                     f"Added connected node: {connected_key} with label: {connected_dict['label']}"
                 )
 
-        # Process each relationship in the path
         if relationship_details:
             for rel_idx, rel_detail in enumerate(relationship_details):
-                # rel_detail structure:
-                # {
-                #   'type': 'LAUNCHES',
-                #   'start_node': {...},
-                #   'start_node_label': 'Organization',
-                #   'end_node': {...},
-                #   'end_node_label': 'Campaign'
-                # }
-
                 rel_type = rel_detail.get("type", "CONNECTED")
 
-                # Get source node
                 source_node_dict = dict(rel_detail.get("start_node", {}))
                 source_node_label = rel_detail.get("start_node_label")
 
@@ -422,7 +387,6 @@ def transform_neo4j_results_to_graph(neo4j_results):
 
                 source_key = source_node_dict.get("name", str(id(source_node_dict)))
 
-                # Get target node
                 target_node_dict = dict(rel_detail.get("end_node", {}))
                 target_node_label = rel_detail.get("end_node_label")
 
@@ -433,11 +397,6 @@ def transform_neo4j_results_to_graph(neo4j_results):
 
                 target_key = target_node_dict.get("name", str(id(target_node_dict)))
 
-                # ==========================================
-                # ADD NODES TO COLLECTION
-                # ==========================================
-
-                # Add source node if new
                 if source_key not in all_nodes:
                     all_nodes[source_key] = {
                         "id": source_key,
@@ -448,7 +407,6 @@ def transform_neo4j_results_to_graph(neo4j_results):
                         f"Added source node: {source_key} with label: {source_node_dict['label']}"
                     )
 
-                # Add target node if new
                 if target_key not in all_nodes:
                     all_nodes[target_key] = {
                         "id": target_key,
@@ -459,13 +417,8 @@ def transform_neo4j_results_to_graph(neo4j_results):
                         f"Added target node: {target_key} with label: {target_node_dict['label']}"
                     )
 
-                # ==========================================
-                # ADD EDGE TO COLLECTION
-                # ==========================================
-
                 edge_id = f"{source_key}-{rel_type}-{target_key}"
 
-                # Add edge if not already present (avoid duplicates)
                 if not any(e["id"] == edge_id for e in all_edges):
                     all_edges.append(
                         {
@@ -479,16 +432,11 @@ def transform_neo4j_results_to_graph(neo4j_results):
                         f"Added edge: {source_key} -[{rel_type}]-> {target_key}"
                     )
 
-    # ==========================================
-    # LOG TRANSFORMATION RESULTS
-    # ==========================================
-
     logger.info("=" * 60)
     logger.info("Transformation complete:")
     logger.info(f"  Total unique nodes: {len(all_nodes)}")
     logger.info(f"  Total edges: {len(all_edges)}")
 
-    # Check first few nodes for labels (debugging)
     for idx, (node_key, node_info) in enumerate(list(all_nodes.items())[:5]):
         has_label = "label" in node_info["data"]
         label_value = node_info["data"].get("label", "MISSING")
@@ -496,15 +444,10 @@ def transform_neo4j_results_to_graph(neo4j_results):
 
     logger.info("=" * 60)
 
-    # ==========================================
-    # FORMAT FOR FRONTEND
-    # ==========================================
-
     if not all_nodes:
         logger.warning("No nodes found after transformation")
         return []
 
-    # Find the main node
     main_node = None
     for node in all_nodes.values():
         if node.get("isMainNode"):
@@ -512,11 +455,9 @@ def transform_neo4j_results_to_graph(neo4j_results):
             break
 
     if not main_node:
-        # Fallback: use first node
         main_node = list(all_nodes.values())[0]
         logger.warning(f"No main node found, using first node: {main_node['id']}")
 
-    # Build connections array from edges
     connections = []
     for edge in all_edges:
         target_node = all_nodes.get(edge["target"])
@@ -530,13 +471,12 @@ def transform_neo4j_results_to_graph(neo4j_results):
                 }
             )
 
-    # Construct final result structure
     result = [
         {
-            "n": main_node["data"],  # Main node data (includes label)
-            "connections": connections,  # All connections with correct rel types
-            "nodes": list(all_nodes.values()),  # All nodes for reference
-            "edges": all_edges,  # All edges with source/target info
+            "n": main_node["data"],
+            "connections": connections,
+            "nodes": list(all_nodes.values()),
+            "edges": all_edges,
         }
     ]
 
@@ -558,7 +498,7 @@ def handle_get_node_by_name(name, request):
         request: Flask request object
 
     Query parameters:
-        - label: Node label (from autocomplete)
+        - label: Node label (required)
         - hops: Context depth 0-3 (default: 1)
 
     Returns:
@@ -568,15 +508,12 @@ def handle_get_node_by_name(name, request):
         if db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
-        # Get parameters
         label = request.args.get("label", None)
-        hops = int(request.args.get("hops", 1))  # Default: 1 hop
+        hops = int(request.args.get("hops", 1))
 
-        # Validate hops parameter
         if hops < 0 or hops > 3:
             return jsonify({"error": "Hops must be between 0 and 3"}), 400
 
-        # Validate label (required for graph queries)
         if not label:
             return jsonify({"error": "Label required for node lookup"}), 400
 
@@ -586,7 +523,6 @@ def handle_get_node_by_name(name, request):
 
         try:
             if hops == 0:
-                # Special case: Just the node, no relationships
                 query, params = builder.get_node_with_relationships(
                     property_name="name",
                     property_value=name,
@@ -595,19 +531,17 @@ def handle_get_node_by_name(name, request):
                     limit=1,
                 )
             else:
-                # Multi-hop: Use find_connected_nodes
                 query, params = builder.find_connected_nodes(
                     start_label=label,
                     start_property="name",
                     start_value=name,
                     max_hops=hops,
-                    limit=100,  # Adjust based on your needs
+                    limit=100,
                 )
         except QueryValidationError as e:
             logger.warning(f"Validation error: {e}")
             return jsonify({"error": str(e)}), 400
 
-        # Execute query
         result = db_driver.run_safe_query(query, params)
 
         if result.success:
@@ -621,13 +555,17 @@ def handle_get_node_by_name(name, request):
 
             transformed_data = transform_neo4j_results_to_graph(result.data)
 
+            if not transformed_data:
+                logger.error("Transformation failed - no data returned")
+                return jsonify(
+                    {"success": False, "error": "Failed to process node data"}
+                ), 500
+
             return jsonify(
                 {
                     "success": True,
-                    "data": transformed_data,  # ← Transformed format!
-                    "count": len(transformed_data[0].get("connections", []))
-                    if transformed_data
-                    else 0,
+                    "data": transformed_data,
+                    "count": len(transformed_data[0].get("nodes", [])),
                     "hops": hops,
                 }
             ), 200
@@ -635,58 +573,10 @@ def handle_get_node_by_name(name, request):
             logger.error(f"Get node query failed: {result.error}")
             return jsonify({"success": False, "error": result.error}), 500
 
-        # Transform the results
-        transformed_data = transform_neo4j_results_to_graph(result.data)
-
-        if not transformed_data:
-            logger.error("Transformation failed - no data returned")
-            return jsonify(
-                {"success": False, "error": "Failed to process node data"}
-            ), 500
-
-        # ADD THIS: Log the complete JSON response
-        import json
-
-        response_json = {
-            "success": True,
-            "data": transformed_data,
-            "count": len(transformed_data[0].get("connections", [])),
-            "hops": hops,
-        }
-
-        # Pretty print the JSON to console
-        logger.info("=" * 80)
-        logger.info("RESPONSE JSON:")
-        logger.info(json.dumps(response_json, indent=2, default=str))
-        logger.info("=" * 80)
-
-        # Also log just the first node's data to see the label
-        if transformed_data and len(transformed_data) > 0:
-            first_node = transformed_data[0]
-            logger.info("First node 'n' data:")
-            logger.info(json.dumps(first_node.get("n"), indent=2, default=str))
-
-            if "nodes" in first_node and len(first_node["nodes"]) > 0:
-                logger.info("First item in 'nodes' array:")
-                logger.info(json.dumps(first_node["nodes"][0], indent=2, default=str))
-
-                if len(first_node["nodes"]) > 1:
-                    logger.info("Second item in 'nodes' array:")
-                    logger.info(
-                        json.dumps(first_node["nodes"][1], indent=2, default=str)
-                    )
-
-        logger.info(
-            "Node found: '{}', returning node with {} connection(s)".format(
-                name, len(transformed_data[0].get("connections", []))
-            )
-        )
-
-        return jsonify(response_json), 200
-
     except ValueError as e:
-        logger.warning("Invalid hops parameter: {}".format(e))
+        logger.warning(f"Invalid hops parameter: {e}")
         return jsonify({"error": "Invalid hops parameter - must be integer"}), 400
     except Exception as e:
-        logger.error("Get node error: {}".format(e), exc_info=True)
+        logger.error(f"Get node error: {e}", exc_info=True)
         return jsonify({"success": False, "error": "Internal server error"}), 500
+

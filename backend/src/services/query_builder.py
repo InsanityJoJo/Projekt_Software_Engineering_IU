@@ -5,7 +5,7 @@ user input. It uses parameterized queries and validates all inputs to
 prevent Cypher injection attacks and restrict user operations to read-only.
 """
 
-from typing import Dict, List, Optional, Any, reveal_type
+from typing import Dict, List, Optional, Any
 from enum import Enum
 from src.constants import ALLOWED_LABELS, ALLOWED_PROPERTIES, ALLOWED_RELATIONSHIPS
 
@@ -569,12 +569,16 @@ class SafeQueryBuilder:
         - Single date properties: published_date, detection_date, resolved_date
         - Date ranges: first_seen/last_seen, start_date/end_date
 
+        Time Filter Behavior:
+        - Both dates provided: Filter nodes within range
+        - Only start_date: Filter nodes active from that date onwards
+        - Only end_date: Filter nodes active up to that date
+        - No dates: No time filtering applied (all nodes matching text search)
+
         Overlap Logic:
         - For single dates: date must be within [start_date, end_date]
         - For date ranges: node's time span overlaps if:
           node.start <= filter.end AND node.end >= filter.start
-
-        Nodes WITHOUT any time properties are EXCLUDED from results.
 
         Security: All inputs validated and parameterized to prevent injection.
 
@@ -593,26 +597,6 @@ class SafeQueryBuilder:
 
         Raises:
             QueryValidationError: If validation fails.
-
-        Examples:
-            Search Malware active in 2022:
-            >>> builder = SafeQueryBuilder()
-            >>> query, params = builder.search_nodes_with_time_filter(
-            ...     label="Malware",
-            ...     search_value="Locker",
-            ...     match_type="contains",
-            ...     start_date="2022-01-01",
-            ...     end_date="2022-12-31",
-            ...     include_metadata=True
-            ... )
-
-            Search all nodes with name starting with "APT" in date range:
-            >>> query, params = builder.search_nodes_with_time_filter(
-            ...     search_value="APT",
-            ...     match_type="starts_with",
-            ...     start_date="2020-01-01",
-            ...     end_date="2024-12-31"
-            ... )
         """
         # Validate inputs using whitelist approach
         search_property = self.validate_property(search_property)
@@ -640,55 +624,84 @@ class SafeQueryBuilder:
             )
 
         # Build time filter WHERE clause
-        # This handles multiple time property patterns:
-        # 1. Single date properties (published_date, detection_date, resolved_date)
-        # 2. Date range properties (first_seen/last_seen, start_date/end_date)
-        #
-        # Overlap condition for ranges: node.start <= filter.end AND node.end >= filter.start
         time_where = ""
+        params = {"search_value": search_value, "limit": limit or self.max_results}
+
         if start_date and end_date:
+            # Validate: start must be before end
+            if start_date > end_date:
+                raise QueryValidationError(
+                    f"start_date ({start_date}) must be before end_date ({end_date})"
+                )
             time_where = """
-  AND (
-    // Single date properties within filter range
-    (n.published_date >= $start_date AND n.published_date <= $end_date)
-    OR
-    (n.detection_date >= $start_date AND n.detection_date <= $end_date)
-    OR
-    (n.resolved_date >= $start_date AND n.resolved_date <= $end_date)
-    OR
-    // Date range properties that overlap with filter range
-    (n.first_seen IS NOT NULL AND n.last_seen IS NOT NULL 
-     AND n.first_seen <= $end_date AND n.last_seen >= $start_date)
-    OR
-    (n.start_date IS NOT NULL AND n.end_date IS NOT NULL 
-     AND n.start_date <= $end_date AND n.end_date >= $start_date)
-  )"""
+      AND (
+        (n.published_date >= $start_date AND n.published_date <= $end_date)
+        OR
+        (n.detection_date >= $start_date AND n.detection_date <= $end_date)
+        OR
+        (n.resolved_date >= $start_date AND n.resolved_date <= $end_date)
+        OR
+        (n.first_seen IS NOT NULL AND n.last_seen IS NOT NULL 
+         AND n.first_seen <= $end_date AND n.last_seen >= $start_date)
+        OR
+        (n.start_date IS NOT NULL AND n.end_date IS NOT NULL 
+         AND n.start_date <= $end_date AND n.end_date >= $start_date)
+      )"""
+            params["start_date"] = start_date
+            params["end_date"] = end_date
+
+        elif start_date:
+            # Only start: nodes active after this date
+            time_where = """
+      AND (
+        (n.published_date >= $start_date)
+        OR
+        (n.detection_date >= $start_date)
+        OR
+        (n.resolved_date >= $start_date)
+        OR
+        (n.last_seen >= $start_date)
+        OR
+        (n.end_date >= $start_date)
+      )"""
+            params["start_date"] = start_date
+
+        elif end_date:
+            # Only end: nodes active before this date
+            time_where = """
+      AND (
+        (n.published_date <= $end_date)
+        OR
+        (n.detection_date <= $end_date)
+        OR
+        (n.resolved_date <= $end_date)
+        OR
+        (n.first_seen <= $end_date)
+        OR
+        (n.start_date <= $end_date)
+      )"""
+            params["end_date"] = end_date
 
         # Build RETURN clause
         if include_metadata:
             return_clause = f"""n.{search_property} AS {search_property},
-                   labels(n)[0] AS label,
-                   elementId(n) AS id"""
+                       labels(n)[0] AS label,
+                       elementId(n) AS id"""
         else:
             return_clause = "n"
 
         # Build complete query
         query = f"""
-        MATCH (n{label_clause})
-        WHERE n.{search_property} IS NOT NULL AND {text_where}{time_where}
-        RETURN {return_clause}
-        ORDER BY n.{search_property}
-        LIMIT $limit
-        """
-
-        # Build parameters
-        params = {"search_value": search_value, "limit": limit or self.max_results}
-        if start_date and end_date:
-            params["start_date"] = start_date
-            params["end_date"] = end_date
+            MATCH (n{label_clause})
+            WHERE n.{search_property} IS NOT NULL AND {text_where}{time_where}
+            RETURN {return_clause}
+            ORDER BY n.{search_property}
+            LIMIT $limit
+            """
 
         # Final safety check
         self.validate_query_safety(query)
+
         return query, params
 
     def check_node_exists(
