@@ -12,6 +12,7 @@
 	import TimelineAnalysis from "./TimelineAnalysis.svelte";
 	import { getAutocompleteSuggestions, getNodeByName } from "./api.js";
 	import { contextDepth, labelFilter, startDate, endDate } from "./stores.js";
+	import { validateInput } from "./inputValidation";
 	
 	// ============================================
 	// DEBUG CONFIGURATION
@@ -76,6 +77,9 @@
 	/** @type {Array} Visible nodes to pass to timeline */
 	let visibleNodes = [];
 
+	/** @type {string|null} Validation error message */
+	let validationError = null;
+
 	// ============================================
 	// AUTOCOMPLETE & SEARCH HANDLERS
 	// ============================================
@@ -92,6 +96,20 @@
 		if (debounceTimer) {
 			clearTimeout(debounceTimer);
 		}
+		
+		// Validate input
+		const validation = validateInput(query);
+
+		// If validation fails, show error and don't proceed
+		if (!validation.isValid) {
+			validationError = validation.error;
+			suggestions = [];
+			showSuggestions = false;
+			return;
+		}
+
+		// Clear validation error if input is now valid
+		validationError = null;
 
 		// Reset state if query is too short
 		if (query.length < 3) {
@@ -110,8 +128,9 @@
 				const currentLabel = $labelFilter === "all" ? null : $labelFilter;
 				const currentStartDate = $startDate;
 				const currentEndDate = $endDate;
-
-				const result = await getAutocompleteSuggestions(query, currentLabel, currentStartDate, currentEndDate);
+				
+				// Use the sanitized input for API call
+				const result = await getAutocompleteSuggestions(validation.sanitized, currentLabel, currentStartDate, currentEndDate);
 
 				if (result.success) {
 					suggestions = result.suggestions || [];
@@ -189,12 +208,24 @@
 	/**
 	 * Handle search button click or Enter key
 	 * 
+	 * Validate input before searching.
 	 * Attempts to search by selecting first suggestion or direct name lookup.
 	 */
 	async function handleSearch() {
-		if (query.trim() === "") return;
+		// Validate input before searching
+		const validation = validateInput(query);
 
-		// If we have suggestions, select the first one
+		if (!validation.isValid) {
+			validationError = validation.error;
+			error = validation.error;
+			return;
+		}
+
+		validationError = null;
+
+		if (validation.sanitized === "") return;
+
+		// If there are suggestions, select the first one
 		if (suggestions.length > 0) {
 			await handleSuggestionSelect(suggestions[0]);
 		} else {
@@ -203,15 +234,15 @@
 				isLoading = true;
 				error = null;
 				
-				debugLog(`Direct search for: "${query.trim()}"`);
-				const result = await getNodeByName(query.trim());
+				debugLog(`Direct search for: "${validation.sanitized}"`);
+				const result = await getNodeByName(validation.sanitized);
 				
 				if (result.success && result.data && result.data.length > 0) {
 					selectedNode = result.data[0];
 					showGraph = true;
 					debugLog('Direct search successful');
 				} else {
-					error = `No entity found with name "${query.trim()}"`;
+					error = `No entity found with name "${validation.sanitized}"`;
 					showGraph = false;
 					debugLog('Direct search failed: no results');
 				}
@@ -235,6 +266,7 @@
 		showGraph = false;
 		selectedNode = null;
 		error = null;
+		validationError = null; 
 		
 		debugLog('Search cleared, app reset to initial state');
 	}
@@ -418,6 +450,7 @@
 				<input
 					type="text"
 					class="searchbar"
+					class:invalid={validationError !== null}
 					bind:value={query}
 					on:input={handleInputChange}
 					on:keydown={handleKeyDown}
@@ -504,6 +537,11 @@
 			<!-- Loading Indicator -->
 			{#if isLoading}
 				<div class="loading-indicator">Loading...</div>
+			{/if}
+
+			<!-- Validation Error Message -->
+			{#if validationError}
+				<div class="validation-error">{validationError}</div>
 			{/if}
 
 			<!-- Error Message -->

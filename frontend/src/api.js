@@ -1,6 +1,8 @@
 // API service for backend communication
 // Handles all HTTP requests to the Flask backend
 
+import { sanitizeInput } from "./inputValidation.js";
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 /**
@@ -38,6 +40,18 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 /**
+ * Sanitize and prepare query string for backend
+ * - Normalizes Unicode (NFKC)
+ * - Trims whitespace
+ *
+ * @param {string} query - Raw query string
+ * @returns {string} - Sanitized lowercase query for backend
+ */
+function prepareQueryForBackend(query) {
+  return sanitizeInput(query);
+}
+
+/**
  * Get autocomplete suggestions with optional filtering
  *
  * @param {string} query - Search query (minimum 3 characters)
@@ -61,7 +75,10 @@ export async function getAutocompleteSuggestions(
     };
   }
 
-  const params = new URLSearchParams({ q: query });
+  // Sanitize and prepare query for backend
+  const sanitizedQuery = prepareQueryForBackend(query);
+
+  const params = new URLSearchParams({ q: sanitizedQuery });
 
   if (label && label !== "all") {
     params.append("label", label);
@@ -94,6 +111,9 @@ export async function getNodeByName(name, label = null, hops = null) {
     throw new Error("Node name is required");
   }
 
+  // Sanitize and prepare name for backend
+  const sanitizedName = prepareQueryForBackend(name);
+
   // If hops not explicitly provided, get from settings store
   if (hops === null) {
     // Import store dynamically to avoid circular dependencies
@@ -117,7 +137,7 @@ export async function getNodeByName(name, label = null, hops = null) {
   params.append("hops", String(hops));
 
   return apiRequest(
-    `/api/node/${encodeURIComponent(name)}?${params.toString()}`,
+    `/api/node/${encodeURIComponent(sanitizedName)}?${params.toString()}`,
   );
 }
 /**

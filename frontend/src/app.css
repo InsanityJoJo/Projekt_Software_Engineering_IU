@@ -298,6 +298,20 @@ h1 {
   color: white;
 }
 
+.validation-error {
+  color: var(--color-error);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #fee;
+  border-left: 3px solid var(--color-error);
+  border-radius: 4px;
+}
+
+.searchbar.invalid {
+  border-color: var(--color-error);
+  background-color: var(--color-background);
+}
 /* ========================================
    BUTTONS
    ======================================== */
