@@ -1,3 +1,4 @@
+// /src/ReportGenerator.js
 /**
  * ReportGenerator.js
  *
@@ -14,9 +15,19 @@
  * @param {Array} reportData.edges - All visible edges
  * @param {string} reportData.graphImage - Base64 PNG image of graph
  * @param {string|null} reportData.timelineImage - Optional base64 PNG image of timeline
+ * @param {Object} reportData.config - Report configuration from modal
+ * @param {Object} reportData.searchParams - Search parameters (filters)
  */
 export function generateReport(reportData) {
-  const { mainNode, nodes, edges, graphImage, timelineImage } = reportData;
+  const {
+    mainNode,
+    nodes,
+    edges,
+    graphImage,
+    timelineImage,
+    config,
+    searchParams,
+  } = reportData;
 
   const html = buildHTMLReport(
     mainNode,
@@ -24,6 +35,8 @@ export function generateReport(reportData) {
     edges,
     graphImage,
     timelineImage,
+    config,
+    searchParams,
   );
 
   // Open in new window
@@ -46,6 +59,8 @@ function buildHTMLReport(
   edges,
   graphImage,
   timelineImage = null,
+  config = null,
+  searchParams = null,
 ) {
   const metadata = {
     generatedDate: new Date().toLocaleString("en-US", {
@@ -59,6 +74,15 @@ function buildHTMLReport(
     edgeCount: edges.length,
     mainEntityName: mainNode.name || "Unknown",
     mainEntityType: mainNode.type || "Unknown",
+    reportType: config
+      ? config.type === "executive"
+        ? "Executive Summary"
+        : config.type === "analyst"
+          ? "Analyst Report"
+          : config.type === "full"
+            ? "Full Investigation"
+            : "Custom Report"
+      : "Standard Report",
   };
 
   return `<!DOCTYPE html>
@@ -76,9 +100,11 @@ function buildHTMLReport(
     ${buildReportHeader(metadata)}
     ${buildMetadataSection(metadata)}
     ${buildMainNodeSection(mainNode)}
-    ${buildGraphVisualizationSection(graphImage)}
-    ${timelineImage ? buildTimelineSection(timelineImage) : ""}
-    ${buildConnectionsSection(nodes, edges, mainNode)}
+    ${config && config.includeSearchParams && searchParams ? buildSearchParamsSection(searchParams) : ""}
+    ${config && config.includeUserText && config.userText ? buildUserTextSection(config.userText) : ""}
+    ${(config && config.includeGraph) || !config ? buildGraphVisualizationSection(graphImage) : ""}
+    ${(config && config.includeTimeline && timelineImage) || (!config && timelineImage) ? buildTimelineSection(timelineImage) : ""}
+    ${(config && config.includeNodes && nodes.length > 1) || (!config && nodes.length > 1) ? buildConnectionsSection(nodes, edges, mainNode, config ? config.includeRelationships : true) : ""}
     ${buildFooter()}
   </div>
   
@@ -270,6 +296,37 @@ function getReportStyles() {
     .properties-table .property-value {
       color: #333;
       word-break: break-word;
+    }
+    
+    /* Search Parameters Section */
+    .search-params-box {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+      margin-top: 1rem;
+    }
+    
+    .search-params-box p {
+      margin: 0.5rem 0;
+      font-size: 0.95rem;
+    }
+    
+    .search-params-box strong {
+      color: #667eea;
+      margin-right: 0.5rem;
+    }
+    
+    /* User Text Section */
+    .user-text-content {
+      background: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      border-left: 4px solid #764ba2;
+      margin-top: 1rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      word-wrap: break-word;
     }
     
     /* Graph Visualization */
@@ -474,7 +531,7 @@ function getReportStyles() {
 function buildReportHeader(metadata) {
   return `
     <button class="print-button" onclick="printReport()">
-      🖨️ Print / Save as PDF
+      Print / Save as PDF
     </button>
     
     <header class="report-header">
@@ -561,6 +618,47 @@ function buildMainNodeSection(mainNode) {
 }
 
 /**
+ * Build search parameters section
+ */
+function buildSearchParamsSection(searchParams) {
+  const { labelFilter, startDate, endDate } = searchParams;
+
+  // Format labels
+  const labelText =
+    labelFilter && labelFilter !== "all" ? `[${labelFilter}]` : "[All Types]";
+
+  // Format time range
+  const timeText =
+    startDate && endDate
+      ? `from [${startDate}] to [${endDate}]`
+      : "No time filter";
+
+  return `
+    <section class="search-params-section">
+      <h2>Search Parameters</h2>
+      <div class="search-params-box">
+        <p><strong>Labels:</strong> ${escapeHtml(labelText)}</p>
+        <p><strong>Time Range:</strong> ${escapeHtml(timeText)}</p>
+      </div>
+    </section>
+  `;
+}
+
+/**
+ * Build user text section
+ */
+function buildUserTextSection(userText) {
+  return `
+    <section class="user-text-section">
+      <h2>User Notes</h2>
+      <div class="user-text-content">
+        ${escapeHtml(userText).replace(/\n/g, "<br>")}
+      </div>
+    </section>
+  `;
+}
+
+/**
  * Build graph visualization section
  */
 function buildGraphVisualizationSection(graphImage) {
@@ -593,7 +691,12 @@ function buildTimelineSection(timelineImage) {
 /**
  * Build connections section (all nodes and edges)
  */
-function buildConnectionsSection(nodes, edges, mainNode) {
+function buildConnectionsSection(
+  nodes,
+  edges,
+  mainNode,
+  includeRelationships = true,
+) {
   // Separate main node from others
   const mainNodeId = mainNode.name || mainNode.id;
   const otherNodes = nodes.filter((n) => n.data.id !== mainNodeId);
@@ -607,10 +710,16 @@ function buildConnectionsSection(nodes, edges, mainNode) {
         ${otherNodes.map((node) => buildNodeCard(node, edges)).join("")}
       </div>
       
-      <h2 class="mt-2">Relationships Overview (${edges.length})</h2>
-      <div class="relationships-list">
-        ${edges.map((edge) => buildRelationshipItem(edge, nodes)).join("")}
-      </div>
+      ${
+        includeRelationships
+          ? `
+        <h2 class="mt-2">Relationships Overview (${edges.length})</h2>
+        <div class="relationships-list">
+          ${edges.map((edge) => buildRelationshipItem(edge, nodes)).join("")}
+        </div>
+      `
+          : ""
+      }
     </section>
   `;
 }
@@ -676,7 +785,7 @@ function buildRelationshipItem(edge, nodes) {
         ${escapeHtml(targetName)}
       </div>
       <div class="relationship-nodes">
-        From: <strong>${escapeHtml(sourceName)}</strong> → 
+        From: <strong>${escapeHtml(sourceName)}</strong> â†’ 
         To: <strong>${escapeHtml(targetName)}</strong>
       </div>
     </div>
@@ -691,7 +800,7 @@ function buildFooter() {
     <footer class="report-footer">
       <p><strong>Threat Intelligence Platform</strong></p>
       <p>Generated automatically from graph data</p>
-      <p>© 2025 - For internal use only</p>
+      <p>Â© 2025 - For internal use only</p>
     </footer>
   `;
 }

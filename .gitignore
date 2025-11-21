@@ -67,8 +67,8 @@ frontend/yarn-debug.log*
 frontend/yarn-error.log*
 frontend/pnpm-debug.log*
 frontend/lerna-debug.log*
-frontend/logs/
-frontend/*.log
+frontend/tests/logs/
+frontend/tests/*.log
 
 # Testing
 frontend/coverage/

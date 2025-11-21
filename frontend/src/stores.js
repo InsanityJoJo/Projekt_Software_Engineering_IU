@@ -1,3 +1,4 @@
+// /src/stores.js
 /**
  * Shared stores for the application
  */

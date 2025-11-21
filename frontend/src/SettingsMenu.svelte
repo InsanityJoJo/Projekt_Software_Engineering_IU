@@ -165,7 +165,7 @@
     top: 100%;
     right: 0;
     margin-top: 8px;
-    background: var(--color-surface);
+    background: var(--color-background-secondary);
     border: 1px solid var(--color-border);
     border-radius: 8px;
     padding: 16px;

@@ -10,6 +10,7 @@
 	import GraphView from "./GraphView.svelte";
 	import SettingsMenu from "./SettingsMenu.svelte";
 	import TimelineAnalysis from "./TimelineAnalysis.svelte";
+	import ReportConfigModal from "./ReportConfigModal.svelte";
 	import { getAutocompleteSuggestions, getNodeByName } from "./api.js";
 	import { contextDepth, labelFilter, startDate, endDate } from "./stores.js";
 	import { validateInput } from "./inputValidation";
@@ -62,6 +63,9 @@
 	/** @type {boolean} Whether settings menu is visible */
 	let showSettings = false;
 	
+	/** @type {boolean} Whether report config modal is visible */
+	let showReportConfig = false;
+	
 	/** @type {GraphView} Reference to GraphView component for report generation */
 	let graphViewComponent;
 	
@@ -76,6 +80,9 @@
 	
 	/** @type {Array} Visible nodes to pass to timeline */
 	let visibleNodes = [];
+
+	/** @type {Array<string>} Available labels for report filtering */
+	let availableLabels = [];
 
 	/** @type {string|null} Validation error message */
 	let validationError = null;
@@ -294,7 +301,7 @@
 	/**
 	 * Handle clicks outside of dropdowns and menus
 	 * 
-	 * Closes suggestions dropdown and settings menu when clicking outside.
+	 * Closes suggestions dropdown, settings menu, and report modal when clicking outside.
 	 * 
 	 * @param {MouseEvent} event - Click event
 	 */
@@ -308,6 +315,11 @@
 		if (showSettings && !event.target.closest('.settings-wrapper')) {
 			showSettings = false;
 		}
+		
+		// Close report config modal if click was outside report wrapper
+		if (showReportConfig && !event.target.closest('.report-wrapper')) {
+			showReportConfig = false;
+		}
 	}
 
 	// ============================================
@@ -315,25 +327,72 @@
 	// ============================================
 
 	/**
-	 * Generate HTML report from current graph state
-	 * 
-	 * Calls the exposed function from GraphView component to generate
-	 * a printable HTML report with all visible nodes and relationships.
-	 * Also includes timeline if visible.
+	 * Handle report button click - open configuration modal
 	 */
-	function handleGenerateReport() {
+	function handleReportClick() {
+		// Update visible nodes from graph
+		if (graphViewComponent && showGraph) {
+			visibleNodes = graphViewComponent.getVisibleNodes();
+			debugLog('Updated visible nodes for report:', visibleNodes.length);
+		}
+		
+		// Update available labels
+		availableLabels = getAvailableLabels();
+		debugLog('Available labels for report:', availableLabels);
+		
+		showReportConfig = !showReportConfig;
+		debugLog('Report config modal toggled:', showReportConfig);
+	}
+	
+	/**
+	 * Get unique labels from visible nodes
+	 * 
+	 * @returns {Array<string>} Array of unique label names
+	 */
+	function getAvailableLabels() {
+		if (!visibleNodes || visibleNodes.length === 0) {
+			return [];
+		}
+		
+		// Extract unique labels from visible nodes
+		const labels = new Set();
+		visibleNodes.forEach(node => {
+			if (node.data && node.data.type) {
+				labels.add(node.data.type);
+			}
+		});
+		
+		return Array.from(labels).sort();
+	}
+	
+	/**
+	 * Handle report generation with configuration
+	 * 
+	 * Called from ReportConfigModal after user configures report options.
+	 * Passes configuration to GraphView for filtered report generation.
+	 * 
+	 * @param {Object} config - Report configuration object
+	 */
+	function handleGenerateReport(config) {
 		if (graphViewComponent) {
-			debugLog('Generating report from current graph state');
+			debugLog('Generating report with config:', config);
 			
-			// Get timeline image if timeline is visible
+			// Get timeline image if timeline is visible and included in config
 			let timelineImage = null;
-			if (showTimeline && timelineComponent) {
+			if (showTimeline && timelineComponent && config.includeTimeline) {
 				timelineImage = timelineComponent.exportAsImage();
 				debugLog('Timeline image exported for report');
 			}
 			
-			// Pass timeline image to GraphView report generation
-			graphViewComponent.generateReportFromGraph(timelineImage);
+			// Get search parameters for the report
+			const searchParams = {
+				labelFilter: $labelFilter,
+				startDate: $startDate,
+				endDate: $endDate
+			};
+			
+			// Pass config, timeline image, and search params to GraphView
+			graphViewComponent.generateReportFromGraph(config, timelineImage, searchParams);
 		} else {
 			console.error('GraphView component not initialized');
 		}
@@ -506,12 +565,22 @@
 							<ChartNoAxesCombined size={20} />
 						</button>
 						
-						<button 
-							on:click={handleGenerateReport}
-							title="Generate Report"
-						>
-							<FileText size={20} />
-						</button>
+						<!-- Report Button and Modal -->
+						<div class="report-wrapper">
+							<button 
+								on:click={handleReportClick}
+								title="Report"
+							>
+								<FileText size={20} />
+							</button>
+							
+							<ReportConfigModal
+  								bind:show={showReportConfig}
+  								availableLabels={availableLabels}
+  								hasTimeline={showTimeline}
+								on:generate={(e) => handleGenerateReport(e.detail)}
+							/>
+						</div>
 					{/if}
 				</div>
 			</div>
@@ -611,7 +680,7 @@
 	<!-- ============================================ -->
 	<footer class="footer">
 		<p>
-			<Copyright size={13} /> 2025 Johannes Liebscher — CTI Platform Version 0.21 Prototype
+			<Copyright size={13} /> 2025 Johannes Liebscher â€” CTI Platform Version 0.21 Prototype
 		</p>
 		<p>Impressum</p>
 	</footer>

@@ -19,7 +19,7 @@ import {
   validateInput,
   isValidForAutocomplete,
   escapeHtml,
-} from "./src/inputValidation.js";
+} from "../../src/inputValidation.js";
 
 describe("Input Validation", () => {
   describe("normalizeUnicode", () => {

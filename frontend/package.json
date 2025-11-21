@@ -13,6 +13,8 @@
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",
+    "@vitest/coverage-v8": "^4.0.10",
+    "happy-dom": "^20.0.10",
     "svelte": "^5.39.6",
     "vite": "^7.1.7",
     "vitest": "^4.0.10"

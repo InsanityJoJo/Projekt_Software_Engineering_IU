@@ -715,13 +715,14 @@
    * @public
    * @param {string|null} timelineImage - Optional base64 timeline image
    */
-  export function generateReportFromGraph(timelineImage = null) {
+  export function generateReportFromGraph(config, timelineImage = null, searchParams = null) {
     if (!cy) {
       console.error('Cannot generate report: Cytoscape instance not initialized');
       return;
     }
 
     debugLog('=== Generating Report ===');
+    debugLog('Config:', config);
 
     // Get current main node info
     const mainNodeInfo = selectedNodeData || {
@@ -731,12 +732,34 @@
     };
 
     // Get all visible nodes
-    const visibleNodes = cy.nodes().jsons();
-    debugLog(`Report includes ${visibleNodes.length} nodes`);
+    let visibleNodes = cy.nodes().jsons();
+    debugLog(`Total visible nodes: ${visibleNodes.length}`);
 
     // Get all visible edges
-    const visibleEdges = cy.edges().jsons();
-    debugLog(`Report includes ${visibleEdges.length} edges`);
+    let visibleEdges = cy.edges().jsons();
+    debugLog(`Total visible edges: ${visibleEdges.length}`);
+    
+    // Filter nodes based on config
+    if (config.includeNodes && config.selectedLabels && config.selectedLabels.length > 0) {
+      // Filter nodes to only include selected labels
+      visibleNodes = visibleNodes.filter(n => 
+        config.selectedLabels.includes(n.data.type) || 
+        config.selectedLabels.includes(n.data.label) ||
+        n.data.id === mainNodeInfo.name // Always include main node
+      );
+      debugLog(`Filtered to ${visibleNodes.length} nodes with labels: ${config.selectedLabels.join(', ')}`);
+      
+      // Filter edges to only include relationships involving at least one filtered node
+      const filteredNodeIds = new Set(visibleNodes.map(n => n.data.id));
+      visibleEdges = visibleEdges.filter(e => 
+        filteredNodeIds.has(e.data.source) || filteredNodeIds.has(e.data.target)
+      );
+      debugLog(`Filtered to ${visibleEdges.length} edges`);
+    } else if (!config.includeNodes) {
+      // If nodes not included, don't include any except main node
+      visibleNodes = visibleNodes.filter(n => n.data.id === mainNodeInfo.name);
+      debugLog('Only including main node');
+    }
 
     // Export graph as PNG image
     const graphImage = cy.png({
@@ -755,7 +778,9 @@
       nodes: visibleNodes,
       edges: visibleEdges,
       graphImage: graphImage,
-      timelineImage: timelineImage  // Include timeline if provided
+      timelineImage: config.includeTimeline ? timelineImage : null,
+      config: config,
+      searchParams: searchParams
     };
 
     // Generate and open report

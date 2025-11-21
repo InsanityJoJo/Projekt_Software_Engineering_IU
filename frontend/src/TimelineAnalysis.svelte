@@ -2,7 +2,7 @@
 <script>
   import { onMount, onDestroy, createEventDispatcher } from 'svelte';
   import { Chart, registerables } from 'chart.js';
-  import 'chartjs-adapter-date-fns';  // ← CRITICAL: Required for time scale
+  import 'chartjs-adapter-date-fns';
   
   // Register Chart.js components
   Chart.register(...registerables);
@@ -360,6 +360,10 @@
       borderSkipped: false
     }];
     
+    // Get the CSS color variable value
+    const textColor = getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-text').trim();
+    
     // Create chart
     chart = new Chart(chartCanvas, {
       type: 'bar',
@@ -375,6 +379,7 @@
           title: {
             display: true,
             text: 'Temporal Analysis - Entity Activity Timeline',
+            color: textColor,
             font: {
               size: 16,
               weight: 'bold'
@@ -422,13 +427,27 @@
             },
             title: {
               display: true,
-              text: 'Timeline'
+              text: 'Timeline',
+              color: textColor
+            },
+            ticks: {
+              color: textColor
+            },
+            grid: {
+              color: 'rgba(231, 253, 240, 0.1)'
             }
           },
           y: {
             title: {
               display: true,
-              text: 'Entities'
+              text: 'Entities',
+              color: textColor
+            },
+            ticks: {
+              color: textColor
+            },
+            grid: {
+              color: 'rgba(231, 253, 240, 0.1)'
             }
           }
         },
@@ -578,7 +597,7 @@
    */
   .timeline-container {
     width: 100%;
-    background: var(--color-surface);
+    background: var(--graph-background);
     border: 1px solid var(--color-border);
     border-radius: 0.5rem;
     margin-top: 2rem;
@@ -608,7 +627,7 @@
     padding-top: 1rem;
     border-top: 1px solid var(--color-border);
     text-align: center;
-    color: var(--color-muted);
+    color: var(--color-text);
     font-size: 0.9rem;
   }
   
