@@ -5,9 +5,15 @@ nodes in the Neo4j database using the SafeQueryBuilder.
 """
 
 from typing import Optional
-from src.driver import GraphDBDriver, ResultWrapper
-from src.services.query_builder import SafeQueryBuilder
 
+from neo4j.exceptions import Neo4jError, ServiceUnavailable, SessionExpired
+
+from src.driver import GraphDBDriver, ResultWrapper
+from src.logger import setup_logger
+from src.services.query_builder import QueryValidationError, SafeQueryBuilder
+
+# Initialise logging
+logger = setup_logger(__name__)
 
 class AutocompleteService:
     """Service for providing node name autocomplete suggestions.
@@ -93,8 +99,29 @@ class AutocompleteService:
 
             return result
 
+        except QueryValidationError as e:
+            # Exception: Invalid Label/Properties
+            logger.warning("Invalid autocomplete query parameters: %s", e)
+            return ResultWrapper(success=False, error=f"Invalid search parameters: {str(e)}")
+
+        except (ServiceUnavailable, SessionExpired) as e:
+            # Exception: Database not reachable
+            logger.error("Database connection error in suggest_node_names: %s", e)
+            return ResultWrapper(success=False, error="Database temporarily unavailable")
+
+        except Neo4jError as e:
+            # Exception: Other database Problems
+            logger.error("Database error in suggest_node_names: %s", e)
+            return ResultWrapper(success=False, error=f"Database error: {str(e)}")
+
         except Exception as e:
-            return ResultWrapper(success=False, error=f"Search failed: {str(e)}")
+            # unexpected Exception: Logging with full stacktrace
+            logger.exception(
+                "Unexpected error in suggest_node_names with prefix='%s', label=%s",
+                prefix,
+                label
+            )
+            return ResultWrapper(success=False, error="An unexpected error occurred")
 
     def fuzzy_search(
         self,
@@ -156,8 +183,25 @@ class AutocompleteService:
 
             return result
 
+        except QueryValidationError as e:
+            logger.warning("Invalid fuzzy search parameters: %s", e)
+            return ResultWrapper(success=False, error=f"Invalid search parameters: {str(e)}")
+
+        except (ServiceUnavailable, SessionExpired) as e:
+            logger.error("Database connection error in fuzzy_search: %s", e)
+            return ResultWrapper(success=False, error="Database temporarily unavailable")
+
+        except Neo4jError as e:
+            logger.error("Database error in fuzzy_search: %s", e)
+            return ResultWrapper(success=False, error=f"Database error: {str(e)}")
+
         except Exception as e:
-            return ResultWrapper(success=False, error=f"Fuzzy search failed: {str(e)}")
+            logger.exception(
+                "Unexpected error in fuzzy_search with term='%s', label=%s",
+                search_term,
+                label
+            )
+            return ResultWrapper(success=False, error="An unexpected error occurred")
 
     def check_node_exists(
         self, name: str, label: Optional[str] = None
@@ -185,10 +229,26 @@ class AutocompleteService:
 
             return result
 
+        except QueryValidationError as e:
+            logger.warning("Invalid existence check parameters: %s", e)
+            return ResultWrapper(success=False, error=f"Invalid parameters: {str(e)}")
+
+        except (ServiceUnavailable, SessionExpired) as e:
+            logger.error("Database connection error in check_node_exists: %s", e)
+            return ResultWrapper(success=False, error="Database temporarily unavailable")
+
+        except Neo4jError as e:
+            logger.error("Database error in check_node_exists: %s", e)
+            return ResultWrapper(success=False, error=f"Database error: {str(e)}")
+
         except Exception as e:
-            return ResultWrapper(
-                success=False, error=f"Existence check failed: {str(e)}"
+            logger.exception(
+                "Unexpected error in check_node_exists with name='%s', label=%s",
+                name,
+                label
             )
+            return ResultWrapper(success=False, error="An unexpected error occurred")
+
 
     def get_all_node_names(
         self, label: Optional[str] = None, max_nodes: int = 1000
@@ -224,6 +284,22 @@ class AutocompleteService:
 
             return result
 
-        except Exception as e:
-            return ResultWrapper(success=False, error=f"Get all names failed: {str(e)}")
+        except QueryValidationError as e:
+            logger.warning("Invalid get all names parameters: %s", e)
+            return ResultWrapper(success=False, error=f"Invalid parameters: {str(e)}")
 
+        except (ServiceUnavailable, SessionExpired) as e:
+            logger.error("Database connection error in get_all_node_names: %s", e)
+            return ResultWrapper(success=False, error="Database temporarily unavailable")
+
+        except Neo4jError as e:
+            logger.error("Database error in get_all_node_names: %s", e)
+            return ResultWrapper(success=False, error=f"Database error: {str(e)}")
+
+        except Exception as e:
+            logger.exception(
+                "Unexpected error in get_all_node_names label=%s, max_nodes=%s",
+                label,
+                max_nodes
+            )
+            return ResultWrapper(success=False, error="An unexpected error occurred")

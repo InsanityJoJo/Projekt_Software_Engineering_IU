@@ -6,9 +6,12 @@ error handling, logging, and a standardized result wrapper for consistent
 query result handling.
 """
 
-from typing import Any, Optional
-from neo4j import GraphDatabase
+import json
 import logging
+from typing import Any, Optional
+
+from neo4j import GraphDatabase
+
 from src.logger import setup_logger
 
 
@@ -75,8 +78,6 @@ class ResultWrapper:
         Returns:
             str: JSON string of the result dictionary.
         """
-        import json
-
         return json.dumps(self.to_dict(), indent=2)
 
 
@@ -165,21 +166,17 @@ class GraphDBDriver:
                 # Use appropriate transaction function based on operation type
                 if write:
                     data = session.execute_write(_execute_query)
-                    self.logger.info(
-                        f"Write query executed: {query} with params: {parameters}"
-                    )
+                    self.logger.info("Write query executed: %s with params: %s", query, parameters)
                 else:
                     data = session.execute_read(_execute_query)
-                    self.logger.info(
-                        f"Read query executed: {query} with params: {parameters}"
-                    )
+                    self.logger.info("Read query executed: %s with params: %s", query, parameters)
 
-                self.logger.debug(f"Query returned {len(data)} records")
+                self.logger.debug("Query returned %d records", len(data))
 
                 return data
 
         except Exception as e:
-            self.logger.error(f"Query execution failed: {e}")
+            self.logger.error("Query execution failed: %s", e)
             raise RuntimeError(
                 f"Query failed: {e}\nQuery: {query}\nParams: {parameters}"
             ) from e
@@ -211,8 +208,15 @@ class GraphDBDriver:
         try:
             data = self.execute(query, parameters)
             return ResultWrapper(success=True, data=data)
-        except Exception as e:
-            # Log at debug level to avoid duplicate error logs
-            # (execute() already logs at ERROR level)
-            self.logger.debug(f"Safe query wrapper caught exception: {e}")
+
+        except RuntimeError as e:
+            # Expected: execute() raises RuntimeError on query failures
+            # (execute() already logged the error)
+            self.logger.debug("Safe query wrapper caught RuntimeError: %s", str(e))
             return ResultWrapper(success=False, error=str(e))
+
+        except Exception as e:
+            # Unexpected: This shouldn't happen but catch it anyway
+            # since this is a "safe" wrapper
+            self.logger.exception("Unexpected error in run_safe_query")
+            return ResultWrapper(success=False, error=f"Unexpected error: {str(e)}")

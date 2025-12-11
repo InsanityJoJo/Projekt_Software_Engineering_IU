@@ -8,14 +8,16 @@ reporting.
 
 import json
 import logging
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
 from datetime import datetime
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from neo4j.exceptions import Neo4jError
 
 from src.driver import GraphDBDriver
-from src.services.query_builder import AdminQueryBuilder, QueryValidationError
 from src.logger import setup_logger
+from src.services.query_builder import AdminQueryBuilder, QueryValidationError
 
 
 @dataclass
@@ -99,12 +101,12 @@ class ImportService:
         if not path.exists():
             raise FileNotFoundError(f"File not found: {filepath}")
 
-        self.logger.info(f"Loading JSON file: {filepath}")
+        self.logger.info("Loading JSON file: %s", filepath)
 
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
-        self.logger.info(f"Loaded JSON file ({path.stat().st_size} bytes)")
+        self.logger.info("Loaded JSON file (%d bytes)", path.stat().st_size)
         return data
 
     def validate_json_structure(self, data: Dict[str, Any]) -> List[str]:
@@ -352,7 +354,7 @@ class ImportService:
             self.logger.info("No nodes to import")
             return 0
 
-        self.logger.info(f"Importing {len(nodes)} nodes...")
+        self.logger.info("Importing %d nodes...", len(nodes))
 
         # Get list of queries (one per label)
         queries = self.builder.merge_nodes_batch(nodes)
@@ -370,10 +372,12 @@ class ImportService:
                 label = result[0].get("label", "Unknown")
                 label_counts[label] = count
                 total_count += count
-                self.logger.info(f" {label}: {count} nodes")
+                self.logger.info(" %s: %d nodes", label, count)
 
         self.logger.info(
-            f"Imported {total_count} nodes total across {len(label_counts)} labels"
+            "Imported %d nodes total across %d labels",
+            total_count,
+            len(label_counts)
         )
 
         return total_count
@@ -394,7 +398,7 @@ class ImportService:
             self.logger.info("No relationships to import")
             return 0
 
-        self.logger.info(f"Importing {len(relationships)} relationships...")
+        self.logger.info("Importing %d relationships...", len(relationships))
 
         # Get list of queries (one per relationship pattern)
         queries = self.builder.merge_relationships_batch(relationships)
@@ -415,11 +419,17 @@ class ImportService:
                 pattern_counts.append((from_label, rel_type, to_label, count))
                 total_count += count
                 self.logger.info(
-                    f" ({from_label})-[{rel_type}]->({to_label}): {count} relationships"
+                    " (%s)-[%s]->(%s): %d relationships",
+                    from_label,
+                    rel_type,
+                    to_label,
+                    count
                 )
 
         self.logger.info(
-            f"Imported {total_count} relationships total across {len(pattern_counts)} patterns"
+            "Imported %d relationships total across %d patterns",
+            total_count,
+            len(pattern_counts)
         )
 
         return total_count
@@ -458,9 +468,9 @@ class ImportService:
                 structure_errors = self.validate_json_structure(data)
                 if structure_errors:
                     result.errors.extend(structure_errors)
-                    self.logger.error(f"âœ— JSON structure validation failed")
+                    self.logger.error("X JSON structure validation failed")
                     for error in structure_errors:
-                        self.logger.error(f"  - {error}")
+                        self.logger.error("  - %s", error)
                     return result
                 self.logger.info("JSON structure is valid")
 
@@ -469,33 +479,35 @@ class ImportService:
 
             # Validate nodes
             if validate:
-                self.logger.info(f"Validating {len(nodes)} nodes...")
+                self.logger.info("Validating %d nodes...", len(nodes))
                 node_errors, node_warnings = self.validate_nodes(nodes)
                 result.errors.extend(node_errors)
                 result.warnings.extend(node_warnings)
 
                 if node_errors:
                     self.logger.error(
-                        f"Node validation failed with {len(node_errors)} errors"
+                        "Node validation failed with %d errors",
+                        len(node_errors)
                     )
                     for error in node_errors[:5]:  # Show first 5
-                        self.logger.error(f"  - {error}")
+                        self.logger.error("  - %s", error)
                     if len(node_errors) > 5:
                         self.logger.error(
-                            f"  ... and {len(node_errors) - 5} more errors"
+                            "  ... and %d more errors",
+                            len(node_errors) - 5
                         )
                     return result
 
                 if node_warnings:
-                    self.logger.warning(f" {len(node_warnings)} warnings")
+                    self.logger.warning(" %d warnings", len(node_warnings))
                     for warning in node_warnings[:3]:  # Show first 3
-                        self.logger.warning(f"  - {warning}")
+                        self.logger.warning("  - %s", warning)
 
                 self.logger.info(" Node validation passed")
 
             # Validate relationships
             if validate:
-                self.logger.info(f"Validating {len(relationships)} relationships...")
+                self.logger.info("Validating %d relationships...", len(relationships))
                 rel_errors, rel_warnings = self.validate_relationships(
                     relationships, existing_nodes=nodes
                 )
@@ -504,20 +516,22 @@ class ImportService:
 
                 if rel_errors:
                     self.logger.error(
-                        f" Relationship validation failed with {len(rel_errors)} errors"
+                        " Relationship validation failed with %d errors",
+                        len(rel_errors)
                     )
                     for error in rel_errors[:5]:
-                        self.logger.error(f"  - {error}")
+                        self.logger.error("  - %s", error)
                     if len(rel_errors) > 5:
                         self.logger.error(
-                            f"  ... and {len(rel_errors) - 5} more errors"
+                            "  ... and %d more errors",
+                            len(rel_errors) - 5
                         )
                     return result
 
                 if rel_warnings:
-                    self.logger.warning(f" {len(rel_warnings)} warnings")
+                    self.logger.warning(" %d warnings", len(rel_warnings))
                     for warning in rel_warnings[:3]:
-                        self.logger.warning(f"  - {warning}")
+                        self.logger.warning("  - %s", warning)
 
                 self.logger.info(" Relationship validation passed")
 
@@ -534,49 +548,63 @@ class ImportService:
 
             try:
                 result.nodes_created = self.import_nodes(nodes)
+            except QueryValidationError as e:
+                error_msg = f"Invalid query during node import: {str(e)}"
+                self.logger.error(error_msg)
+                result.errors.append(error_msg)
+                return result
+            except Neo4jError as e:
+                error_msg = f"Database error during node import: {str(e)}"
+                self.logger.error(error_msg)
+                result.errors.append(error_msg)
+                return result
             except Exception as e:
                 error_msg = f"Failed to import nodes: {str(e)}"
-                self.logger.error(error_msg)
+                self.logger.exception("Unexpected error in node import")
                 result.errors.append(error_msg)
                 return result
 
             # Transform and import relationships
             try:
                 transformed_rels = self.transform_relationships(relationships)
-                result.relationships_created = self.import_relationships(
-                    transformed_rels
-                )
-            except Exception as e:
-                error_msg = f"Failed to import relationships: {str(e)}"
+                result.relationships_created = self.import_relationships(transformed_rels)
+            except QueryValidationError as e:
+                error_msg = f"Invalid query during relationship import: {str(e)}"
                 self.logger.error(error_msg)
                 result.errors.append(error_msg)
-                # Don't return here - nodes were imported successfully
+            except Neo4jError as e:
+                error_msg = f"Database error during relationship import: {str(e)}"
+                self.logger.error(error_msg)
+                result.errors.append(error_msg)
+            except Exception as e:
+                error_msg = f"Failed to import relationships: {str(e)}"
+                self.logger.exception("Unexpected error in relationship import")
+                result.errors.append(error_msg)
 
             # Success!
             result.success = True
 
             self.logger.info("=" * 60)
             self.logger.info(" Import completed successfully!")
-            self.logger.info(f"  Nodes: {result.nodes_created}")
-            self.logger.info(f"  Relationships: {result.relationships_created}")
+            self.logger.info("  Nodes: %d", result.nodes_created)
+            self.logger.info("  Relationships: %d", result.relationships_created)
             if result.warnings:
-                self.logger.info(f"  Warnings: {len(result.warnings)}")
+                self.logger.info("  Warnings: %d", len(result.warnings))
             self.logger.info("=" * 60)
 
         except FileNotFoundError as e:
             error_msg = str(e)
-            self.logger.error(f" {error_msg}")
+            self.logger.error(" %s", error_msg)
             result.errors.append(error_msg)
 
         except json.JSONDecodeError as e:
             error_msg = f"Invalid JSON: {str(e)}"
-            self.logger.error(f" {error_msg}")
+            self.logger.error(" %s", error_msg)
             result.errors.append(error_msg)
 
         except Exception as e:
             error_msg = f"Unexpected error: {str(e)}"
-            self.logger.error(f" {error_msg}")
-            self.logger.exception("Full traceback:")
+            self.logger.exception("Full traceback of unexpected error")
             result.errors.append(error_msg)
 
         finally:

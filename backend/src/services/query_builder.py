@@ -5,9 +5,11 @@ user input. It uses parameterized queries and validates all inputs to
 prevent Cypher injection attacks and restrict user operations to read-only.
 """
 
-from typing import Dict, List, Optional, Any
 from enum import Enum
-from src.constants import ALLOWED_LABELS, ALLOWED_PROPERTIES, ALLOWED_RELATIONSHIPS
+from typing import Any, Dict, List, Optional
+
+from src.constants import (ALLOWED_LABELS, ALLOWED_PROPERTIES,
+                           ALLOWED_RELATIONSHIPS)
 
 
 class QueryType(Enum):
@@ -19,9 +21,6 @@ class QueryType(Enum):
 
 class QueryValidationError(Exception):
     """Raised when query validation fails."""
-
-    pass
-
 
 class SafeQueryBuilder:
     """Builder for constructing safe, parameterized Cypher queries.
@@ -218,7 +217,7 @@ class SafeQueryBuilder:
         MATCH path = (start:{start_label} {{{start_property}: $start_value}})
                  -{rel_pattern}-(connected)
         WITH start, connected, relationships(path) AS rels, nodes(path) AS pathNodes
-        RETURN 
+        RETURN
             start,
             labels(start)[0] AS start_label,
             connected,
@@ -302,7 +301,10 @@ class SafeQueryBuilder:
             match_clause = f"MATCH (n:{label} {{{property_name}: $value}})"
         else:
             # Search across all labels - need WHERE clause to ensure property exists
-            match_clause = f"MATCH (n {{{property_name}: $value}})\n        WHERE n.{property_name} IS NOT NULL"
+            match_clause = (
+                f"MATCH (n {{{property_name}: $value}})\n"
+                f"WHERE n.{property_name} IS NOT NULL"
+            )
 
         # Build relationship filter
         if relationship_type:
@@ -323,7 +325,7 @@ class SafeQueryBuilder:
                        nodeLabel: labels(connected)[0],
                        nodeId: elementId(connected),
                        type: type(r),
-                       direction: CASE 
+                       direction: CASE
                          WHEN startNode(r) = n THEN 'outgoing'
                          ELSE 'incoming'
                        END
@@ -335,7 +337,7 @@ class SafeQueryBuilder:
                        relationship: r,
                        node: connected,
                        type: type(r),
-                       direction: CASE 
+                       direction: CASE
                          WHEN startNode(r) = n THEN 'outgoing'
                          ELSE 'incoming'
                        END
@@ -520,7 +522,7 @@ class SafeQueryBuilder:
             return_clause = f"""n.{search_property} AS {search_property},
                    labels(n)[0] AS label,
                    elementId(n) AS id,
-                   CASE 
+                   CASE
                      WHEN toLower(n.{search_property}) STARTS WITH toLower($search_value) THEN 1
                      ELSE 2
                    END AS relevance"""
@@ -528,7 +530,7 @@ class SafeQueryBuilder:
         else:
             # Without metadata, still include relevance for ordering but don't return it
             return_clause = f"""n,
-                   CASE 
+                   CASE
                      WHEN toLower(n.{search_property}) STARTS WITH toLower($search_value) THEN 1
                      ELSE 2
                    END AS relevance"""
@@ -537,7 +539,7 @@ class SafeQueryBuilder:
         # Build complete query with CONTAINS for fuzzy matching
         query = f"""
         MATCH (n{label_clause})
-        WHERE n.{search_property} IS NOT NULL 
+        WHERE n.{search_property} IS NOT NULL
           AND toLower(n.{search_property}) CONTAINS toLower($search_value)
         RETURN {return_clause}
         ORDER BY {order_clause}
@@ -641,10 +643,10 @@ class SafeQueryBuilder:
         OR
         (n.resolved_date >= $start_date AND n.resolved_date <= $end_date)
         OR
-        (n.first_seen IS NOT NULL AND n.last_seen IS NOT NULL 
+        (n.first_seen IS NOT NULL AND n.last_seen IS NOT NULL
          AND n.first_seen <= $end_date AND n.last_seen >= $start_date)
         OR
-        (n.start_date IS NOT NULL AND n.end_date IS NOT NULL 
+        (n.start_date IS NOT NULL AND n.end_date IS NOT NULL
          AND n.start_date <= $end_date AND n.end_date >= $start_date)
       )"""
             params["start_date"] = start_date
@@ -904,13 +906,6 @@ class AdminQueryBuilder(SafeQueryBuilder):
     All operations will still use parameterization to prevent cypher injection.
     """
 
-    def __init__(self, max_results: int = 100):
-        """Initialize the admin query builder.
-        Args:
-            max_results: Maximum number or results to return (safty limit).
-        """
-        super().__init__(max_results)
-
     def validate_query_safety(self, query: str) -> None:
         """Override parent method to allow write operations.
 
@@ -920,7 +915,6 @@ class AdminQueryBuilder(SafeQueryBuilder):
         Args:
             query: The query string (not validated for write keywords).
         """
-        pass
 
     def _validate_properties_dict(self, properties: Dict[str, Any]) -> Dict[str, Any]:
         """Validate all properties in a dictionary.
@@ -1027,8 +1021,12 @@ class AdminQueryBuilder(SafeQueryBuilder):
         Examples:
             >>> builder = AdminQueryBuilder()
             >>> nodes = [
-            ...     {"label": "ThreatActor", "properties": {"name": "APT28", "type": "Nation-State"}},
-            ...     {"label": "Malware", "properties": {"name": "X-Agent", "family": "Sofacy"}}
+            ...     {"label": 
+                        "ThreatActor", 
+                        "properties": {"name": "APT28", "type": "Nation-State"}},
+            ...     {"label": 
+                        "Malware", 
+                        "properties": {"name": "X-Agent", "family": "Sofacy"}}
             ... ]
             >>> queries = builder.merge_nodes_batch(nodes)
             >>> # Returns list with 2 queries, one for ThreatActor, one for Malware

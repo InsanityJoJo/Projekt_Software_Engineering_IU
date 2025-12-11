@@ -16,7 +16,7 @@ COPY pyproject.toml .
 Run pip install --upgrade pip
 
 # Install Python dependencies
-RUN pip install .  
+RUN pip install ".[dev]"  
 
 # Copy application code (prod)
 COPY src/ ./src/

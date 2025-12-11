@@ -5,15 +5,17 @@ All handlers use SafeQueryBuilder and AdminQueryBuilder - no raw Cypher.
 """
 
 from flask import jsonify
+from neo4j.exceptions import Neo4jError
 from werkzeug.exceptions import BadRequest, UnsupportedMediaType
+
 from src.logger import setup_logger
 from src.services.autocomplete_service import AutocompleteService
 from src.services.query_builder import QueryValidationError, SafeQueryBuilder
 
 logger = setup_logger("Handlers", 10)
 
-db_driver = None
-autocomplete_service = None
+_db_driver = None
+_autocomplete_service = None
 
 
 def init_handlers(driver, autocomplete_svc=None):
@@ -23,54 +25,56 @@ def init_handlers(driver, autocomplete_svc=None):
         driver: GraphDBDriver instance
         autocomplete_svc: AutocompleteService instance (optional)
     """
-    global db_driver, autocomplete_service
-    db_driver = driver
+    global _db_driver, _autocomplete_service
+    _db_driver = driver
 
     if autocomplete_svc:
-        autocomplete_service = autocomplete_svc
+        _autocomplete_service = autocomplete_svc
     else:
-        autocomplete_service = AutocompleteService(driver)
+        _autocomplete_service = AutocompleteService(driver)
 
 
 def handle_health_check():
     """Handle health check request."""
     try:
-        if db_driver is None:
+        if _db_driver is None:
             return jsonify(
                 {"status": "unhealthy", "error": "Database driver not initialized"}
             ), 503
 
-        result = db_driver.run_safe_query("RETURN 1 AS health")
+        result = _db_driver.run_safe_query("RETURN 1 AS health")
 
         if result.success:
             return jsonify({"status": "healthy", "database": "connected"}), 200
-        else:
-            return jsonify(
-                {
-                    "status": "unhealthy",
-                    "database": "disconnected",
-                    "error": result.error,
-                }
-            ), 503
+        return jsonify(
+            {
+                "status": "unhealthy",
+                "database": "disconnected",
+                "error": result.error,
+             }
+         ), 503
 
-    except Exception as e:
-        logger.error(f"Health check failed: {e}")
-        return jsonify({"status": "unhealthy", "error": str(e)}), 503
+    except Neo4jError as e:
+        logger.error("Database error in health check: %s", e)
+        return jsonify({"status": "unhealthy", "error": "Database error"}), 503
 
+    except Exception:
+        logger.exception("Unexpected error in health check")
+        return jsonify({"status": "unhealthy", "error": "Internal error"}), 503
 
 def handle_get_stats():
     """Handle get statistics request."""
     try:
-        if db_driver is None:
+        if _db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
         builder = SafeQueryBuilder()
 
         node_query, node_params = builder.count_nodes()
-        node_result = db_driver.run_safe_query(node_query, node_params)
+        node_result = _db_driver.run_safe_query(node_query, node_params)
 
         rel_query, rel_params = builder.count_relationships()
-        rel_result = db_driver.run_safe_query(rel_query, rel_params)
+        rel_result = _db_driver.run_safe_query(rel_query, rel_params)
 
         if node_result.success and rel_result.success:
             return jsonify(
@@ -80,20 +84,26 @@ def handle_get_stats():
                     "relationships": rel_result.data[0]["count"],
                 }
             ), 200
-        else:
-            error = node_result.error or rel_result.error
-            logger.error(f"Stats query failed: {error}")
-            return jsonify({"success": False, "error": error}), 500
+        error = node_result.error or rel_result.error
+        logger.error("Stats query failed: %s", error)
+        return jsonify({"success": False, "error": error}), 500
+
+    except QueryValidationError as e:
+        logger.warning("Invalid query in get_stats: %s", e)
+        return jsonify({"success": False, "error": "Invalid query"}), 400
+
+    except Neo4jError as e:
+        logger.error("Database error in get_stats: %s", e)
+        return jsonify({"success": False, "error": "Database error"}), 500
 
     except Exception as e:
-        logger.error(f"Error fetching stats: {e}")
+        logger.exception("Unexpected error in get_stats")
         return jsonify({"success": False, "error": "Internal server error"}), 500
-
 
 def handle_execute_query(request):
     """Handle Cypher query execution."""
     try:
-        if db_driver is None:
+        if _db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
         data = request.get_json()
@@ -104,25 +114,31 @@ def handle_execute_query(request):
         query = data["query"]
         parameters = data.get("parameters", None)
 
-        logger.info(f"Executing query: {query[:100]}...")
+        logger.info("Executing query: %s...", query[:100])
 
-        result = db_driver.run_safe_query(query, parameters)
+        result = _db_driver.run_safe_query(query, parameters)
 
         if result.success:
             return jsonify(
                 {"success": True, "data": result.data, "count": len(result.data)}
             ), 200
-        else:
-            return jsonify({"success": False, "error": result.error}), 400
+        return jsonify({"success": False, "error": result.error}), 400
 
     except (BadRequest, UnsupportedMediaType) as e:
-        logger.warning(f"Bad request: {e}")
+        logger.warning("Bad request in execute_query: %s", e)
         return jsonify({"error": "Invalid JSON format"}), 400
 
-    except Exception as e:
-        logger.error(f"Query execution error: {e}")
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+    except QueryValidationError as e:
+        logger.warning("Invalid query: %s", e)
+        return jsonify({"success": False, "error": str(e)}), 400
 
+    except Neo4jError as e:
+        logger.error("Database error in execute_query: %s", e)
+        return jsonify({"success": False, "error": "Database error"}), 500
+
+    except Exception as e:
+        logger.exception("Unexpected error in execute_query")
+        return jsonify({"success": False, "error": "Internal server error"}), 500
 
 def handle_autocomplete(request):
     """Handle autocomplete request with optional time filtering.
@@ -135,7 +151,7 @@ def handle_autocomplete(request):
         - end_date: Optional end of time range (ISO format)
     """
     try:
-        if autocomplete_service is None:
+        if _autocomplete_service is None:
             return jsonify(
                 {"success": False, "error": "Autocomplete service not available"}
             ), 503
@@ -157,7 +173,7 @@ def handle_autocomplete(request):
                 }
             ), 200
 
-        result = autocomplete_service.suggest_node_names(
+        result = _autocomplete_service.suggest_node_names(
             prefix=query,
             label=label,
             limit=limit,
@@ -166,7 +182,7 @@ def handle_autocomplete(request):
         )
 
         if result.success and isinstance(result.data, list) and len(result.data) < 3:
-            fuzzy_result = autocomplete_service.fuzzy_search(
+            fuzzy_result = _autocomplete_service.fuzzy_search(
                 search_term=query,
                 label=label,
                 limit=limit,
@@ -188,21 +204,27 @@ def handle_autocomplete(request):
                     "count": len(result.data[:limit]),
                 }
             ), 200
-        else:
-            return jsonify({"success": False, "error": result.error}), 500
+        return jsonify({"success": False, "error": result.error}), 500
 
     except ValueError as e:
         return jsonify({"success": False, "error": f"Invalid parameter: {str(e)}"}), 400
 
-    except Exception as e:
-        logger.error(f"Autocomplete error: {e}")
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+    except QueryValidationError as e:
+        logger.warning("Invalid parameters in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": str(e)}), 400
 
+    except Neo4jError as e:
+        logger.error("Database error in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": "Database error"}), 500
+
+    except Exception as e:
+        logger.exception("Unexpected error in [HANDLER_NAME]")
+        return jsonify({"error": "Internal server error"}), 500
 
 def handle_get_nodes(request):
     """Handle get all nodes request."""
     try:
-        if db_driver is None:
+        if _db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
         limit = request.args.get("limit", 100, type=int)
@@ -212,24 +234,30 @@ def handle_get_nodes(request):
 
         try:
             query, params = builder.get_all_nodes(label=label, limit=limit)
-            result = db_driver.run_safe_query(query, params)
+            result = _db_driver.run_safe_query(query, params)
 
             if result.success:
                 return jsonify(
                     {"success": True, "nodes": result.data, "count": len(result.data)}
                 ), 200
-            else:
-                logger.error(f"Get nodes query failed: {result.error}")
-                return jsonify({"success": False, "error": result.error}), 500
+            logger.error("Get nodes query failed: %s", result.error)
+            return jsonify({"success": False, "error": result.error}), 500
 
         except QueryValidationError as e:
-            logger.warning(f"Validation error: {e}")
+            logger.warning("Validation error: %s", e)
             return jsonify({"error": str(e)}), 400
 
-    except Exception as e:
-        logger.error(f"Error fetching nodes: {e}", exc_info=True)
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+    except QueryValidationError as e:
+        logger.warning("Invalid parameters in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": str(e)}), 400
 
+    except Neo4jError as e:
+        logger.error("Database error in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": "Database error"}), 500
+
+    except Exception as e:
+        logger.exception("Unexpected error in [HANDLER_NAME]")
+        return jsonify({"error": "Internal server error"}), 500
 
 def handle_create_node(request):
     """Handle create node request.
@@ -237,7 +265,7 @@ def handle_create_node(request):
     IMPORTANT: Should be restricted to authenticated admin users!
     """
     try:
-        if db_driver is None:
+        if _db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
         data = request.get_json()
@@ -261,31 +289,37 @@ def handle_create_node(request):
                 else {},
             )
 
-            result = db_driver.run_safe_query(query, params)
+            result = _db_driver.run_safe_query(query, params)
 
             if result.success:
                 return jsonify(
                     {
                         "success": True,
                         "data": result.data,
-                        "message": f"Node created with label {label}",
+        "message": f"Node created with label {label}",
                     }
                 ), 201
-            else:
-                return jsonify({"success": False, "error": result.error}), 500
+            return jsonify({"success": False, "error": result.error}), 500
 
         except QueryValidationError as e:
-            logger.warning(f"Validation error: {e}")
+            logger.warning("Validation error: %s", e)
             return jsonify({"error": str(e)}), 400
 
     except (BadRequest, UnsupportedMediaType) as e:
-        logger.warning(f"Bad request: {e}")
+        logger.warning("Bad request: %s", e)
         return jsonify({"error": "Invalid JSON format"}), 400
 
-    except Exception as e:
-        logger.error(f"Error creating node: {e}", exc_info=True)
-        return jsonify({"success": False, "error": "Internal server error"}), 500
+    except QueryValidationError as e:
+        logger.warning("Invalid parameters in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": str(e)}), 400
 
+    except Neo4jError as e:
+        logger.error("Database error in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": "Database error"}), 500
+
+    except Exception as e:
+        logger.exception("Unexpected error in [HANDLER_NAME]")
+        return jsonify({"error": "Internal server error"}), 500
 
 def transform_neo4j_results_to_graph(neo4j_results):
     """Transform Neo4j path results to graph format with full path preservation.
@@ -313,7 +347,7 @@ def transform_neo4j_results_to_graph(neo4j_results):
     start_node_key = None
 
     logger.info("=" * 60)
-    logger.info(f"Starting transformation of {len(neo4j_results)} Neo4j records")
+    logger.info("Starting transformation of %d Neo4j records", len(neo4j_results))
     logger.info("=" * 60)
 
     for record_idx, record in enumerate(neo4j_results):
@@ -324,7 +358,7 @@ def transform_neo4j_results_to_graph(neo4j_results):
         relationship_details = record.get("relationship_details", [])
 
         if not start:
-            logger.warning(f"Record {record_idx} missing 'start' node")
+            logger.warning("Record %d missing 'start' node", record_idx)
             continue
 
         start_dict = dict(start)
@@ -332,10 +366,12 @@ def transform_neo4j_results_to_graph(neo4j_results):
         if start_label:
             start_dict["label"] = start_label
             logger.debug(
-                f"Start node: {start_dict.get('name')} with label: {start_label}"
+                "Start node: %s with label: %s",
+                start_dict.get('name'),
+                start_label
             )
         else:
-            logger.warning(f"Start node missing label: {start_dict.get('name')}")
+            logger.warning("Start node missing label: %s", start_dict.get('name'))
             start_dict["label"] = "Unknown"
 
         start_node_key = start_dict.get("name", str(id(start)))
@@ -347,7 +383,9 @@ def transform_neo4j_results_to_graph(neo4j_results):
                 "isMainNode": True,
             }
             logger.debug(
-                f"Added main node: {start_node_key} with label: {start_dict['label']}"
+                "Added main node: %s with label: %s",
+                start_node_key,
+                start_dict['label']
             )
 
         if connected:
@@ -357,7 +395,8 @@ def transform_neo4j_results_to_graph(neo4j_results):
                 connected_dict["label"] = connected_label
             else:
                 logger.warning(
-                    f"Connected node missing label: {connected_dict.get('name')}"
+                    "Connected node missing label: %s",
+                    connected_dict.get('name')
                 )
                 connected_dict["label"] = "Unknown"
 
@@ -370,11 +409,13 @@ def transform_neo4j_results_to_graph(neo4j_results):
                     "isMainNode": False,
                 }
                 logger.debug(
-                    f"Added connected node: {connected_key} with label: {connected_dict['label']}"
+                    "Added connected node: %s with label: %s",
+                    connected_key,
+                    connected_dict['label']
                 )
 
         if relationship_details:
-            for rel_idx, rel_detail in enumerate(relationship_details):
+            for rel_detail in relationship_details:
                 rel_type = rel_detail.get("type", "CONNECTED")
 
                 source_node_dict = dict(rel_detail.get("start_node", {}))
@@ -404,7 +445,9 @@ def transform_neo4j_results_to_graph(neo4j_results):
                         "isMainNode": (source_key == start_node_key),
                     }
                     logger.debug(
-                        f"Added source node: {source_key} with label: {source_node_dict['label']}"
+                        "Added source node: %s with label: %s",
+                        source_key,
+                        source_node_dict['label']
                     )
 
                 if target_key not in all_nodes:
@@ -414,7 +457,9 @@ def transform_neo4j_results_to_graph(neo4j_results):
                         "isMainNode": False,
                     }
                     logger.debug(
-                        f"Added target node: {target_key} with label: {target_node_dict['label']}"
+                        "Added target node: %s with label: %s",
+                        target_key,
+                        target_node_dict['label']
                     )
 
                 edge_id = f"{source_key}-{rel_type}-{target_key}"
@@ -429,18 +474,21 @@ def transform_neo4j_results_to_graph(neo4j_results):
                         }
                     )
                     logger.debug(
-                        f"Added edge: {source_key} -[{rel_type}]-> {target_key}"
+                        "Added edge: %s -[%s]-> %s",
+                        source_key,
+                        rel_type,
+                        target_key
                     )
 
     logger.info("=" * 60)
     logger.info("Transformation complete:")
-    logger.info(f"  Total unique nodes: {len(all_nodes)}")
-    logger.info(f"  Total edges: {len(all_edges)}")
+    logger.info("  Total unique nodes: %d", len(all_nodes))
+    logger.info("  Total edges: %d", len(all_edges))
 
-    for idx, (node_key, node_info) in enumerate(list(all_nodes.items())[:5]):
+    for node_key, node_info in list(all_nodes.items())[:5]:
         has_label = "label" in node_info["data"]
         label_value = node_info["data"].get("label", "MISSING")
-        logger.info(f"  Node '{node_key}': label={label_value} (present={has_label})")
+        logger.info("  Node '%s': label=%s (present=%s)", node_key, label_value, has_label)
 
     logger.info("=" * 60)
 
@@ -456,7 +504,7 @@ def transform_neo4j_results_to_graph(neo4j_results):
 
     if not main_node:
         main_node = list(all_nodes.values())[0]
-        logger.warning(f"No main node found, using first node: {main_node['id']}")
+        logger.warning("No main node found, using first node: %s", main_node['id'])
 
     connections = []
     for edge in all_edges:
@@ -481,8 +529,10 @@ def transform_neo4j_results_to_graph(neo4j_results):
     ]
 
     logger.info(
-        f"Transformed {len(neo4j_results)} Neo4j records into "
-        f"{len(all_nodes)} unique nodes with {len(all_edges)} edges"
+        "Transformed %d Neo4j records into %d unique nodes with %d edges",
+        len(neo4j_results),
+        len(all_nodes),
+        len(all_edges)
     )
 
     return result
@@ -505,7 +555,7 @@ def handle_get_node_by_name(name, request):
         JSON response with node details and relationships
     """
     try:
-        if db_driver is None:
+        if _db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
 
         label = request.args.get("label", None)
@@ -517,7 +567,7 @@ def handle_get_node_by_name(name, request):
         if not label:
             return jsonify({"error": "Label required for node lookup"}), 400
 
-        logger.info(f"Fetching node: name='{name}', label={label}, hops={hops}")
+        logger.info("Fetching node: name='%s', label=%s, hops=%s", name, label, hops)
 
         builder = SafeQueryBuilder()
 
@@ -539,19 +589,19 @@ def handle_get_node_by_name(name, request):
                     limit=100,
                 )
         except QueryValidationError as e:
-            logger.warning(f"Validation error: {e}")
+            logger.warning("Validation error: %s", e)
             return jsonify({"error": str(e)}), 400
 
-        result = db_driver.run_safe_query(query, params)
+        result = _db_driver.run_safe_query(query, params)
 
         if result.success:
             if len(result.data) == 0:
-                logger.warning(f"Node not found: '{name}' (label={label})")
+                logger.warning("Node not found: '%s' (label=%s)", name, label)
                 return jsonify(
                     {"success": False, "error": f"Node '{name}' not found"}
                 ), 404
 
-            logger.info(f"Node found: '{name}', returning {len(result.data)} result(s)")
+            logger.info("Node found: '%s', returning %d result(s)", name, len(result.data))
 
             transformed_data = transform_neo4j_results_to_graph(result.data)
 
@@ -569,14 +619,21 @@ def handle_get_node_by_name(name, request):
                     "hops": hops,
                 }
             ), 200
-        else:
-            logger.error(f"Get node query failed: {result.error}")
-            return jsonify({"success": False, "error": result.error}), 500
+        logger.error("Get node query failed: %s", result.error)
+        return jsonify({"success": False, "error": result.error}), 500
 
     except ValueError as e:
-        logger.warning(f"Invalid hops parameter: {e}")
+        logger.warning("Invalid hops parameter: %s", e)
         return jsonify({"error": "Invalid hops parameter - must be integer"}), 400
-    except Exception as e:
-        logger.error(f"Get node error: {e}", exc_info=True)
-        return jsonify({"success": False, "error": "Internal server error"}), 500
 
+    except QueryValidationError as e:
+        logger.warning("Invalid parameters in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": str(e)}), 400
+
+    except Neo4jError as e:
+        logger.error("Database error in [HANDLER_NAME]: %s", e)
+        return jsonify({"error": "Database error"}), 500
+
+    except Exception as e:
+        logger.exception("Unexpected error in [HANDLER_NAME]")
+        return jsonify({"error": "Internal server error"}), 500
