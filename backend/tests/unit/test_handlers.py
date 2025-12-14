@@ -9,7 +9,7 @@ testing initialization logic.
 """
 
 import pytest
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 from src.driver import ResultWrapper
 from src.services.query_builder import QueryValidationError
 from src.api import handlers
@@ -24,8 +24,9 @@ class TestHandlerInitialization:
 
         handlers.init_handlers(mock_driver)
 
-        assert handlers.db_driver == mock_driver
-        assert handlers.autocomplete_service is not None
+        # Access private variables directly
+        assert handlers._db_driver == mock_driver
+        assert handlers._autocomplete_service is not None
 
     def test_init_handlers_with_autocomplete_service(self):
         """Test initializing handlers with both driver and autocomplete service."""
@@ -34,8 +35,9 @@ class TestHandlerInitialization:
 
         handlers.init_handlers(mock_driver, mock_autocomplete)
 
-        assert handlers.db_driver == mock_driver
-        assert handlers.autocomplete_service == mock_autocomplete
+        # Access private variables directly
+        assert handlers._db_driver == mock_driver
+        assert handlers._autocomplete_service == mock_autocomplete
 
 
 class TestHealthCheckHandler:
@@ -67,9 +69,10 @@ class TestHealthCheckHandler:
         assert data["status"] == "unhealthy"
         assert data["database"] == "disconnected"
 
-    def test_health_check_driver_not_initialized(self, client):
+    def test_health_check_driver_not_initialized(self, client, monkeypatch):
         """Test health check when driver is not initialized."""
-        handlers.db_driver = None
+        # Use monkeypatch to set the private variable to None
+        monkeypatch.setattr('src.api.handlers._db_driver', None)
 
         response = client.get("/api/health")
         assert response.status_code == 503
@@ -147,9 +150,9 @@ class TestGetStatsHandler:
         data = response.get_json()
         assert data["success"] is False
 
-    def test_get_stats_driver_not_initialized(self, client):
+    def test_get_stats_driver_not_initialized(self, client, monkeypatch):
         """Test stats when driver not initialized."""
-        handlers.db_driver = None
+        monkeypatch.setattr('src.api.handlers._db_driver', None)
 
         response = client.get("/api/stats")
         assert response.status_code == 503
@@ -236,9 +239,9 @@ class TestExecuteQueryHandler:
         data = response.get_json()
         assert data["success"] is False
 
-    def test_execute_query_driver_not_initialized(self, client):
+    def test_execute_query_driver_not_initialized(self, client, monkeypatch):
         """Test query execution when driver not initialized."""
-        handlers.db_driver = None
+        monkeypatch.setattr('src.api.handlers._db_driver', None)
 
         response = client.post(
             "/api/query",
@@ -252,7 +255,7 @@ class TestAutocompleteHandler:
 
     def test_autocomplete_success(self, client, mock_driver):
         """Test successful autocomplete."""
-        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+        handlers._autocomplete_service.suggest_node_names.return_value = ResultWrapper(
             success=True,
             data=[
                 {"name": "ShadowGroup", "label": "ThreatActor", "id": "1"},
@@ -283,10 +286,10 @@ class TestAutocompleteHandler:
 
     def test_autocomplete_with_fuzzy_fallback(self, client, mock_driver):
         """Test autocomplete falls back to fuzzy search."""
-        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+        handlers._autocomplete_service.suggest_node_names.return_value = ResultWrapper(
             success=True, data=[{"name": "Shadow", "label": "ThreatActor", "id": "1"}]
         )
-        handlers.autocomplete_service.fuzzy_search.return_value = ResultWrapper(
+        handlers._autocomplete_service.fuzzy_search.return_value = ResultWrapper(
             success=True,
             data=[
                 {"name": "DarkShadow", "label": "Campaign", "id": "2"},
@@ -302,22 +305,22 @@ class TestAutocompleteHandler:
 
     def test_autocomplete_with_label_filter(self, client, mock_driver):
         """Test autocomplete with label filter."""
-        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+        handlers._autocomplete_service.suggest_node_names.return_value = ResultWrapper(
             success=True, data=[{"name": "APT28", "label": "ThreatActor", "id": "1"}]
         )
         response = client.get("/api/autocomplete?q=APT&label=ThreatActor")
         assert response.status_code == 200
 
-    def test_autocomplete_service_not_available(self, client, mock_driver):
+    def test_autocomplete_service_not_available(self, client, monkeypatch):
         """Test autocomplete when service is not available."""
-        handlers.autocomplete_service = None
+        monkeypatch.setattr('src.api.handlers._autocomplete_service', None)
 
         response = client.get("/api/autocomplete?q=test")
         assert response.status_code == 503
 
     def test_autocomplete_service_error(self, client, mock_driver):
         """Test autocomplete when service returns error."""
-        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+        handlers._autocomplete_service.suggest_node_names.return_value = ResultWrapper(
             success=False, error="Database error"
         )
 
@@ -326,7 +329,7 @@ class TestAutocompleteHandler:
 
     def test_autocomplete_with_limit(self, client, mock_driver):
         """Test autocomplete with custom limit."""
-        handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+        handlers._autocomplete_service.suggest_node_names.return_value = ResultWrapper(
             success=True,
             data=[
                 {"name": f"Entity{i}", "label": "ThreatActor", "id": str(i)}
@@ -397,9 +400,9 @@ class TestGetNodesHandler:
         response = client.get("/api/nodes")
         assert response.status_code == 500
 
-    def test_get_nodes_driver_not_initialized(self, client):
+    def test_get_nodes_driver_not_initialized(self, client, monkeypatch):
         """Test node retrieval when driver not initialized."""
-        handlers.db_driver = None
+        monkeypatch.setattr('src.api.handlers._db_driver', None)
 
         response = client.get("/api/nodes")
         assert response.status_code == 503
@@ -470,9 +473,9 @@ class TestCreateNodeHandler:
         )
         assert response.status_code == 500
 
-    def test_create_node_driver_not_initialized(self, client):
+    def test_create_node_driver_not_initialized(self, client, monkeypatch):
         """Test node creation when driver not initialized."""
-        handlers.db_driver = None
+        monkeypatch.setattr('src.api.handlers._db_driver', None)
 
         response = client.post(
             "/api/nodes",
@@ -586,9 +589,9 @@ class TestGetNodeByNameHandler:
         response = client.get("/api/node/APT28?label=ThreatActor&hops=1")
         assert response.status_code == 500
 
-    def test_get_node_by_name_driver_not_initialized(self, client):
+    def test_get_node_by_name_driver_not_initialized(self, client, monkeypatch):
         """Test node retrieval when driver not initialized."""
-        handlers.db_driver = None
+        monkeypatch.setattr('src.api.handlers._db_driver', None)
 
         response = client.get("/api/node/APT28?label=ThreatActor&hops=1")
         assert response.status_code == 503
@@ -708,4 +711,3 @@ class TestTransformNeo4jResults:
         assert len(result) == 1
         assert len(result[0]["edges"]) == 2
         assert len(result[0]["nodes"]) >= 2
-

@@ -108,27 +108,43 @@ def db_driver(mock_neo4j_driver, mock_session):
 
 @pytest.fixture(scope="function")
 def mock_driver():
-    """Provide ONE mock_driver per test function."""
+    """Provide ONE mock_driver per test function.
+
+    This fixture creates a properly configured mock driver with sensible
+    defaults that return ResultWrapper objects with real data (not Mock objects).
+
+    The key fix here is that run_safe_query returns ResultWrapper with REAL
+    lists, not Mock objects, preventing "TypeError: 'Mock' object is not subscriptable".
+    """
     driver = Mock()
-    driver.run_safe_query = Mock()
-    driver.execute = Mock()
+
+    # Configure run_safe_query with a default that returns real data
+    # Individual tests can override this with side_effect or return_value
+    driver.run_safe_query.return_value = ResultWrapper(
+        success=True,
+        data=[]  # Real empty list, not Mock()
+    )
+
+    driver.execute = Mock(return_value=[])  # Real list
     driver.close = Mock()
 
     handlers.init_handlers(driver)
 
-    # Patch autocomplete service behaviour
-    handlers.autocomplete_service = Mock()
-    handlers.autocomplete_service.suggest_node_names.return_value = ResultWrapper(
+    # Patch autocomplete service with proper ResultWrapper responses
+    # Access the PRIVATE variable through the module
+    handlers._autocomplete_service = Mock()
+    handlers._autocomplete_service.suggest_node_names.return_value = ResultWrapper(
         success=True, data=[{"name": "Alpha"}, {"name": "Beta"}]
     )
-    handlers.autocomplete_service.fuzzy_search.return_value = ResultWrapper(
+    handlers._autocomplete_service.fuzzy_search.return_value = ResultWrapper(
         success=True, data=[]
     )
+
     yield driver
 
-    # Cleanup
-    handlers.db_driver = None
-    handlers.autocomplete_service = None
+    # Cleanup - reset private variables
+    handlers._db_driver = None
+    handlers._autocomplete_service = None
 
 
 # ==============================================================================

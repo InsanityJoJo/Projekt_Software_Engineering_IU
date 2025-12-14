@@ -1,4 +1,4 @@
-"""Unit tests for the SafeQueryBuilder class.
+""""Unit tests for the SafeQueryBuilder class.
 
 This module tests the query builder's ability to create safe,
 parameterized Cypher queries and prevent injection attacks.
@@ -157,7 +157,9 @@ class TestFindConnectedNodes:
             max_hops=1,
         )
 
-        assert "MATCH path = (start:ThreatActor {name: $start_value})" in query
+        # Changed: Now uses MATCH (start) and OPTIONAL MATCH path to support isolated nodes
+        assert "MATCH (start:ThreatActor {name: $start_value})" in query
+        assert "OPTIONAL MATCH path = (start)-[r*1..1]-(connected)" in query
         assert "[r*1..1]" in query
         assert params["start_value"] == "Alice"
 
@@ -198,19 +200,24 @@ class TestFindConnectedNodes:
                 max_hops=5,
             )
 
-        assert "max_hops must be between 1 and 3" in str(exc_info.value)
+        # Changed: Now supports hops=0, so error message is "0 and 3" instead of "1 and 3"
+        assert "max_hops must be between 0 and 3" in str(exc_info.value)
 
-    def test_reject_zero_hops(self):
-        """Test that zero hops are rejected."""
+    def test_accept_zero_hops(self):
+        """Test that zero hops are now accepted (for getting just the start node)."""
         builder = SafeQueryBuilder()
 
-        with pytest.raises(QueryValidationError):
-            builder.find_connected_nodes(
-                start_label="ThreatActor",
-                start_property="name",
-                start_value="Alice",
-                max_hops=0,
-            )
+        # Changed: hops=0 is now valid and should NOT raise an error
+        query, params = builder.find_connected_nodes(
+            start_label="ThreatActor",
+            start_property="name",
+            start_value="Alice",
+            max_hops=0,
+        )
+        
+        # Should return query with just the start node
+        assert "MATCH (start:ThreatActor {name: $start_value})" in query
+        assert params["start_value"] == "Alice"
 
 
 class TestGetNodeWithRelationships:
@@ -1523,8 +1530,9 @@ class TestGetNodeWithRelationshipsEnhanced:
             property_name="name", property_value="APT28", label="ThreatActor"
         )
 
-        assert "labels(n)[0] AS nodeLabel" in query
-        assert "elementId(n) AS nodeId" in query
+        # Changed: Now returns same format as find_connected_nodes
+        assert "n AS start" in query
+        assert "labels(n)[0] AS start_label" in query
         assert "labels(connected)[0]" in query
 
     def test_get_node_without_label(self):

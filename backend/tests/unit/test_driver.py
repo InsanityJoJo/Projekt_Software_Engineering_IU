@@ -306,7 +306,7 @@ class TestGraphDBDriverRunSafeQuery:
 
                 # run_safe_query() logs at DEBUG level
                 assert mock_debug_log.call_count == 1
-                assert "Safe query wrapper caught exception" in str(
+                assert "Safe query wrapper caught RuntimeError" in str(
                     mock_debug_log.call_args
                 )
 

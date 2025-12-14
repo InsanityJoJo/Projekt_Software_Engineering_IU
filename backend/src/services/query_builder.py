@@ -182,41 +182,66 @@ class SafeQueryBuilder:
         limit: Optional[int] = None,
     ) -> tuple[str, Dict[str, Any]]:
         """Build a query to find nodes connected to a starting node.
-
+        
+        Supports isolated nodes (nodes without connections) and hops=0 for 
+        retrieving just the start node without any relationships.
+        
         Args:
             start_label: Label of the starting node.
             start_property: Property to identify the starting node.
             start_value: Value to match the starting node.
             relationship_type: Optional specific relationship type.
-            max_hops: Maximum number of hops (1-3, default: 1).
+            max_hops: Maximum number of hops (0-3, default: 1).
+                      0 = only the start node, no relationships
+                      1-3 = start node + connected nodes up to N hops
             limit: Maximum results to return.
-
+        
         Returns:
             tuple: (query_string, parameters_dict)
-
+        
         Raises:
             QueryValidationError: If validation fails.
         """
         # Validate inputs
         start_label = self.validate_label(start_label)
         start_property = self.validate_property(start_property)
-
+        
         # Limit max hops to prevent resource exhaustion
-        if max_hops < 1 or max_hops > 3:
-            raise QueryValidationError("max_hops must be between 1 and 3")
-
-        # Build relationship pattern
+        # NOW SUPPORTS hops=0 for just the start node
+        if max_hops < 0 or max_hops > 3:
+            raise QueryValidationError("max_hops must be between 0 and 3")
+        
+        # Special case: hops=0 means just return the start node
+        if max_hops == 0:
+            query = f"""
+            MATCH (start:{start_label} {{{start_property}: $start_value}})
+            RETURN
+                start,
+                labels(start)[0] AS start_label,
+                null AS connected,
+                null AS connected_label,
+                [] AS relationship_details,
+                [start] AS pathNodes
+            LIMIT $limit
+            """
+            params = {"start_value": start_value, "limit": limit or self.max_results}
+            self.validate_query_safety(query)
+            return query, params
+        
+        # Build relationship pattern for hops >= 1
         if relationship_type:
             rel_type = self.validate_relationship(relationship_type)
             rel_pattern = f"[r:{rel_type}*1..{max_hops}]"
         else:
             rel_pattern = f"[r*1..{max_hops}]"
-
-        # Build query
+        
+        # Build query with OPTIONAL MATCH for nodes without connections
         query = f"""
-        MATCH path = (start:{start_label} {{{start_property}: $start_value}})
-                 -{rel_pattern}-(connected)
-        WITH start, connected, relationships(path) AS rels, nodes(path) AS pathNodes
+        MATCH (start:{start_label} {{{start_property}: $start_value}})
+        OPTIONAL MATCH path = (start)-{rel_pattern}-(connected)
+        WITH start, connected, 
+             CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS rels,
+             CASE WHEN path IS NULL THEN [start] ELSE nodes(path) END AS pathNodes
         RETURN
             start,
             labels(start)[0] AS start_label,
@@ -232,11 +257,12 @@ class SafeQueryBuilder:
             pathNodes
         LIMIT $limit
         """
-
+        
         params = {"start_value": start_value, "limit": limit or self.max_results}
-
+        
         self.validate_query_safety(query)
         return query, params
+
 
     def get_node_with_relationships(
         self,
@@ -313,12 +339,14 @@ class SafeQueryBuilder:
         else:
             rel_pattern = "[r]"
 
-        # Build RETURN clause based on metadata requirement
+       # Build RETURN clause based on metadata requirement
         if include_metadata:
             # Include Neo4j metadata for frontend display
-            return_clause = """n,
-                   labels(n)[0] AS nodeLabel,
-                   elementId(n) AS nodeId,
+            # CHANGED: Use same format as find_connected_nodes()
+            return_clause = """n AS start,
+                   labels(n)[0] AS start_label,
+                   null AS connected,
+                   null AS connected_label,
                    collect({
                        relationship: type(r),
                        node: connected,
@@ -329,10 +357,13 @@ class SafeQueryBuilder:
                          WHEN startNode(r) = n THEN 'outgoing'
                          ELSE 'incoming'
                        END
-                   }) AS connections"""
+                   }) AS connections,
+                   [] AS relationship_details,
+                   [n] AS pathNodes"""
         else:
             # Basic version without metadata
-            return_clause = """n,
+            return_clause = """n AS start,
+                   null AS connected,
                    collect({
                        relationship: r,
                        node: connected,
@@ -341,7 +372,9 @@ class SafeQueryBuilder:
                          WHEN startNode(r) = n THEN 'outgoing'
                          ELSE 'incoming'
                        END
-                   }) AS connections"""
+                   }) AS connections,
+                   [] AS relationship_details,
+                   [n] AS pathNodes"""        
 
         # Build complete query
         # OPTIONAL MATCH ensures we get the node even if it has no relationships
