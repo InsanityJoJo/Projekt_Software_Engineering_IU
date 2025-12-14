@@ -366,6 +366,14 @@
     });
     
     debugLog(`Merged: ${addedNodes} new nodes, ${addedEdges} new edges`);
+    
+    // Dispatch event if nodes were added (to update timeline)
+    if (addedNodes > 0) {
+      dispatch('graphChanged', {
+        action: 'nodesAdded',
+        count: addedNodes
+      });
+    }
   }
 
   /**
@@ -406,6 +414,12 @@
     // Re-run layout to adjust positions
     if (removedCount > 0) {
       runLayout(true);
+
+      // Dispatch event (to update timeline)
+      dispatch('graphChanged', {
+        action: 'nodesRemoved',
+        count: removedCount
+      });
     }
   }
 
@@ -434,8 +448,13 @@
     
     // Re-run layout
     runLayout(true);
+    
+    // Dispatch event (to update timeline)
+    dispatch('graphChanged', {
+      action: 'nodeDeleted',
+      nodeId: nodeId
+    });
   }
-
   /**
    * Run layout algorithm
    */

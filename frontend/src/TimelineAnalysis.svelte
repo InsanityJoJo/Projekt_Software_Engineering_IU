@@ -400,7 +400,7 @@
                 
                 const lines = [
                   `Type: ${data.nodeType}`,
-                  `Period: ${formatDate(data.startDate)} → ${formatDate(data.endDate)}`,
+                  `Period: ${formatDate(data.startDate)} â†’ ${formatDate(data.endDate)}`,
                   ''
                 ];
                 
@@ -419,11 +419,13 @@
             type: 'time',
             min: dateRange.min,
             max: dateRange.max,
+
             time: {
-              unit: 'month',
+              unit: 'quarter',
               displayFormats: {
-                month: 'MMM yyyy'
+                month: 'QQ yyyy'
               }
+
             },
             title: {
               display: true,
@@ -431,7 +433,11 @@
               color: textColor
             },
             ticks: {
-              color: textColor
+              color: textColor,
+
+	      font: {
+		  size: 16
+		}
             },
             grid: {
               color: 'rgba(231, 253, 240, 0.1)'
@@ -444,7 +450,10 @@
               color: textColor
             },
             ticks: {
-              color: textColor
+              color: textColor,
+	      font: {
+		  size: 16
+		}
             },
             grid: {
               color: 'rgba(231, 253, 240, 0.1)'
@@ -506,18 +515,39 @@
       .join(' ');
   }
   
+
   /**
    * Export timeline as image for reports
    * 
    * @returns {string} Base64 PNG image
    */
-  export function exportAsImage() {
-    if (chart) {
-      return chart.toBase64Image();
-    }
+export function exportAsImage(withBackground = false) {
+  if (!chart) {
     return null;
   }
   
+  if (!withBackground) {
+    // Normal: transparent
+    return chart.toBase64Image();
+  }
+  
+  // Report: with dark background
+  const canvas = chart.canvas;
+  const tempCanvas = document.createElement('canvas');
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  const ctx = tempCanvas.getContext('2d');
+  
+  // dark grey background
+  ctx.fillStyle = '#46484e';
+  ctx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+  
+  // Chart over background
+  ctx.drawImage(canvas, 0, 0);
+  
+  return tempCanvas.toDataURL('image/png', 1.0);
+}
+ 
   // ============================================
   // LIFECYCLE & REACTIVITY
   // ============================================

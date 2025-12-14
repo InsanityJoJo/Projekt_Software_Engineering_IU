@@ -378,10 +378,11 @@
 			debugLog('Generating report with config:', config);
 			
 			// Get timeline image if timeline is visible and included in config
+			// Use lightMode=true for report export (white background, black text)
 			let timelineImage = null;
 			if (showTimeline && timelineComponent && config.includeTimeline) {
-				timelineImage = timelineComponent.exportAsImage();
-				debugLog('Timeline image exported for report');
+				timelineImage = timelineComponent.exportAsImage(true);
+				debugLog('Timeline image exported for report (light mode)');
 			}
 			
 			// Get search parameters for the report
@@ -399,14 +400,59 @@
 	}
 
 	/**
+	 * Handle graph changes (nodes added/removed)
+	 * Updates timeline if it's visible
+	 * 
+	 * @param {CustomEvent} event - Event with action and details
+	 */
+	function handleGraphChanged(event) {
+		const { action, count, nodeId } = event.detail;
+		debugLog('Graph changed:', action, count || nodeId);
+		
+		// Update visible nodes
+		updateVisibleNodes();
+		
+		// If timeline is visible, it will automatically update via reactive statement
+		if (showTimeline) {
+			debugLog('Timeline will be updated automatically');
+		}
+	}
+
+	/**
 	 * Toggle time analysis view
 	 * 
 	 * Shows/hides temporal analysis of all visible nodes with date properties.
 	 * Displays timeline visualization of entity activity periods.
 	 */
 	function handleTimeAnalysis() {
-		showTimeline = !showTimeline;
-		debugLog('Timeline visibility toggled:', showTimeline);
+		// If timeline is currently visible, just hide it
+		if (showTimeline) {
+			showTimeline = false;
+			debugLog('Timeline hidden');
+			return;
+		}
+		
+		// Update visible nodes first to ensure we have latest data
+		updateVisibleNodes();
+		
+		// Check if any visible nodes have temporal data
+		const hasTemporalData = visibleNodes.some(node => {
+			const properties = node.data?.properties || {};
+			const temporalFields = [
+				'first_seen', 'last_seen', 'published_date',
+				'start_date', 'end_date', 'detection_date', 'resolved_date'
+			];
+			return temporalFields.some(field => properties[field]);
+		});
+		
+		if (hasTemporalData) {
+			showTimeline = true;
+			debugLog('Timeline visible - temporal data found');
+		} else {
+			// Timeline will show "No temporal data" message
+			showTimeline = true;
+			debugLog('Timeline visible - no temporal data (will show message)');
+		}
 	}
 	
 	/**
@@ -650,6 +696,7 @@
 				bind:this={graphViewComponent} 
 				node={selectedNode}
 				on:nodeSelected={handleGraphNodeSelected}
+				on:graphChanged={handleGraphChanged}
 			/>
 		</div>
 	{:else if showGraph && !selectedNode}
@@ -680,7 +727,7 @@
 	<!-- ============================================ -->
 	<footer class="footer">
 		<p>
-			<Copyright size={13} /> 2025 Johannes Liebscher â€” CTI Platform Version 0.21 Prototype
+			<Copyright size={13} /> 2025 Johannes Liebscher &mdash; CTI Platform Version 0.21 Prototype
 		</p>
 		<p>Impressum</p>
 	</footer>

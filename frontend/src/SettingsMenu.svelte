@@ -272,13 +272,18 @@
   .date-input-group label {
     font-size: 13px;
     font-weight: 500;
-    color: #64748b;
+    border-radius: 4px;
+    color: #131212;
+    background-color: #cbd5e1;
+
   }
   
   input[type="date"] {
     width: 100%;
     padding: 0px;
     border: 1px solid #cbd5e1;
+    color: #131212;
+    background-color: #cbd5e1;	  
     border-radius: 4px;
     font-size: 16px;
     font-family: inherit;

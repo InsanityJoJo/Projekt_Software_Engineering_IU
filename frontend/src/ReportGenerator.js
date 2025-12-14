@@ -332,7 +332,7 @@ function getReportStyles() {
     /* Graph Visualization */
     .graph-visualization {
       text-align: center;
-      background: #f8f9fa;
+      background: #46484e;
       padding: 2rem;
       border-radius: 8px;
       margin-top: 1rem;
@@ -785,7 +785,7 @@ function buildRelationshipItem(edge, nodes) {
         ${escapeHtml(targetName)}
       </div>
       <div class="relationship-nodes">
-        From: <strong>${escapeHtml(sourceName)}</strong> â†’ 
+        From: <strong>${escapeHtml(sourceName)}</strong> &rarr; 
         To: <strong>${escapeHtml(targetName)}</strong>
       </div>
     </div>
@@ -800,7 +800,7 @@ function buildFooter() {
     <footer class="report-footer">
       <p><strong>Threat Intelligence Platform</strong></p>
       <p>Generated automatically from graph data</p>
-      <p>Â© 2025 - For internal use only</p>
+      <p>&copy; 2025 - For internal use only</p>
     </footer>
   `;
 }
