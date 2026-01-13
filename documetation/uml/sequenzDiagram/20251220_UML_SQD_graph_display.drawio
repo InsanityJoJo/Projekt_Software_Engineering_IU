@@ -1,0 +1,656 @@
+<mxfile host="Electron" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) draw.io/28.2.5 Chrome/138.0.7204.251 Electron/37.6.1 Safari/537.36" version="28.2.5">
+  <diagram name="Page-1" id="BkvsTcgoVqJXShTr3Mbh">
+    <mxGraphModel dx="4610" dy="2408" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-1" value="Benutzer" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};participant=umlActor;verticalAlign=bottom;labelPosition=center;verticalLabelPosition=top;align=center;size=65;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="35" height="2030" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-2" value="App.svelte" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="240" y="20" width="150" height="2030" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-3" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-2">
+          <mxGeometry x="70" y="180" width="10" height="1750" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-69" value="selectedNode = result.data[0]" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="Rl3KIcMCa2HAWkFzbtAz-2" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="1520" />
+              <mxPoint x="120" y="1540" />
+            </Array>
+            <mxPoint x="80" y="1570" as="sourcePoint" />
+            <mxPoint x="80" y="1600" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-70" value="showGraph = true" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="Rl3KIcMCa2HAWkFzbtAz-2" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry y="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="1550" />
+              <mxPoint x="120" y="1570" />
+            </Array>
+            <mxPoint x="80" y="1620" as="sourcePoint" />
+            <mxPoint x="80" y="1650" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-71" value="isLoading = false" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="Rl3KIcMCa2HAWkFzbtAz-2" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry y="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="1580" />
+              <mxPoint x="120" y="1600" />
+            </Array>
+            <mxPoint x="80" y="1670" as="sourcePoint" />
+            <mxPoint x="80" y="1700" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-4" value="GraphView.svelte" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="480" y="20" width="150" height="2030" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-5" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-4">
+          <mxGeometry x="70" y="1610" width="10" height="310" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-6" value="api.js" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="720" y="10" width="150" height="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-7" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-6">
+          <mxGeometry x="70" y="360" width="10" height="1160" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-32" value="hops = 1 (aus stores)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="Rl3KIcMCa2HAWkFzbtAz-6" source="Rl3KIcMCa2HAWkFzbtAz-7" target="Rl3KIcMCa2HAWkFzbtAz-7">
+          <mxGeometry x="-0.0769" y="60" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="120" y="420" />
+              <mxPoint x="120" y="450" />
+            </Array>
+            <mxPoint x="90" y="477.00000000000045" as="sourcePoint" />
+            <mxPoint x="90" y="507.00000000000045" as="targetPoint" />
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-8" value="inputValidation.js" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="940" y="10" width="150" height="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-9" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-8">
+          <mxGeometry x="70" y="500" width="10" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-10" value="stores.js" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="1126" y="10" width="150" height="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-11" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-10">
+          <mxGeometry x="70" y="370" width="10" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-12" value="routes.py" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="1300" y="10" width="150" height="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-13" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-12">
+          <mxGeometry x="70" y="560" width="10" height="950" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-14" value="handlers.py" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="1654" y="10" width="150" height="2040" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-15" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-14">
+          <mxGeometry x="70" y="570" width="10" height="930" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-16" value="SafeQueryBuilder" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="1970" width="153" height="2050" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-17" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-16">
+          <mxGeometry x="71" y="1807" width="10" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-18" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-16">
+          <mxGeometry x="71.5" y="780" width="10" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-19" value="GraphDBDriver" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="2140" width="150" height="2050" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-20" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-19">
+          <mxGeometry x="70" y="980" width="10" height="280" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-21" value="Neo4j Database" style="shape=umlLifeline;perimeter=lifelinePerimeter;whiteSpace=wrap;container=1;dropTarget=0;collapsible=0;recursiveResize=0;outlineConnect=0;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0};size=65;" vertex="1" parent="1">
+          <mxGeometry x="2530" y="20" width="150" height="2030" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-22" value="" style="points=[];perimeter=orthogonalPerimeter;outlineConnect=0;targetShapes=umlLifeline;portConstraint=eastwest;newEdgeStyle={&quot;edgeStyle&quot;:&quot;elbowEdgeStyle&quot;,&quot;elbow&quot;:&quot;vertical&quot;,&quot;curved&quot;:0,&quot;rounded&quot;:0}" vertex="1" parent="Rl3KIcMCa2HAWkFzbtAz-21">
+          <mxGeometry x="70" y="1020" width="10" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-23" value="Klickt auf &quot;Threat-Group-Alpha&quot; (ThreatActor)" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="308" y="200" />
+            </Array>
+            <mxPoint x="37" y="200" as="sourcePoint" />
+            <mxPoint x="310" y="200" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-24" value="handleSuggestionSelect(suggestion)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry x="-0.0909" y="100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="210" />
+              <mxPoint x="360" y="240" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-25" value="query = &quot;Threat-Group-Alpha&quot;" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry x="-0.0909" y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="250" />
+              <mxPoint x="360" y="280" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-26" value="showSuggestions = false" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry x="-0.0909" y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="290" />
+              <mxPoint x="360" y="320" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-27" value="isLoading = true" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry x="-0.0909" y="50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="360" y="330" />
+              <mxPoint x="360" y="360" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-28" value="getNodeByName(name=&quot;Threat-Group-Alpha&quot;,&#xa;label=&quot;ThreatActor&quot;,&#xa;hops=null)" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-7">
+          <mxGeometry x="-0.0417" y="-50" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="480" y="370" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-29" value="Liest contextDepth" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-7" target="Rl3KIcMCa2HAWkFzbtAz-11">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1150" y="380" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-30" value="localStorage.getItem(&quot;contextDepth&quot;)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-11" target="Rl3KIcMCa2HAWkFzbtAz-11">
+          <mxGeometry y="100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1240" y="390" />
+              <mxPoint x="1240" y="410" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-31" value="contextDepth = 1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-10" target="Rl3KIcMCa2HAWkFzbtAz-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="970" y="420" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-33" value="Validiert hops (0-3)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-7" target="Rl3KIcMCa2HAWkFzbtAz-7">
+          <mxGeometry y="64" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="840" y="470" />
+              <mxPoint x="840" y="500" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-34" value="sanitizeInput(&quot;Threat-Group-Alpha&quot;)" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-7" target="Rl3KIcMCa2HAWkFzbtAz-9">
+          <mxGeometry x="0.4501" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="900" y="510" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-35" value="normalize(NFKC), trim(), toLowerCase()" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-9" target="Rl3KIcMCa2HAWkFzbtAz-9">
+          <mxGeometry x="0.0909" y="100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1060" y="520" />
+              <mxPoint x="1060" y="550" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-36" value="&quot;threat-group-alpha&quot;" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-8" target="Rl3KIcMCa2HAWkFzbtAz-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="870" y="560" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-37" value="HTTP GET /api/node/threat-group-alpha&#xa;?label=ThreatActor&amp;hops=1" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-7" target="Rl3KIcMCa2HAWkFzbtAz-13">
+          <mxGeometry x="-0.2727" y="-30" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1050" y="570" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-38" value="handle_get_node_by_name(name=&quot;threat-group-alpha&quot;, request)" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-13" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1500" y="580" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-39" value="label = request.args.get(&quot;label&quot;)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1780" y="590" />
+              <mxPoint x="1780" y="620" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-40" value="hops = int(request.args.get(&quot;hops&quot;, 1))" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry x="-0.082" y="100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1780" y="630" />
+              <mxPoint x="1780" y="660" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-41" value="Validiert: hops &gt;= 0 and hops &lt;= 3" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry x="-0.082" y="90" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1780" y="670" />
+              <mxPoint x="1780" y="700" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-42" value="Validiert: label ist nicht None" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry x="-0.082" y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1780" y="710" />
+              <mxPoint x="1780" y="740" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-43" value="Erstellt neue Instanz" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-16">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1790" y="750" />
+            </Array>
+            <mxPoint x="3190" y="1100" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-44" value="find_connected_nodes(&#xa;start_label=&quot;ThreatActor&quot;,&#xa;start_property=&quot;name&quot;,&#xa;start_value=&quot;threat-group-alpha&quot;,&#xa;relationship_type=None,&#xa;max_hops=1,&#xa;limit=100)" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-18">
+          <mxGeometry x="0.0146" y="-100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1970" y="780" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-45" value="validate_label(&quot;ThreatActor&quot;)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-18" target="Rl3KIcMCa2HAWkFzbtAz-18">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2090" y="790" />
+              <mxPoint x="2090" y="820" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-46" value="validate_property(&quot;name&quot;)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-18" target="Rl3KIcMCa2HAWkFzbtAz-18">
+          <mxGeometry x="-0.0935" y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2090" y="830" />
+              <mxPoint x="2090" y="860" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-47" value="Prüft max_hops (0-3)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-18" target="Rl3KIcMCa2HAWkFzbtAz-18">
+          <mxGeometry x="-0.0935" y="60" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2090" y="870" />
+              <mxPoint x="2090" y="900" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-48" value="Baut Graph-Traversal Query" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-18" target="Rl3KIcMCa2HAWkFzbtAz-18">
+          <mxGeometry x="-0.0935" y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2090" y="910" />
+              <mxPoint x="2090" y="940" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-49" value="(query_string, {start_value: &quot;threat-group-alpha&quot;, limit: 100})" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-16" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1880" y="960" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-50" value="run_safe_query(query, params)" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-20">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1880" y="980" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-51" value="execute(query, parameters, write=False)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-20" target="Rl3KIcMCa2HAWkFzbtAz-20">
+          <mxGeometry x="-0.0667" y="110" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2260" y="1000" />
+              <mxPoint x="2260" y="1030" />
+            </Array>
+            <mxPoint y="1" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-52" value="Cypher Graph-Traversal Query via Bolt" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-20" target="Rl3KIcMCa2HAWkFzbtAz-22">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2320" y="1040" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-53" value="Findet Start-Node: &#xa;Threat-Group-Alpha (ThreatActor)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-22" target="Rl3KIcMCa2HAWkFzbtAz-22">
+          <mxGeometry x="-0.0909" y="90" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2650" y="1090" />
+              <mxPoint x="2650" y="1120" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-54" value="Traversiert ausgehende&#xa; Beziehungen (max 1 Hop)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-22" target="Rl3KIcMCa2HAWkFzbtAz-22">
+          <mxGeometry x="-0.0909" y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2650" y="1050" />
+              <mxPoint x="2650" y="1080" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-55" value="Ergebnisse:&#xa;[&#xa;  {&#xa;    &quot;start&quot;: {name: &quot;Threat-Group-Alpha&quot;, type: &quot;ThreatActor&quot;, ...},&#xa;    &quot;start_label&quot;: &quot;ThreatActor&quot;,&#xa;    &quot;connected&quot;: {name: &quot;Malware-Tool-X&quot;, type: &quot;Malware&quot;, ...},&#xa;    &quot;connected_label&quot;: &quot;Malware&quot;,&#xa;    &quot;relationship_details&quot;: [{type: &quot;USES&quot;, start_node: {...}, end_node: {...}}],&#xa;    &quot;pathNodes&quot;: [...]&#xa;  },&#xa;  {...weitere Pfade...}&#xa;]" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-21" target="Rl3KIcMCa2HAWkFzbtAz-20">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2380" y="1210" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-56" value="Erstellt ResultWrapper(success=True, data=neo4j_results)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-20" target="Rl3KIcMCa2HAWkFzbtAz-20">
+          <mxGeometry x="0.0909" y="150" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2260" y="1220" />
+              <mxPoint x="2260" y="1250" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-57" value="ResultWrapper(success=True, data=[...])" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-19" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="2030" y="1260" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-58" value="transform_neo4j_results_to_graph(result.data)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="120" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1270" />
+              <mxPoint x="1770" y="1290" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-59" value="Erstellt all_nodes Dictionary" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1300" />
+              <mxPoint x="1770" y="1320" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-60" value="all_nodes[&quot;Threat-Group-Alpha&quot;] = {id: &quot;Threat-Group-Alpha&quot;,&#xa;  data: {name: &quot;...&quot;, label: &quot;ThreatActor&quot;, ...}, isMainNode: true }" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="160" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1330" />
+              <mxPoint x="1770" y="1350" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-61" value="all_nodes[&quot;Malware-Tool-X&quot;] = {id: &quot;Malware-Tool-X&quot;,&#xa;  data: {name: &quot;...&quot;, label: &quot;Malware&quot;, ...}, isMainNode: false}" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="150" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1360" />
+              <mxPoint x="1770" y="1380" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-62" value="Erstellt all_edges Array" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1390" />
+              <mxPoint x="1770" y="1410" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-63" value="all_edges.append({id: &quot;Threat-Group-Alpha-USES-Malware-Tool-X&quot;,&#xa;  source: &quot;Threat-Group-Alpha&quot;, target: &quot;Malware-Tool-X&quot;, relationship: &quot;USES&quot; })" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="210" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1420" />
+              <mxPoint x="1770" y="1440" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-64" value="Erstellt connections Array" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1450" />
+              <mxPoint x="1770" y="1470" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-65" value="Baut finales Ergebnis-Objekt" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-15" target="Rl3KIcMCa2HAWkFzbtAz-15">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1770" y="1480" />
+              <mxPoint x="1770" y="1500" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-66" value="JSON Response&#xa;{&#xa;  success: true,&#xa;  data: [{n: {...}, connections: [...], nodes: [...], edges: [...]}],&#xa;  count: 4,&#xa;  hops: 1&#xa;}" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-14" target="Rl3KIcMCa2HAWkFzbtAz-13">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1510" y="1510" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-67" value="HTTP 200 OK + JSON Body" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-12" target="Rl3KIcMCa2HAWkFzbtAz-7">
+          <mxGeometry x="-0.002" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1030" y="1520" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-68" value="{success: true, data: [...], count: 4, hops: 1}" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;dashed=1;dashPattern=2 3;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-7" target="Rl3KIcMCa2HAWkFzbtAz-3">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="490" y="1530" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-72" value="Rendert &lt;GraphView node={selectedNode} /&gt;" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-3" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry x="0.0435" y="-20" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="380" y="1630" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-73" value="initGraph()" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="30" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1640" />
+              <mxPoint x="600" y="1660" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-74" value="Initialisiert Cytoscape.js" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="60" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1670" />
+              <mxPoint x="600" y="1690" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-75" value="renderGraph(selectedNode)" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1700" />
+              <mxPoint x="600" y="1720" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-76" value="Iteriert über nodes-Array" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1730" />
+              <mxPoint x="600" y="1750" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-77" value="Für jeden Node: createNodeStyleData()" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1760" />
+              <mxPoint x="600" y="1780" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-78" value="cy.add({ data: {id, label, ...}, style: {...} })" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="100" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1790" />
+              <mxPoint x="600" y="1810" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-79" value="Iteriert über edges-Array" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1820" />
+              <mxPoint x="600" y="1840" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-80" value="cy.add({ data: {id, source, target, label} })" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="110" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1850" />
+              <mxPoint x="600" y="1870" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-81" value="cy.layout({name: &#39;cose&#39;}).run()" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="80" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1880" />
+              <mxPoint x="600" y="1900" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-82" value="Registriert Event-Listener" style="curved=1;endArrow=block;rounded=0;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-5">
+          <mxGeometry y="70" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="600" y="1910" />
+              <mxPoint x="600" y="1930" />
+            </Array>
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-83" value="Zeigt interaktiven Graph" style="verticalAlign=bottom;edgeStyle=elbowEdgeStyle;elbow=vertical;curved=0;rounded=0;endArrow=block;" edge="1" parent="1" source="Rl3KIcMCa2HAWkFzbtAz-5" target="Rl3KIcMCa2HAWkFzbtAz-1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="210" y="1940" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-84" value="Ausgangssituation:&#xa;Autocomplete-Dropdown mit 3 Vorschlägen ist sichtbar" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="70" y="95" width="2630" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-85" value="Setzt Query-Input auf gewählten Namen&#xa;und schließt Dropdown" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="508" y="280" width="222" height="31" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-86" value="User hatte zuvor 1 Hop&#xa;in Settings gesetzt" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="420" width="193" height="64" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-87" value="Prüft gegen ALLOWED_LABELS&#xa;aus constants.py" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2270" y="780" width="190" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-88" value="Prüft gegen ALLOWED_PROPERTIES" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2260" y="830" width="210" height="20" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-89" value="MATCH path = (start:ThreatActor {name: $start_value})&#xa;              -[r*0..1]-(connected)&#xa;RETURN&#xa;  start,&#xa;  labels(start)[0] AS start_label,&#xa;  connected,&#xa;  labels(connected)[0] AS connected_label,&#xa;  [rel in relationships(path) |&#xa;    {type: type(rel),&#xa;     start_node: startNode(rel),&#xa;     end_node: endNode(rel),&#xa;     start_node_label: labels(startNode(rel))[0],&#xa;     end_node_label: labels(endNode(rel))[0]}]&#xa;  AS relationship_details,&#xa;  [node in nodes(path) | node] AS pathNodes&#xa;LIMIT $limit" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2490" y="780" width="300" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-90" value="Findet verbundene Nodes:&#xa;- Threat-Group-Alpha -[USES]-&gt; Malware-Tool-X&#xa;- Threat-Group-Alpha -[ATTRIBUTED_TO]-&gt; Campaign-2024&#xa;- Threat-Group-Alpha -[TARGETS]-&gt; Government-Sector" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2620" y="1140" width="330" height="61" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-91" value="Transformiert Neo4j-Struktur&#xa;in Frontend-kompatibles Format" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2026.5" y="1270" width="180" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-92" value="all_nodes = {}&#xa;Iteriert über Neo4j-Ergebnisse:&#xa;- Extrahiert Start-Node&#xa;- Extrahiert Connected-Nodes&#xa;- Markiert Main-Node&#xa;- Verhindert Duplikate" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2100" y="1310" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-93" value="all_edges = []&#xa;Iteriert über relationship_details:&#xa;- Extrahiert source, target, type&#xa;- Erstellt eindeutige edge_id&#xa;- Verhindert Duplikate" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="2180" y="1410" width="172" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-94" value="connections = []&#xa;Für jede Edge:&#xa;- Findet target_node&#xa;- Erstellt connection-Objekt&#xa;mit relationship und node" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="1960" y="1450" width="157" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-95" value="result = [{&#xa;  &quot;n&quot;: main_node.data,&#xa;  &quot;connections&quot;: connections,&#xa;  &quot;nodes&quot;: list(all_nodes.values()),&#xa;  &quot;edges&quot;: all_edges&#xa;}]" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="1780" y="1510" width="170" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-96" value="Übergibt Node-Daten via Props:&#xa;- n: Main-Node-Daten&#xa;- connections: Beziehungen&#xa;- nodes: Alle Nodes für Cytoscape&#xa;- edges: Alle Edges für Cytoscape" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="330" y="1650" width="191" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-97" value="cy = cytoscape({&#xa;  container: containerElement,&#xa;  style: [...],&#xa;  layout: { name: &#39;cose&#39; }&#xa;})" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="740" y="1610" width="151" height="77" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-99" value="Fügt Nodes zu Cytoscape hinzu:&#xa;- Threat-Group-Alpha (80px, bold, border)&#xa;- Malware-Tool-X (60px, normal)&#xa;- Campaign-2024 (60px, normal)&#xa;- Government-Sector (60px, normal)" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="827" y="1730" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-100" value="Fügt Edges zu Cytoscape hinzu:&#xa;- USES (Threat → Malware)&#xa;- ATTRIBUTED_TO (Threat → Campaign)&#xa;- TARGETS (Threat → Sector)" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="827" y="1820" width="235" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-102" value="cy.on(&#39;tap&#39;, &#39;node&#39;, handleNodeClick)&#xa;cy.on(&#39;cxttap&#39;, &#39;node&#39;, handleContextMenu)" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="826" y="1900" width="231" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="Rl3KIcMCa2HAWkFzbtAz-103" value="Graph-Darstellung abgeschlossen:&#xa;1. Node-Details geladen (1 Hop)&#xa;2. Graph-Traversal in Neo4j&#xa;3. Daten transformiert (Neo4j → Frontend)&#xa;4. Cytoscape.js rendert interaktiven Graph&#xa;5. User kann mit Graph interagieren" style="fillColor=#ffff88;strokeColor=#9E916F;" vertex="1" parent="1">
+          <mxGeometry x="20" y="1950" width="2630" height="90" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
