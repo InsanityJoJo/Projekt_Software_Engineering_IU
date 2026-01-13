@@ -258,12 +258,12 @@ def handle_get_nodes(request):
     except Exception as e:
         logger.exception("Unexpected error in [HANDLER_NAME]")
         return jsonify({"error": "Internal server error"}), 500
-
+"""
 def handle_create_node(request):
-    """Handle create node request.
+    #Handle create node request.
 
-    IMPORTANT: Should be restricted to authenticated admin users!
-    """
+    #IMPORTANT: Should be restricted to authenticated admin users!
+    
     try:
         if _db_driver is None:
             return jsonify({"error": "Database not initialized"}), 503
@@ -320,7 +320,7 @@ def handle_create_node(request):
     except Exception as e:
         logger.exception("Unexpected error in [HANDLER_NAME]")
         return jsonify({"error": "Internal server error"}), 500
-
+"""
 def transform_neo4j_results_to_graph(neo4j_results):
     """Transform Neo4j path results to graph format with full path preservation.
 

@@ -408,88 +408,11 @@ class TestGetNodesHandler:
         assert response.status_code == 503
 
 
-class TestCreateNodeHandler:
-    """Test node creation endpoint handler."""
-
-    def test_create_node_success(self, client, mock_driver):
-        """Test successful node creation."""
-        mock_driver.run_safe_query.return_value = ResultWrapper(
-            success=True, data=[{"name": "NewActor"}]
-        )
-
-        response = client.post(
-            "/api/nodes",
-            json={
-                "label": "ThreatActor",
-                "properties": {"name": "NewActor", "type": "APT"},
-            },
-        )
-        assert response.status_code == 201
-
-        data = response.get_json()
-        assert data["success"] is True
-
-    def test_create_node_missing_label(self, client, mock_driver):
-        """Test node creation without label."""
-        response = client.post("/api/nodes", json={"properties": {"name": "Test"}})
-        assert response.status_code == 400
-
-        data = response.get_json()
-        assert "label" in data["error"].lower()
-
-    def test_create_node_validation_error(self, client, mock_driver):
-        """Test node creation with invalid label."""
-        mock_driver.run_safe_query.side_effect = QueryValidationError("Invalid label")
-
-        response = client.post(
-            "/api/nodes",
-            json={"label": "InvalidLabel", "properties": {}},
-        )
-        assert response.status_code == 400
-
-    def test_create_node_empty_body(self, client, mock_driver):
-        """Test node creation with empty body."""
-        response = client.post("/api/nodes", json=None)
-        assert response.status_code == 400
-
-    def test_create_node_invalid_json(self, client, mock_driver):
-        """Test node creation with invalid JSON."""
-        response = client.post(
-            "/api/nodes",
-            data="invalid json",
-            content_type="application/json",
-        )
-        assert response.status_code == 400
-
-    def test_create_node_query_failed(self, client, mock_driver):
-        """Test node creation when query fails."""
-        mock_driver.run_safe_query.return_value = ResultWrapper(
-            success=False, error="Creation failed"
-        )
-
-        response = client.post(
-            "/api/nodes",
-            json={"label": "ThreatActor", "properties": {"name": "Test"}},
-        )
-        assert response.status_code == 500
-
-    def test_create_node_driver_not_initialized(self, client, monkeypatch):
-        """Test node creation when driver not initialized."""
-        monkeypatch.setattr('src.api.handlers._db_driver', None)
-
-        response = client.post(
-            "/api/nodes",
-            json={"label": "ThreatActor", "properties": {"name": "Test"}},
-        )
-        assert response.status_code == 503
-
-
 class TestGetNodeByNameHandler:
     """Test get node by name endpoint handler."""
 
     def test_get_node_by_name_success(self, client, mock_driver):
         """Test successful node retrieval by name."""
-        # FIX: Mock data must match the expected structure from query builder
         mock_driver.run_safe_query.return_value = ResultWrapper(
             success=True,
             data=[
