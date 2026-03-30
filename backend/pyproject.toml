@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-testpaths = ["tests/unit","tests/integration"]
+testpaths = ["tests/unit"]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
@@ -7,6 +7,10 @@ addopts = [
     "-v",
     "--tb=short",
     "--strict-markers",
+]
+markers = [
+    "integration: Integrationstests gegen echte Neo4j-Instanz (erfordern docker-compose.test.yml)",
+    "unit: Unit-Tests mit Mocks",
 ]
 log_cli = true
 log_cli_level = "INFO"
@@ -33,13 +37,13 @@ exclude_lines = [
 ]
 
 [tool.coverage.html]
-directory = "tests/cov/html"  # HTML reports
+directory = "tests/cov/html"
 
 [tool.coverage.xml]
-output = "tests/cov/coverage.xml"  # XML reports
+output = "tests/cov/coverage.xml"
 
 [tool.coverage.json]
-output = "tests/cov/coverage.json"  # JSON reports
+output = "tests/cov/coverage.json"
 
 [build-system]
 requires = ["setuptools>=45", "wheel"]
@@ -64,9 +68,3 @@ dev = [
     "pytest-cov>=4.1.0",
     "pylint>=4.0.4",
 ]
-
-
-
-
-
-
