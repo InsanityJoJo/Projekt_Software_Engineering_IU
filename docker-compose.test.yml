@@ -1,0 +1,53 @@
+services:
+  neo4j-test:
+    image: neo4j:5.15.0
+    container_name: neo4j_test
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    environment:
+      - NEO4J_AUTH=neo4j/testpassword
+      - NEO4J_server_memory_pagecache_size=256M
+      - NEO4J_server_memory_heap_initial__size=256M
+      - NEO4J_server_memory_heap_max__size=512M
+    healthcheck:
+      test: ["CMD-SHELL", "cypher-shell -u neo4j -p testpassword 'RETURN 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    volumes:
+      - neo4j_test_data:/data
+      - neo4j_test_logs:/logs
+    networks:
+      - test_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: python_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env.test
+    volumes:
+      - ./backend/src:/app/src
+      - ./backend/tests:/app/tests
+      - ./backend/data:/app/data
+      - ./backend/scripts:/app/scripts
+      - backend_logs:/app/logs
+    depends_on:
+      neo4j-test:
+        condition: service_healthy
+    networks:
+      - test_network
+    command: sh -c "sleep infinity"
+
+networks:
+  test_network:
+    driver: bridge
+
+volumes:
+  neo4j_test_data:
+  neo4j_test_logs:
+  backend_logs:
