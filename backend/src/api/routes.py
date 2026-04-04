@@ -44,10 +44,10 @@ def get_nodes():
     return handlers.handle_get_nodes(request)
 
 
-@api_bp.route("/nodes", methods=["POST"])
-def create_node():
-    """Create a new node."""
-    return handlers.handle_create_node(request)
+# @api_bp.route("/nodes", methods=["POST"])
+# def create_node():
+#     """Create a new node."""
+#     return handlers.handle_create_node(request)
 
 
 @api_bp.route("/node/<string:name>", methods=["GET"])

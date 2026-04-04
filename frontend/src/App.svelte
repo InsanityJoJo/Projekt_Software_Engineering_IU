@@ -18,7 +18,7 @@
 	// ============================================
 	// DEBUG CONFIGURATION
 	// ============================================
-	const DEBUG = true;
+	const DEBUG = false;
 	
 	/**
 	 * Debug logging wrapper

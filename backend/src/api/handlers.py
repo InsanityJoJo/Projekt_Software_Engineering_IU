@@ -12,7 +12,7 @@ from src.logger import setup_logger
 from src.services.autocomplete_service import AutocompleteService
 from src.services.query_builder import QueryValidationError, SafeQueryBuilder
 
-logger = setup_logger("Handlers", 10)
+logger = setup_logger("Handlers")
 
 _db_driver = None
 _autocomplete_service = None

@@ -4,173 +4,15 @@ cachedir: .pytest_cache
 rootdir: /app
 configfile: pyproject.toml
 plugins: cov-7.1.0, flask-1.3.0
-[1mcollecting ... [0mcollected 27 items
+[1mcollecting ... [0mcollected 18 items
 
-tests/integration/test_data_import_cli_neo4j.py::TestAdminQueryBuilderIntegration::test_import_scenario [32mPASSED[0m[32m [  3%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_complete_import_workflow 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpmkkq9g9z.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (969 bytes)
-[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
-[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
-[32mINFO    [0m ImportService:import_service.py:482 Validating 4 nodes...
-[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
-[32mINFO    [0m ImportService:import_service.py:510 Validating 3 relationships...
-[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
-[32mINFO    [0m ImportService:import_service.py:545 ============================================================
-[32mINFO    [0m ImportService:import_service.py:546 Starting import...
-[32mINFO    [0m ImportService:import_service.py:547 ============================================================
-[32mINFO    [0m ImportService:import_service.py:357 Importing 4 nodes...
-[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 2 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Campaign: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:377 Imported 4 nodes total across 3 labels
-[32mINFO    [0m ImportService:import_service.py:401 Importing 3 relationships...
-[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 2 relationships
-[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[LAUNCHED]->(ThreatActor): 1 relationships
-[32mINFO    [0m ImportService:import_service.py:429 Imported 3 relationships total across 2 patterns
-[32mINFO    [0m ImportService:import_service.py:587 ============================================================
-[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
-[32mINFO    [0m ImportService:import_service.py:589   Nodes: 4
-[32mINFO    [0m ImportService:import_service.py:590   Relationships: 3
-[32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mPASSED[0m[32m                                                                   [  7%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_large_batch_import 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmppwco8qr1.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (2934 bytes)
-[32mINFO    [0m ImportService:import_service.py:545 ============================================================
-[32mINFO    [0m ImportService:import_service.py:546 Starting import...
-[32mINFO    [0m ImportService:import_service.py:547 ============================================================
-[32mINFO    [0m ImportService:import_service.py:357 Importing 50 nodes...
-[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 20 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Malware: 15 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Tool: 15 nodes
-[32mINFO    [0m ImportService:import_service.py:377 Imported 50 nodes total across 3 labels
-[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
-[32mINFO    [0m ImportService:import_service.py:587 ============================================================
-[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
-[32mINFO    [0m ImportService:import_service.py:589   Nodes: 50
-[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
-[32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mPASSED[0m[32m                                                                   [ 11%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_with_mixed_valid_invalid_data 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpksxglo_i.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (239 bytes)
-[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
-[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
-[32mINFO    [0m ImportService:import_service.py:482 Validating 3 nodes...
-[1m[31mERROR   [0m ImportService:import_service.py:488 Node validation failed with 1 errors
-[1m[31mERROR   [0m ImportService:import_service.py:493   - Node 1: Label 'InvalidLabel' is not allowed. Allowed labels: Identity, ThreatActor, Vulnerability, Observable, EmailAddr, AttackPattern, IPv4Address, Tool, Campaign, Report, File, Incident, Malware, Organization, URL, Indicator, DomainName
-[32mPASSED[0m[32m                                                                   [ 14%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_performance_with_many_labels 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpkm4xgtpj.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (3224 bytes)
-[32mINFO    [0m ImportService:import_service.py:545 ============================================================
-[32mINFO    [0m ImportService:import_service.py:546 Starting import...
-[32mINFO    [0m ImportService:import_service.py:547 ============================================================
-[32mINFO    [0m ImportService:import_service.py:357 Importing 50 nodes...
-[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Malware: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Tool: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Campaign: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  AttackPattern: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Indicator: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Organization: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Vulnerability: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Report: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Incident: 5 nodes
-[32mINFO    [0m ImportService:import_service.py:377 Imported 50 nodes total across 10 labels
-[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
-[32mINFO    [0m ImportService:import_service.py:587 ============================================================
-[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
-[32mINFO    [0m ImportService:import_service.py:589   Nodes: 50
-[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
-[32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mPASSED[0m[32m                                                                   [ 18%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_with_complex_relationship_patterns 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpltcmkt0p.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (956 bytes)
-[32mINFO    [0m ImportService:import_service.py:545 ============================================================
-[32mINFO    [0m ImportService:import_service.py:546 Starting import...
-[32mINFO    [0m ImportService:import_service.py:547 ============================================================
-[32mINFO    [0m ImportService:import_service.py:357 Importing 4 nodes...
-[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Campaign: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Organization: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:377 Imported 4 nodes total across 4 labels
-[32mINFO    [0m ImportService:import_service.py:401 Importing 4 relationships...
-[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
-[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[LAUNCHED]->(ThreatActor): 1 relationships
-[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[TARGETS]->(Organization): 1 relationships
-[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[INVOLVES]->(Malware): 1 relationships
-[32mINFO    [0m ImportService:import_service.py:429 Imported 4 relationships total across 4 patterns
-[32mINFO    [0m ImportService:import_service.py:587 ============================================================
-[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
-[32mINFO    [0m ImportService:import_service.py:589   Nodes: 4
-[32mINFO    [0m ImportService:import_service.py:590   Relationships: 4
-[32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mPASSED[0m[32m                                                                   [ 22%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_dry_run_does_not_modify_database 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpvx56c9mk.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (123 bytes)
-[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
-[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
-[32mINFO    [0m ImportService:import_service.py:482 Validating 1 nodes...
-[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
-[32mINFO    [0m ImportService:import_service.py:510 Validating 0 relationships...
-[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
-[32mINFO    [0m ImportService:import_service.py:540  Dry run completed - no data imported
-[32mPASSED[0m[32m                                                                   [ 25%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_preserves_node_properties 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmp90kmfzbu.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (254 bytes)
-[32mINFO    [0m ImportService:import_service.py:545 ============================================================
-[32mINFO    [0m ImportService:import_service.py:546 Starting import...
-[32mINFO    [0m ImportService:import_service.py:547 ============================================================
-[32mINFO    [0m ImportService:import_service.py:357 Importing 1 nodes...
-[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:377 Imported 1 nodes total across 1 labels
-[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
-[32mINFO    [0m ImportService:import_service.py:587 ============================================================
-[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
-[32mINFO    [0m ImportService:import_service.py:589   Nodes: 1
-[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
-[32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mPASSED[0m[32m                                                                   [ 29%][0m
-tests/integration/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_with_relationship_properties 
-[1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpzfkz41t5.json
-[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (476 bytes)
-[32mINFO    [0m ImportService:import_service.py:545 ============================================================
-[32mINFO    [0m ImportService:import_service.py:546 Starting import...
-[32mINFO    [0m ImportService:import_service.py:547 ============================================================
-[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
-[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
-[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
-[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
-[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
-[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
-[32mINFO    [0m ImportService:import_service.py:587 ============================================================
-[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
-[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
-[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
-[32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mPASSED[0m[32m                                                                   [ 33%][0m
-tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_nodes_landen_wirklich_in_neo4j 
+[INT-IMP-001] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_nodes_are_persisted_in_neo4j <- tests/integration/test_import_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: RETURN 1 AS test with params: None
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 [1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_nodes_landen_wirklich_in_0/standard.json
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_nodes_are_persisted_in_ne0/standard.json
 [32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
 [32mINFO    [0m ImportService:import_service.py:545 ============================================================
 [32mINFO    [0m ImportService:import_service.py:546 Starting import...
@@ -206,15 +48,15 @@ RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'U
 [32mINFO    [0m ImportService:import_service.py:593 ============================================================
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:Malware) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
-[32mPASSED[0m[32m                                                                   [ 37%][0m
+[32mPASSED[0m[32m                                                                   [  5%][0m
 [1m------------------------------ live log teardown -------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 
-tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_alle_properties_korrekt_gespeichert 
+[INT-IMP-002] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_all_properties_stored_correctly <- tests/integration/test_import_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 [1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_alle_properties_korrekt_g0/props.json
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_all_properties_stored_cor0/props.json
 [32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (217 bytes)
 [32mINFO    [0m ImportService:import_service.py:545 ============================================================
 [32mINFO    [0m ImportService:import_service.py:546 Starting import...
@@ -234,15 +76,15 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
 [32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
 [32mINFO    [0m ImportService:import_service.py:593 ============================================================
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor {name: $name}) RETURN n with params: {'name': 'IMPORT_TEST_PropTest'}
-[32mPASSED[0m[32m                                                                   [ 40%][0m
+[32mPASSED[0m[32m                                                                   [ 11%][0m
 [1m------------------------------ live log teardown -------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 
-tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_relationship_wird_erstellt 
+[INT-IMP-003] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_relationship_is_created <- tests/integration/test_import_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 [1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_relationship_wird_erstell0/standard.json
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_relationship_is_created0/standard.json
 [32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
 [32mINFO    [0m ImportService:import_service.py:545 ============================================================
 [32mINFO    [0m ImportService:import_service.py:546 Starting import...
@@ -277,15 +119,15 @@ RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'U
 [32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
 [32mINFO    [0m ImportService:import_service.py:593 ============================================================
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n {name: $name})-[r:USES]->() RETURN count(r) AS c with params: {'name': 'IMPORT_TEST_Actor'}
-[32mPASSED[0m[32m                                                                   [ 44%][0m
+[32mPASSED[0m[32m                                                                   [ 16%][0m
 [1m------------------------------ live log teardown -------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 
-tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_merge_verhindert_duplikate_bei_wiederholtem_import 
+[INT-IMP-004] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_merge_prevents_duplicates_on_repeated_import <- tests/integration/test_import_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 [1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_merge_verhindert_duplikat0/standard.json
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_merge_prevents_duplicates0/standard.json
 [32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
 [32mINFO    [0m ImportService:import_service.py:545 ============================================================
 [32mINFO    [0m ImportService:import_service.py:546 Starting import...
@@ -319,7 +161,7 @@ RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'U
 [32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
 [32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
 [32mINFO    [0m ImportService:import_service.py:593 ============================================================
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_merge_verhindert_duplikat0/standard.json
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_merge_prevents_duplicates0/standard.json
 [32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
 [32mINFO    [0m ImportService:import_service.py:545 ============================================================
 [32mINFO    [0m ImportService:import_service.py:546 Starting import...
@@ -356,15 +198,15 @@ RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'U
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:Malware) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n {name: $name})-[r:USES]->() RETURN count(r) AS c with params: {'name': 'IMPORT_TEST_Actor'}
-[32mPASSED[0m[32m                                                                   [ 48%][0m
+[32mPASSED[0m[32m                                                                   [ 22%][0m
 [1m------------------------------ live log teardown -------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 
-tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_dry_run_schreibt_nichts_in_neo4j 
+[INT-IMP-005] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_dry_run_writes_nothing_to_neo4j <- tests/integration/test_import_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 [1m-------------------------------- live log call ---------------------------------[0m
-[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_dry_run_schreibt_nichts_i0/standard.json
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_dry_run_writes_nothing_to0/standard.json
 [32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
 [32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
 [32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
@@ -374,11 +216,11 @@ tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_dry_r
 [32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
 [32mINFO    [0m ImportService:import_service.py:540  Dry run completed - no data imported
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
-[32mPASSED[0m[32m                                                                   [ 51%][0m
+[32mPASSED[0m[32m                                                                   [ 27%][0m
 [1m------------------------------ live log teardown -------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
 
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_prefix_match_findet_korrekten_node 
+[INT-AC-001] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_prefix_match_returns_correct_node <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -395,8 +237,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
         ORDER BY n.name
         LIMIT $limit
          with params: {'search_value': 'APT', 'limit': 10}
-[32mPASSED[0m[32m                                                                   [ 55%][0m
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_prefix_match_ist_case_insensitiv 
+[32mPASSED[0m[32m                                                                   [ 33%][0m
+[INT-AC-002] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_prefix_match_is_case_insensitive <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -422,8 +264,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
         ORDER BY n.name
         LIMIT $limit
          with params: {'search_value': 'APT', 'limit': 10}
-[32mPASSED[0m[32m                                                                   [ 59%][0m
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_kein_treffer_gibt_leere_liste 
+[32mPASSED[0m[32m                                                                   [ 38%][0m
+[INT-AC-003] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_no_match_returns_empty_list <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -440,8 +282,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
         ORDER BY n.name
         LIMIT $limit
          with params: {'search_value': 'XYZ_NONEXISTENT_999', 'limit': 10}
-[32mPASSED[0m[32m                                                                   [ 62%][0m
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_label_filter_schraenkt_ergebnisse_ein 
+[32mPASSED[0m[32m                                                                   [ 44%][0m
+[INT-AC-004] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_label_filter_restricts_results <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log call ---------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -467,8 +309,8 @@ RETURN count(n) AS count, 'Campaign' AS label with params: {'nodes_Campaign': [{
         ORDER BY n.name
         LIMIT $limit
          with params: {'search_value': 'Alpha', 'limit': 10}
-[32mPASSED[0m[32m                                                                   [ 66%][0m
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_limit_wird_eingehalten 
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+[INT-AC-005] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_limit_parameter_is_respected <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log call ---------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -484,8 +326,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
         ORDER BY n.name
         LIMIT $limit
          with params: {'search_value': 'TestActor', 'limit': 3}
-[32mPASSED[0m[32m                                                                   [ 70%][0m
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_fuzzy_search_findet_substring 
+[32mPASSED[0m[32m                                                                   [ 55%][0m
+[INT-AC-006] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_fuzzy_search_finds_substring <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -507,8 +349,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
         ORDER BY relevance, n.name
         LIMIT $limit
          with params: {'search_value': 'PT2', 'limit': 10}
-[32mPASSED[0m[32m                                                                   [ 74%][0m
-tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_ergebnis_enthaelt_pflichtfelder_fuer_ui 
+[32mPASSED[0m[32m                                                                   [ 61%][0m
+[INT-AC-007] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_result_contains_required_frontend_fields <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -525,8 +367,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
         ORDER BY n.name
         LIMIT $limit
          with params: {'search_value': 'APT', 'limit': 10}
-[32mPASSED[0m[32m                                                                   [ 77%][0m
-tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_null_gibt_nur_startnode 
+[32mPASSED[0m[32m                                                                   [ 66%][0m
+[INT-HOP-001] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_zero_returns_only_start_node <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -581,8 +423,8 @@ RETURN count(r) AS count, 'Campaign' AS from_label, 'ThreatActor' AS to_label, '
                 [start] AS pathNodes
             LIMIT $limit
              with params: {'start_value': 'APT28', 'limit': 100}
-[32mPASSED[0m[32m                                                                   [ 81%][0m
-tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_eins_gibt_direkte_nachbarn 
+[32mPASSED[0m[32m                                                                   [ 72%][0m
+[INT-HOP-002] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_one_returns_direct_neighbors <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -647,8 +489,8 @@ RETURN count(r) AS count, 'Campaign' AS from_label, 'ThreatActor' AS to_label, '
             pathNodes
         LIMIT $limit
          with params: {'start_value': 'APT28', 'limit': 100}
-[32mPASSED[0m[32m                                                                   [ 85%][0m
-tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_zwei_findet_indirekte_verbindungen 
+[32mPASSED[0m[32m                                                                   [ 77%][0m
+[INT-HOP-003] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_two_finds_indirect_connections <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log call ---------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -700,8 +542,8 @@ RETURN count(r) AS count, 'Malware' AS from_label, 'Vulnerability' AS to_label, 
             pathNodes
         LIMIT $limit
          with params: {'start_value': 'APT28', 'limit': 100}
-[32mPASSED[0m[32m                                                                   [ 88%][0m
-tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_isolierter_node_wird_zurueckgegeben 
+[32mPASSED[0m[32m                                                                   [ 83%][0m
+[INT-HOP-004] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_isolated_node_is_returned <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log call ---------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -729,8 +571,8 @@ RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActo
             pathNodes
         LIMIT $limit
          with params: {'start_value': 'LoneWolf', 'limit': 100}
-[32mPASSED[0m[32m                                                                   [ 92%][0m
-tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_nicht_existierender_node_gibt_leere_liste 
+[32mPASSED[0m[32m                                                                   [ 88%][0m
+[INT-HOP-005] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_nonexistent_node_returns_empty_list <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log call ---------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
         MATCH (start:ThreatActor {name: $start_value})
@@ -752,9 +594,9 @@ tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test
             }] AS relationship_details,
             pathNodes
         LIMIT $limit
-         with params: {'start_value': 'EXISTIERT_NICHT', 'limit': 100}
-[32mPASSED[0m[32m                                                                   [ 96%][0m
-tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_relationship_typ_in_ergebnis_enthalten 
+         with params: {'start_value': 'DOES_NOT_EXIST', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [ 94%][0m
+[INT-HOP-006] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_relationship_type_included_in_result <- tests/integration/test_neo4j_integration.py 
 [1m-------------------------------- live log setup --------------------------------[0m
 [32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
 UNWIND $nodes_ThreatActor AS props
@@ -824,4 +666,4 @@ RETURN count(r) AS count, 'Campaign' AS from_label, 'ThreatActor' AS to_label, '
 [32mINFO    [0m GraphDBDriver:driver.py:129 Neo4j driver closed.
 
 
-[32m============================== [32m[1m27 passed[0m[32m in 2.36s[0m[32m ==============================[0m
+[32m============================== [32m[1m18 passed[0m[32m in 2.31s[0m[32m ==============================[0m

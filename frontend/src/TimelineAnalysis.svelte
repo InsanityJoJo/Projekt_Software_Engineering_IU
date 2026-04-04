@@ -400,7 +400,7 @@
                 
                 const lines = [
                   `Type: ${data.nodeType}`,
-                  `Period: ${formatDate(data.startDate)} â†’ ${formatDate(data.endDate)}`,
+                  `Period: ${formatDate(data.startDate)} -> ${formatDate(data.endDate)}`,
                   ''
                 ];
                 

@@ -1,7 +1,7 @@
-"""Integrationstests fuer AutocompleteService und SafeQueryBuilder.
+"""Integration tests for AutocompleteService and SafeQueryBuilder.
 
-Testet Query-Logik gegen echte Neo4j-Instanz im Docker-Netzwerk.
-Fixtures kommen aus conftest.py in diesem Verzeichnis.
+Tests query logic against a real Neo4j instance running in the Docker network.
+Fixtures are provided by conftest.py in this directory.
 """
 
 import pytest
@@ -12,12 +12,13 @@ pytestmark = pytest.mark.integration
 
 
 class TestAutocompleteIntegration:
-    """AutocompleteService gegen echte Neo4j-Instanz."""
+    """AutocompleteService against a real Neo4j instance."""
 
-    def test_prefix_match_findet_korrekten_node(
+    @pytest.mark.test_id("INT-AC-001")
+    def test_prefix_match_returns_correct_node(
         self, neo4j_driver, sample_threat_actor
     ):
-        """Prefix 'APT' findet 'APT28'."""
+        """Prefix 'APT' finds 'APT28'."""
         service = AutocompleteService(neo4j_driver)
 
         result = service.suggest_node_names(prefix="APT")
@@ -27,10 +28,11 @@ class TestAutocompleteIntegration:
         names = [item["name"] for item in result.data]
         assert "APT28" in names
 
-    def test_prefix_match_ist_case_insensitiv(
+    @pytest.mark.test_id("INT-AC-002")
+    def test_prefix_match_is_case_insensitive(
         self, neo4j_driver, sample_threat_actor
     ):
-        """'apt' und 'APT' liefern identische Treffer."""
+        """'apt' and 'APT' return identical results."""
         service = AutocompleteService(neo4j_driver)
 
         result_lower = service.suggest_node_names(prefix="apt")
@@ -43,10 +45,11 @@ class TestAutocompleteIntegration:
             == {item["name"] for item in result_upper.data}
         )
 
-    def test_kein_treffer_gibt_leere_liste(
+    @pytest.mark.test_id("INT-AC-003")
+    def test_no_match_returns_empty_list(
         self, neo4j_driver, sample_threat_actor
     ):
-        """Unbekannter Prefix -> leere Liste, kein Fehler."""
+        """Unknown prefix returns an empty list without raising an error."""
         service = AutocompleteService(neo4j_driver)
 
         result = service.suggest_node_names(prefix="XYZ_NONEXISTENT_999")
@@ -54,8 +57,9 @@ class TestAutocompleteIntegration:
         assert result.success is True
         assert len(result.data) == 0
 
-    def test_label_filter_schraenkt_ergebnisse_ein(self, neo4j_driver):
-        """label='ThreatActor' schliesst Malware- und Campaign-Nodes aus."""
+    @pytest.mark.test_id("INT-AC-004")
+    def test_label_filter_restricts_results(self, neo4j_driver):
+        """label='ThreatActor' excludes Malware and Campaign nodes."""
         builder = AdminQueryBuilder()
         nodes = [
             {"label": "ThreatActor", "properties": {"name": "AlphaGroup"}},
@@ -76,8 +80,9 @@ class TestAutocompleteIntegration:
         assert "AlphaBot" not in names
         assert "AlphaOperation" not in names
 
-    def test_limit_wird_eingehalten(self, neo4j_driver):
-        """limit=3 liefert hoechstens 3 Ergebnisse, auch bei 10 Nodes."""
+    @pytest.mark.test_id("INT-AC-005")
+    def test_limit_parameter_is_respected(self, neo4j_driver):
+        """limit=3 returns at most 3 results even when 10 nodes match."""
         builder = AdminQueryBuilder()
         nodes = [
             {"label": "ThreatActor", "properties": {"name": f"TestActor{i:02d}"}}
@@ -92,10 +97,11 @@ class TestAutocompleteIntegration:
         assert result.success is True
         assert len(result.data) <= 3
 
-    def test_fuzzy_search_findet_substring(
+    @pytest.mark.test_id("INT-AC-006")
+    def test_fuzzy_search_finds_substring(
         self, neo4j_driver, sample_threat_actor
     ):
-        """'PT2' ist Substring von 'APT28' und wird per fuzzy_search gefunden."""
+        """'PT2' is a substring of 'APT28' and is found via fuzzy_search."""
         service = AutocompleteService(neo4j_driver)
 
         result = service.fuzzy_search(search_term="PT2")
@@ -104,10 +110,11 @@ class TestAutocompleteIntegration:
         names = [item["name"] for item in result.data]
         assert "APT28" in names
 
-    def test_ergebnis_enthaelt_pflichtfelder_fuer_ui(
+    @pytest.mark.test_id("INT-AC-007")
+    def test_result_contains_required_frontend_fields(
         self, neo4j_driver, sample_threat_actor
     ):
-        """Jedes Ergebnis hat 'name', 'label', 'id' - benoetigt vom Frontend."""
+        """Every result contains 'name', 'label', 'id' as required by the frontend."""
         service = AutocompleteService(neo4j_driver)
 
         result = service.suggest_node_names(prefix="APT")
@@ -115,16 +122,17 @@ class TestAutocompleteIntegration:
         assert result.success is True
         assert len(result.data) > 0
         for item in result.data:
-            assert "name" in item, f"Feld 'name' fehlt in: {item}"
-            assert "label" in item, f"Feld 'label' fehlt in: {item}"
-            assert "id" in item, f"Feld 'id' fehlt in: {item}"
+            assert "name" in item, f"Field 'name' missing in: {item}"
+            assert "label" in item, f"Field 'label' missing in: {item}"
+            assert "id" in item, f"Field 'id' missing in: {item}"
 
 
 class TestNodeByNameHopsIntegration:
-    """find_connected_nodes mit verschiedenen Hop-Tiefen gegen echte Neo4j."""
+    """find_connected_nodes with varying hop depths against a real Neo4j instance."""
 
-    def test_hops_null_gibt_nur_startnode(self, neo4j_driver, sample_graph):
-        """hops=0: nur der angefragte Node, 'connected' ist immer None."""
+    @pytest.mark.test_id("INT-HOP-001")
+    def test_hops_zero_returns_only_start_node(self, neo4j_driver, sample_graph):
+        """hops=0: only the requested node is returned, 'connected' is always None."""
         builder = SafeQueryBuilder()
         query, params = builder.find_connected_nodes(
             start_label="ThreatActor",
@@ -138,8 +146,9 @@ class TestNodeByNameHopsIntegration:
         assert len(result.data) >= 1
         assert all(r.get("connected") is None for r in result.data)
 
-    def test_hops_eins_gibt_direkte_nachbarn(self, neo4j_driver, sample_graph):
-        """hops=1: X-Agent und AcmeCorp sind direkte Nachbarn von APT28."""
+    @pytest.mark.test_id("INT-HOP-002")
+    def test_hops_one_returns_direct_neighbors(self, neo4j_driver, sample_graph):
+        """hops=1: X-Agent and AcmeCorp are direct neighbors of APT28."""
         builder = SafeQueryBuilder()
         query, params = builder.find_connected_nodes(
             start_label="ThreatActor",
@@ -158,8 +167,9 @@ class TestNodeByNameHopsIntegration:
         assert "X-Agent" in connected_names
         assert "AcmeCorp" in connected_names
 
-    def test_hops_zwei_findet_indirekte_verbindungen(self, neo4j_driver):
-        """hops=2: Kette APT28 -> X-Agent -> CVE wird vollstaendig traversiert."""
+    @pytest.mark.test_id("INT-HOP-003")
+    def test_hops_two_finds_indirect_connections(self, neo4j_driver):
+        """hops=2: chain APT28 -> X-Agent -> CVE is fully traversed."""
         builder = AdminQueryBuilder()
         nodes = [
             {"label": "ThreatActor", "properties": {"name": "APT28"}},
@@ -203,8 +213,9 @@ class TestNodeByNameHopsIntegration:
         }
         assert "CVE-2021-1234" in all_connected
 
-    def test_isolierter_node_wird_zurueckgegeben(self, neo4j_driver):
-        """Node ohne Verbindungen liefert Ergebnis dank OPTIONAL MATCH."""
+    @pytest.mark.test_id("INT-HOP-004")
+    def test_isolated_node_is_returned(self, neo4j_driver):
+        """Node without relationships is still returned due to OPTIONAL MATCH."""
         builder = AdminQueryBuilder()
         nodes = [{"label": "ThreatActor", "properties": {"name": "LoneWolf"}}]
         for query, params in builder.merge_nodes_batch(nodes):
@@ -224,13 +235,14 @@ class TestNodeByNameHopsIntegration:
         assert result.data[0]["start"]["name"] == "LoneWolf"
         assert result.data[0].get("connected") is None
 
-    def test_nicht_existierender_node_gibt_leere_liste(self, neo4j_driver):
-        """Anfrage fuer unbekannten Node -> leere Liste, kein Fehler."""
+    @pytest.mark.test_id("INT-HOP-005")
+    def test_nonexistent_node_returns_empty_list(self, neo4j_driver):
+        """Query for an unknown node returns an empty list without raising an error."""
         sq = SafeQueryBuilder()
         query, params = sq.find_connected_nodes(
             start_label="ThreatActor",
             start_property="name",
-            start_value="EXISTIERT_NICHT",
+            start_value="DOES_NOT_EXIST",
             max_hops=1,
         )
         result = neo4j_driver.run_safe_query(query, params)
@@ -238,10 +250,11 @@ class TestNodeByNameHopsIntegration:
         assert result.success is True
         assert len(result.data) == 0
 
-    def test_relationship_typ_in_ergebnis_enthalten(
+    @pytest.mark.test_id("INT-HOP-006")
+    def test_relationship_type_included_in_result(
         self, neo4j_driver, sample_graph
     ):
-        """relationship_details enthaelt die Typen der Kanten."""
+        """relationship_details contains the types of the traversed edges."""
         sq = SafeQueryBuilder()
         query, params = sq.find_connected_nodes(
             start_label="ThreatActor",
