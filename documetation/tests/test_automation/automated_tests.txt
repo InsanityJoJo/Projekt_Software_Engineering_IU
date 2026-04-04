@@ -1,0 +1,2051 @@
+================================
+Running ALL Tests (Unit + Integration)
+================================
+
+------- BACKEND UNIT TESTS (pytest) -------
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+testpaths: tests/unit
+plugins: cov-7.1.0, flask-1.3.0
+[1mcollecting ... [0mcollected 347 items
+
+tests/unit/test_autocomplete_service.py::TestAutocompleteServiceInit::test_init_with_driver [32mPASSED[0m[32m [  0%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_with_results [32mPASSED[0m[32m [  0%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_with_label_filter [32mPASSED[0m[32m [  0%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_empty_prefix [32mPASSED[0m[32m [  1%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_whitespace_prefix [32mPASSED[0m[32m [  1%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_invalid_label 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m src.services.autocomplete_service:autocomplete_service.py:104 Invalid autocomplete query parameters: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [  1%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_no_label_filter [32mPASSED[0m[32m [  2%][0m
+tests/unit/test_autocomplete_service.py::TestSuggestNodeNames::test_suggest_custom_limit [32mPASSED[0m[32m [  2%][0m
+tests/unit/test_autocomplete_service.py::TestFuzzySearch::test_fuzzy_search_success [32mPASSED[0m[32m [  2%][0m
+tests/unit/test_autocomplete_service.py::TestFuzzySearch::test_fuzzy_search_with_label [32mPASSED[0m[32m [  2%][0m
+tests/unit/test_autocomplete_service.py::TestFuzzySearch::test_fuzzy_search_empty_term [32mPASSED[0m[32m [  3%][0m
+tests/unit/test_autocomplete_service.py::TestFuzzySearch::test_fuzzy_search_invalid_label 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m src.services.autocomplete_service:autocomplete_service.py:187 Invalid fuzzy search parameters: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [  3%][0m
+tests/unit/test_autocomplete_service.py::TestFuzzySearch::test_fuzzy_search_relevance_ordering [32mPASSED[0m[32m [  3%][0m
+tests/unit/test_autocomplete_service.py::TestCheckNodeExists::test_check_exists_true [32mPASSED[0m[32m [  4%][0m
+tests/unit/test_autocomplete_service.py::TestCheckNodeExists::test_check_exists_false [32mPASSED[0m[32m [  4%][0m
+tests/unit/test_autocomplete_service.py::TestCheckNodeExists::test_check_exists_with_label [32mPASSED[0m[32m [  4%][0m
+tests/unit/test_autocomplete_service.py::TestCheckNodeExists::test_check_exists_invalid_label 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m src.services.autocomplete_service:autocomplete_service.py:233 Invalid existence check parameters: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [  4%][0m
+tests/unit/test_autocomplete_service.py::TestGetAllNodeNames::test_get_all_nodes_success [32mPASSED[0m[32m [  5%][0m
+tests/unit/test_autocomplete_service.py::TestGetAllNodeNames::test_get_all_nodes_with_label_filter [32mPASSED[0m[32m [  5%][0m
+tests/unit/test_autocomplete_service.py::TestGetAllNodeNames::test_get_all_nodes_custom_limit [32mPASSED[0m[32m [  5%][0m
+tests/unit/test_autocomplete_service.py::TestGetAllNodeNames::test_get_all_nodes_invalid_label 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m src.services.autocomplete_service:autocomplete_service.py:288 Invalid get all names parameters: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [  6%][0m
+tests/unit/test_autocomplete_service.py::TestIntegrationScenarios::test_autocomplete_workflow [32mPASSED[0m[32m [  6%][0m
+tests/unit/test_autocomplete_service.py::TestIntegrationScenarios::test_fallback_to_fuzzy_search [32mPASSED[0m[32m [  6%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestSuggestNodeNamesExceptions::test_service_unavailable_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:109 Database connection error in suggest_node_names: Connection refused
+[32mPASSED[0m[32m                                                                   [  6%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestSuggestNodeNamesExceptions::test_session_expired_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:109 Database connection error in suggest_node_names: Session has expired
+[32mPASSED[0m[32m                                                                   [  7%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestSuggestNodeNamesExceptions::test_neo4j_error_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:114 Database error in suggest_node_names: Internal Neo4j error
+[32mPASSED[0m[32m                                                                   [  7%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestSuggestNodeNamesExceptions::test_unexpected_exception_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:119 Unexpected error in suggest_node_names with prefix='APT', label=None
+Traceback (most recent call last):
+  File "/app/src/services/autocomplete_service.py", line 98, in suggest_node_names
+    result = self.driver.run_safe_query(query, params)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+RuntimeError: Completely unexpected
+[32mPASSED[0m[32m                                                                   [  7%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestSuggestNodeNamesExceptions::test_service_unavailable_with_time_filter 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:109 Database connection error in suggest_node_names: No route to host
+[32mPASSED[0m[32m                                                                   [  8%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestFuzzySearchExceptions::test_service_unavailable_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:191 Database connection error in fuzzy_search: Connection refused
+[32mPASSED[0m[32m                                                                   [  8%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestFuzzySearchExceptions::test_session_expired_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:191 Database connection error in fuzzy_search: Session has expired
+[32mPASSED[0m[32m                                                                   [  8%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestFuzzySearchExceptions::test_neo4j_error_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:195 Database error in fuzzy_search: Query execution failed
+[32mPASSED[0m[32m                                                                   [  8%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestFuzzySearchExceptions::test_unexpected_exception_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:199 Unexpected error in fuzzy_search with term='shadow', label=None
+Traceback (most recent call last):
+  File "/app/src/services/autocomplete_service.py", line 182, in fuzzy_search
+    result = self.driver.run_safe_query(query, params)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+ValueError: Unexpected value error
+[32mPASSED[0m[32m                                                                   [  9%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestFuzzySearchExceptions::test_service_unavailable_with_time_filter 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:191 Database connection error in fuzzy_search: Timeout
+[32mPASSED[0m[32m                                                                   [  9%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestCheckNodeExistsExceptions::test_service_unavailable_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:237 Database connection error in check_node_exists: DB offline
+[32mPASSED[0m[32m                                                                   [  9%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestCheckNodeExistsExceptions::test_session_expired_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:237 Database connection error in check_node_exists: Session gone
+[32mPASSED[0m[32m                                                                   [ 10%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestCheckNodeExistsExceptions::test_neo4j_error_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:241 Database error in check_node_exists: Constraint error
+[32mPASSED[0m[32m                                                                   [ 10%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestCheckNodeExistsExceptions::test_unexpected_exception_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:245 Unexpected error in check_node_exists with name='APT28', label=None
+Traceback (most recent call last):
+  File "/app/src/services/autocomplete_service.py", line 228, in check_node_exists
+    result = self.driver.run_safe_query(query, params)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+RuntimeError: Something exploded
+[32mPASSED[0m[32m                                                                   [ 10%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestGetAllNodeNamesExceptions::test_service_unavailable_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:292 Database connection error in get_all_node_names: DB unreachable
+[32mPASSED[0m[32m                                                                   [ 10%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestGetAllNodeNamesExceptions::test_session_expired_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:292 Database connection error in get_all_node_names: Session expired
+[32mPASSED[0m[32m                                                                   [ 11%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestGetAllNodeNamesExceptions::test_neo4j_error_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:296 Database error in get_all_node_names: Index not found
+[32mPASSED[0m[32m                                                                   [ 11%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestGetAllNodeNamesExceptions::test_unexpected_exception_returns_error_result 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:300 Unexpected error in get_all_node_names label=None, max_nodes=1000
+Traceback (most recent call last):
+  File "/app/src/services/autocomplete_service.py", line 283, in get_all_node_names
+    result = self.driver.run_safe_query(query, params)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+MemoryError: Out of memory
+[32mPASSED[0m[32m                                                                   [ 11%][0m
+tests/unit/test_autocomplete_service_exceptions.py::TestGetAllNodeNamesExceptions::test_with_label_filter_and_service_unavailable 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m src.services.autocomplete_service:autocomplete_service.py:292 Database connection error in get_all_node_names: Timeout during bulk retrieval
+[32mPASSED[0m[32m                                                                   [ 12%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestAdminQueryBuilderIntegration::test_import_scenario [32mPASSED[0m[32m [ 12%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_complete_import_workflow 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmp8hsqrlcf.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (969 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 4 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 3 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 4 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 2 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Campaign: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 4 nodes total across 3 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 3 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 2 relationships
+[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[LAUNCHED]->(ThreatActor): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 3 relationships total across 2 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 4
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 3
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 12%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_large_batch_import 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpd_qj8988.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (2934 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 50 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 20 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 15 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Tool: 15 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 50 nodes total across 3 labels
+[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 50
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 12%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_with_mixed_valid_invalid_data 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpng6mz5os.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (239 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 3 nodes...
+[1m[31mERROR   [0m ImportService:import_service.py:488 Node validation failed with 1 errors
+[1m[31mERROR   [0m ImportService:import_service.py:493   - Node 1: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [ 13%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_performance_with_many_labels 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmp_b5ns996.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (3224 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 50 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Tool: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Campaign: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  AttackPattern: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Indicator: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Organization: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Vulnerability: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Report: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Incident: 5 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 50 nodes total across 10 labels
+[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 50
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 13%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_with_complex_relationship_patterns 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmptm7j_nqh.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (956 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 4 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Campaign: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Organization: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 4 nodes total across 4 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 4 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[LAUNCHED]->(ThreatActor): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[TARGETS]->(Organization): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[INVOLVES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 4 relationships total across 4 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 4
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 4
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 13%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_dry_run_does_not_modify_database 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmph4ihyajr.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (123 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 1 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 0 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:540  Dry run completed - no data imported
+[32mPASSED[0m[32m                                                                   [ 14%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_preserves_node_properties 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpddar5ac5.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (254 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 1 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 1 nodes total across 1 labels
+[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 1
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 14%][0m
+tests/unit/test_data_import_cli_neo4j.py::TestImportServiceIntegration::test_import_with_relationship_properties 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpfc1qiy39.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (476 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 14%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_init_success [32mPASSED[0m[32m   [ 14%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_init_failure [32mPASSED[0m[32m   [ 15%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_bool_true [32mPASSED[0m[32m      [ 15%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_bool_false [32mPASSED[0m[32m     [ 15%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_to_dict [32mPASSED[0m[32m        [ 16%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_repr [32mPASSED[0m[32m           [ 16%][0m
+tests/unit/test_driver.py::TestResultWrapper::test_str [32mPASSED[0m[32m            [ 16%][0m
+tests/unit/test_driver.py::TestGraphDBDriverInit::test_init_creates_driver 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 17%][0m
+tests/unit/test_driver.py::TestGraphDBDriverInit::test_init_sets_default_log_level 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 17%][0m
+tests/unit/test_driver.py::TestGraphDBDriverInit::test_init_sets_custom_log_level 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 17%][0m
+tests/unit/test_driver.py::TestGraphDBDriverConnect::test_connect_returns_connected 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 17%][0m
+tests/unit/test_driver.py::TestGraphDBDriverClose::test_close_calls_driver_close 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:129 Neo4j driver closed.
+[32mPASSED[0m[32m                                                                   [ 18%][0m
+tests/unit/test_driver.py::TestGraphDBDriverClose::test_close_logs_message 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 18%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_read_query_success 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor) RETURN n.name, n.type with params: None
+[32mPASSED[0m[32m                                                                   [ 18%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_write_query_success 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: CREATE (n:ThreatActor {name: $name}) with params: {'name': 'Charlie'}
+[32mPASSED[0m[32m                                                                   [ 19%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_with_parameters 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor {name: $name}) RETURN n with params: {'name': 'Alice', 'type': 'gang'}
+[32mPASSED[0m[32m                                                                   [ 19%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_without_parameters 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor) RETURN n with params: None
+[32mPASSED[0m[32m                                                                   [ 19%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_empty_result 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:NonExistent) RETURN n with params: None
+[32mPASSED[0m[32m                                                                   [ 19%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_logs_read_operation 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 20%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_logs_write_operation 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 20%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_raises_runtime_error_on_failure 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m GraphDBDriver:driver.py:179 Query execution failed: Syntax error
+[32mPASSED[0m[32m                                                                   [ 20%][0m
+tests/unit/test_driver.py::TestGraphDBDriverExecute::test_execute_logs_error_on_failure 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 21%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_success 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n) RETURN n with params: None
+[32mPASSED[0m[32m                                                                   [ 21%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_with_parameters 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor {name: $name}) RETURN n with params: {'name': 'Alice', 'type': 'gang'}
+[32mPASSED[0m[32m                                                                   [ 21%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_handles_exception 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m GraphDBDriver:driver.py:179 Query execution failed: Syntax error
+[32mPASSED[0m[32m                                                                   [ 21%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_does_not_raise_exception 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m GraphDBDriver:driver.py:179 Query execution failed: Error
+[32mPASSED[0m[32m                                                                   [ 22%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_logs_error_on_failure 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mPASSED[0m[32m                                                                   [ 22%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_boolean_evaluation_success 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n) RETURN n with params: None
+[32mPASSED[0m[32m                                                                   [ 22%][0m
+tests/unit/test_driver.py::TestGraphDBDriverRunSafeQuery::test_run_safe_query_boolean_evaluation_failure 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m GraphDBDriver:driver.py:179 Query execution failed: Error
+[32mPASSED[0m[32m                                                                   [ 23%][0m
+tests/unit/test_driver.py::TestGraphDBDriverSessionManagement::test_execute_opens_and_closes_session 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n) RETURN n with params: None
+[32mPASSED[0m[32m                                                                   [ 23%][0m
+tests/unit/test_driver.py::TestGraphDBDriverSessionManagement::test_execute_closes_session_on_error 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m GraphDBDriver:driver.py:179 Query execution failed: Error
+[32mPASSED[0m[32m                                                                   [ 23%][0m
+tests/unit/test_handlers.py::TestHandlerInitialization::test_init_handlers_with_driver_only [32mPASSED[0m[32m [ 23%][0m
+tests/unit/test_handlers.py::TestHandlerInitialization::test_init_handlers_with_autocomplete_service [32mPASSED[0m[32m [ 24%][0m
+tests/unit/test_handlers.py::TestHealthCheckHandler::test_health_check_success [32mPASSED[0m[32m [ 24%][0m
+tests/unit/test_handlers.py::TestHealthCheckHandler::test_health_check_database_unhealthy [32mPASSED[0m[32m [ 24%][0m
+tests/unit/test_handlers.py::TestHealthCheckHandler::test_health_check_driver_not_initialized [32mPASSED[0m[32m [ 25%][0m
+tests/unit/test_handlers.py::TestHealthCheckHandler::test_health_check_exception_handling 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m Handlers:handlers.py:62 Unexpected error in health check
+Traceback (most recent call last):
+  File "/app/src/api/handlers.py", line 45, in handle_health_check
+    result = _db_driver.run_safe_query("RETURN 1 AS health")
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+Exception: Database error
+[32mPASSED[0m[32m                                                                   [ 25%][0m
+tests/unit/test_handlers.py::TestGetStatsHandler::test_get_stats_success [32mPASSED[0m[32m [ 25%][0m
+tests/unit/test_handlers.py::TestGetStatsHandler::test_get_stats_empty_database [32mPASSED[0m[32m [ 25%][0m
+tests/unit/test_handlers.py::TestGetStatsHandler::test_get_stats_node_query_fails 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m Handlers:handlers.py:88 Stats query failed: Query failed
+[32mPASSED[0m[32m                                                                   [ 26%][0m
+tests/unit/test_handlers.py::TestGetStatsHandler::test_get_stats_relationship_query_fails 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m Handlers:handlers.py:88 Stats query failed: Rel query failed
+[32mPASSED[0m[32m                                                                   [ 26%][0m
+tests/unit/test_handlers.py::TestGetStatsHandler::test_get_stats_driver_not_initialized [32mPASSED[0m[32m [ 26%][0m
+tests/unit/test_handlers.py::TestGetStatsHandler::test_get_stats_exception_handling 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m Handlers:handlers.py:100 Unexpected error in get_stats
+Traceback (most recent call last):
+  File "/app/src/api/handlers.py", line 74, in handle_get_stats
+    node_result = _db_driver.run_safe_query(node_query, node_params)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+Exception: Unexpected error
+[32mPASSED[0m[32m                                                                   [ 27%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_success 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:117 Executing query: MATCH (n:ThreatActor) RETURN n...
+[32mPASSED[0m[32m                                                                   [ 27%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_missing_query [32mPASSED[0m[32m [ 27%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_with_parameters 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:117 Executing query: MATCH (n:ThreatActor {name: $name}) RETURN n...
+[32mPASSED[0m[32m                                                                   [ 27%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_invalid_json 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m Handlers:handlers.py:128 Bad request in execute_query: 400 Bad Request: Failed to decode JSON object: Expecting value: line 1 column 1 (char 0)
+[32mPASSED[0m[32m                                                                   [ 28%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_empty_body 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m Handlers:handlers.py:128 Bad request in execute_query: 415 Unsupported Media Type: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+[32mPASSED[0m[32m                                                                   [ 28%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_failed_execution 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:117 Executing query: INVALID CYPHER...
+[32mPASSED[0m[32m                                                                   [ 28%][0m
+tests/unit/test_handlers.py::TestExecuteQueryHandler::test_execute_query_driver_not_initialized [32mPASSED[0m[32m [ 29%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_success [32mPASSED[0m[32m [ 29%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_min_length [32mPASSED[0m[32m [ 29%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_with_fuzzy_fallback [32mPASSED[0m[32m [ 29%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_with_label_filter [32mPASSED[0m[32m [ 30%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_service_not_available [32mPASSED[0m[32m [ 30%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_service_error [32mPASSED[0m[32m [ 30%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_with_limit [32mPASSED[0m[32m [ 31%][0m
+tests/unit/test_handlers.py::TestAutocompleteHandler::test_autocomplete_invalid_limit [32mPASSED[0m[32m [ 31%][0m
+tests/unit/test_handlers.py::TestGetNodesHandler::test_get_nodes_success [32mPASSED[0m[32m [ 31%][0m
+tests/unit/test_handlers.py::TestGetNodesHandler::test_get_nodes_with_custom_limit [32mPASSED[0m[32m [ 31%][0m
+tests/unit/test_handlers.py::TestGetNodesHandler::test_get_nodes_with_label_filter [32mPASSED[0m[32m [ 32%][0m
+tests/unit/test_handlers.py::TestGetNodesHandler::test_get_nodes_validation_error 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m Handlers:handlers.py:247 Validation error: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [ 32%][0m
+tests/unit/test_handlers.py::TestGetNodesHandler::test_get_nodes_query_failed 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m Handlers:handlers.py:243 Get nodes query failed: Database error
+[32mPASSED[0m[32m                                                                   [ 32%][0m
+tests/unit/test_handlers.py::TestGetNodesHandler::test_get_nodes_driver_not_initialized [32mPASSED[0m[32m [ 33%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_success 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:570 Fetching node: name='APT28', label=ThreatActor, hops=0
+[32mINFO    [0m Handlers:handlers.py:604 Node found: 'APT28', returning 1 result(s)
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 2
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 1
+[32mINFO    [0m Handlers:handlers.py:491   Node 'APT28': label=ThreatActor (present=True)
+[32mINFO    [0m Handlers:handlers.py:491   Node 'X-Agent': label=Malware (present=True)
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[32mINFO    [0m Handlers:handlers.py:531 Transformed 1 Neo4j records into 2 unique nodes with 1 edges
+[32mPASSED[0m[32m                                                                   [ 33%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_not_found 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:570 Fetching node: name='NonExistent', label=ThreatActor, hops=1
+[33mWARNING [0m Handlers:handlers.py:599 Node not found: 'NonExistent' (label=ThreatActor)
+[32mPASSED[0m[32m                                                                   [ 33%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_with_label 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:570 Fetching node: name='APT28', label=ThreatActor, hops=1
+[32mINFO    [0m Handlers:handlers.py:604 Node found: 'APT28', returning 1 result(s)
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 1
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 0
+[32mINFO    [0m Handlers:handlers.py:491   Node 'APT28': label=ThreatActor (present=True)
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[32mINFO    [0m Handlers:handlers.py:531 Transformed 1 Neo4j records into 1 unique nodes with 0 edges
+[32mPASSED[0m[32m                                                                   [ 34%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_validation_error 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:570 Fetching node: name='Test', label=InvalidLabel, hops=1
+[33mWARNING [0m Handlers:handlers.py:592 Validation error: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [ 34%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_missing_label [32mPASSED[0m[32m [ 34%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_invalid_hops [32mPASSED[0m[32m [ 34%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_negative_hops [32mPASSED[0m[32m [ 35%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_non_integer_hops 
+[1m-------------------------------- live log call ---------------------------------[0m
+[33mWARNING [0m Handlers:handlers.py:626 Invalid hops parameter: invalid literal for int() with base 10: 'abc'
+[32mPASSED[0m[32m                                                                   [ 35%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_query_failed 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:570 Fetching node: name='APT28', label=ThreatActor, hops=1
+[1m[31mERROR   [0m Handlers:handlers.py:622 Get node query failed: Query error
+[32mPASSED[0m[32m                                                                   [ 35%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_driver_not_initialized [32mPASSED[0m[32m [ 36%][0m
+tests/unit/test_handlers.py::TestGetNodeByNameHandler::test_get_node_by_name_transformation_fails 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:570 Fetching node: name='APT28', label=ThreatActor, hops=1
+[32mINFO    [0m Handlers:handlers.py:604 Node found: 'APT28', returning 1 result(s)
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[33mWARNING [0m Handlers:handlers.py:361 Record 0 missing 'start' node
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 0
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 0
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[33mWARNING [0m Handlers:handlers.py:496 No nodes found after transformation
+[1m[31mERROR   [0m Handlers:handlers.py:609 Transformation failed - no data returned
+[32mPASSED[0m[32m                                                                   [ 36%][0m
+tests/unit/test_handlers.py::TestTransformNeo4jResults::test_transform_empty_results [32mPASSED[0m[32m [ 36%][0m
+tests/unit/test_handlers.py::TestTransformNeo4jResults::test_transform_single_node 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 1
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 0
+[32mINFO    [0m Handlers:handlers.py:491   Node 'APT28': label=ThreatActor (present=True)
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[32mINFO    [0m Handlers:handlers.py:531 Transformed 1 Neo4j records into 1 unique nodes with 0 edges
+[32mPASSED[0m[32m                                                                   [ 36%][0m
+tests/unit/test_handlers.py::TestTransformNeo4jResults::test_transform_with_relationships 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 2
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 1
+[32mINFO    [0m Handlers:handlers.py:491   Node 'APT28': label=ThreatActor (present=True)
+[32mINFO    [0m Handlers:handlers.py:491   Node 'X-Agent': label=Malware (present=True)
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[32mINFO    [0m Handlers:handlers.py:531 Transformed 1 Neo4j records into 2 unique nodes with 1 edges
+[32mPASSED[0m[32m                                                                   [ 37%][0m
+tests/unit/test_handlers.py::TestTransformNeo4jResults::test_transform_missing_labels 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[33mWARNING [0m Handlers:handlers.py:374 Start node missing label: APT28
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 1
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 0
+[32mINFO    [0m Handlers:handlers.py:491   Node 'APT28': label=Unknown (present=True)
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[32mINFO    [0m Handlers:handlers.py:531 Transformed 1 Neo4j records into 1 unique nodes with 0 edges
+[32mPASSED[0m[32m                                                                   [ 37%][0m
+tests/unit/test_handlers.py::TestTransformNeo4jResults::test_transform_multiple_relationships 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m Handlers:handlers.py:349 ============================================================
+[32mINFO    [0m Handlers:handlers.py:350 Starting transformation of 1 Neo4j records
+[32mINFO    [0m Handlers:handlers.py:351 ============================================================
+[32mINFO    [0m Handlers:handlers.py:483 ============================================================
+[32mINFO    [0m Handlers:handlers.py:484 Transformation complete:
+[32mINFO    [0m Handlers:handlers.py:485   Total unique nodes: 3
+[32mINFO    [0m Handlers:handlers.py:486   Total edges: 2
+[32mINFO    [0m Handlers:handlers.py:491   Node 'APT28': label=ThreatActor (present=True)
+[32mINFO    [0m Handlers:handlers.py:491   Node 'Campaign1': label=Campaign (present=True)
+[32mINFO    [0m Handlers:handlers.py:491   Node 'X-Agent': label=Malware (present=True)
+[32mINFO    [0m Handlers:handlers.py:493 ============================================================
+[32mINFO    [0m Handlers:handlers.py:531 Transformed 1 Neo4j records into 3 unique nodes with 2 edges
+[32mPASSED[0m[32m                                                                   [ 37%][0m
+tests/unit/test_import_service.py::TestLoadJsonFile::test_load_valid_json_file 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpw4h8tgck.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mPASSED[0m[32m                                                                   [ 38%][0m
+tests/unit/test_import_service.py::TestLoadJsonFile::test_load_nonexistent_file [32mPASSED[0m[32m [ 38%][0m
+tests/unit/test_import_service.py::TestLoadJsonFile::test_load_invalid_json 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpy8xuk7t1.json
+[32mPASSED[0m[32m                                                                   [ 38%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_complete_structure [32mPASSED[0m[32m [ 38%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_missing_nodes [32mPASSED[0m[32m [ 39%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_missing_relationships [32mPASSED[0m[32m [ 39%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_nodes_not_list [32mPASSED[0m[32m [ 39%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_relationships_not_list [32mPASSED[0m[32m [ 40%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_metadata_not_dict [32mPASSED[0m[32m [ 40%][0m
+tests/unit/test_import_service.py::TestValidateJsonStructure::test_validate_missing_version_in_metadata [32mPASSED[0m[32m [ 40%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_valid_nodes [32mPASSED[0m[32m [ 40%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_node_missing_label [32mPASSED[0m[32m [ 41%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_node_missing_properties [32mPASSED[0m[32m [ 41%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_node_invalid_label [32mPASSED[0m[32m [ 41%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_node_invalid_property [32mPASSED[0m[32m [ 42%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_node_missing_name_property_warning [32mPASSED[0m[32m [ 42%][0m
+tests/unit/test_import_service.py::TestValidateNodes::test_validate_node_properties_not_dict [32mPASSED[0m[32m [ 42%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_valid_relationships [32mPASSED[0m[32m [ 42%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_relationship_missing_type [32mPASSED[0m[32m [ 43%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_relationship_missing_from [32mPASSED[0m[32m [ 43%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_relationship_missing_to [32mPASSED[0m[32m [ 43%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_relationship_invalid_type [32mPASSED[0m[32m [ 44%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_relationship_invalid_from_label [32mPASSED[0m[32m [ 44%][0m
+tests/unit/test_import_service.py::TestValidateRelationships::test_validate_relationship_invalid_to_label [32mPASSED[0m[32m [ 44%][0m
+tests/unit/test_import_service.py::TestTransformRelationships::test_transform_basic_relationships [32mPASSED[0m[32m [ 44%][0m
+tests/unit/test_import_service.py::TestTransformRelationships::test_transform_relationships_with_properties [32mPASSED[0m[32m [ 45%][0m
+tests/unit/test_import_service.py::TestTransformRelationships::test_transform_relationships_without_properties [32mPASSED[0m[32m [ 45%][0m
+tests/unit/test_import_service.py::TestImportNodes::test_import_nodes_success 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mPASSED[0m[32m                                                                   [ 45%][0m
+tests/unit/test_import_service.py::TestImportNodes::test_import_nodes_empty_list 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:354 No nodes to import
+[32mPASSED[0m[32m                                                                   [ 46%][0m
+tests/unit/test_import_service.py::TestImportNodes::test_import_nodes_tracks_per_label_counts 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:357 Importing 3 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 2 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 3 nodes total across 2 labels
+[32mPASSED[0m[32m                                                                   [ 46%][0m
+tests/unit/test_import_service.py::TestImportNodes::test_import_nodes_handles_errors 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:357 Importing 1 nodes...
+[32mPASSED[0m[32m                                                                   [ 46%][0m
+tests/unit/test_import_service.py::TestImportRelationships::test_import_relationships_success 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mPASSED[0m[32m                                                                   [ 46%][0m
+tests/unit/test_import_service.py::TestImportRelationships::test_import_relationships_empty_list 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
+[32mPASSED[0m[32m                                                                   [ 47%][0m
+tests/unit/test_import_service.py::TestImportRelationships::test_import_relationships_multiple_patterns 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:401 Importing 2 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:421  (Campaign)-[LAUNCHED]->(ThreatActor): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 2 relationships total across 2 patterns
+[32mPASSED[0m[32m                                                                   [ 47%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_success 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpvnsubwaj.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 47%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_with_validation 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpfajrcfbe.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 48%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_without_validation 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpgrp5osxg.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 48%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_dry_run 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpziugkpno.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:540  Dry run completed - no data imported
+[32mPASSED[0m[32m                                                                   [ 48%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_file_not_found 
+[1m-------------------------------- live log call ---------------------------------[0m
+[1m[31mERROR   [0m ImportService:import_service.py:597  File not found: /nonexistent/file.json
+[32mPASSED[0m[32m                                                                   [ 48%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_invalid_structure 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpb34flear.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (24 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[1m[31mERROR   [0m ImportService:import_service.py:471 X JSON structure validation failed
+[1m[31mERROR   [0m ImportService:import_service.py:473   - Missing 'nodes' key in JSON
+[1m[31mERROR   [0m ImportService:import_service.py:473   - Missing 'relationships' key in JSON
+[32mPASSED[0m[32m                                                                   [ 49%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_validation_errors 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpsmk2ro9d.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (123 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 1 nodes...
+[1m[31mERROR   [0m ImportService:import_service.py:488 Node validation failed with 1 errors
+[1m[31mERROR   [0m ImportService:import_service.py:493   - Node 0: Label 'InvalidLabel' is not allowed. Allowed labels: File, Report, Organization, Incident, DomainName, AttackPattern, Campaign, EmailAddr, URL, IPv4Address, Identity, Malware, Observable, ThreatActor, Vulnerability, Indicator, Tool
+[32mPASSED[0m[32m                                                                   [ 49%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_database_error_nodes 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpf50k728p.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[1m[31mERROR   [0m ImportService:import_service.py:563 Unexpected error in node import
+Traceback (most recent call last):
+  File "/app/src/services/import_service.py", line 550, in import_from_json
+    result.nodes_created = self.import_nodes(nodes)
+                           ~~~~~~~~~~~~~~~~~^^^^^^^
+  File "/app/src/services/import_service.py", line 367, in import_nodes
+    result = self.driver.execute(query, params, write=True)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1228, in _execute_mock_call
+    raise effect
+Exception: Database connection failed
+[32mPASSED[0m[32m                                                                   [ 49%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_database_error_relationships 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmph5quop7e.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[1m[31mERROR   [0m ImportService:import_service.py:581 Unexpected error in relationship import
+Traceback (most recent call last):
+  File "/app/src/services/import_service.py", line 570, in import_from_json
+    result.relationships_created = self.import_relationships(transformed_rels)
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/app/src/services/import_service.py", line 411, in import_relationships
+    result = self.driver.execute(query, params, write=True)
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1169, in __call__
+    return self._mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1173, in _mock_call
+    return self._execute_mock_call(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/unittest/mock.py", line 1232, in _execute_mock_call
+    raise result
+Exception: Database error during relationships
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_tracks_duration 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmp6nhp09eb.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+tests/unit/test_import_service.py::TestImportFromJson::test_import_from_json_preserves_metadata 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/tmpgizufaxg.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (506 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+tests/unit/test_import_service.py::TestImportResult::test_import_result_defaults [32mPASSED[0m[32m [ 51%][0m
+tests/unit/test_import_service.py::TestImportResult::test_import_result_to_dict [32mPASSED[0m[32m [ 51%][0m
+tests/unit/test_import_service.py::TestImportResult::test_import_result_post_init [32mPASSED[0m[32m [ 51%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderValidation::test_validate_allowed_label [32mPASSED[0m[32m [ 51%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderValidation::test_validate_disallowed_label [32mPASSED[0m[32m [ 52%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderValidation::test_validate_allowed_relationship [32mPASSED[0m[32m [ 52%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderValidation::test_validate_disallowed_relationship [32mPASSED[0m[32m [ 52%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderValidation::test_validate_allowed_property [32mPASSED[0m[32m [ 53%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderValidation::test_validate_disallowed_property [32mPASSED[0m[32m [ 53%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderSafety::test_detect_delete_keyword [32mPASSED[0m[32m [ 53%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderSafety::test_detect_create_keyword [32mPASSED[0m[32m [ 53%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderSafety::test_detect_remove_keyword [32mPASSED[0m[32m [ 54%][0m
+tests/unit/test_query_builder.py::TestQueryBuilderSafety::test_allow_safe_read_query [32mPASSED[0m[32m [ 54%][0m
+tests/unit/test_query_builder.py::TestFindNodeByProperty::test_build_simple_query [32mPASSED[0m[32m [ 54%][0m
+tests/unit/test_query_builder.py::TestFindNodeByProperty::test_build_query_with_specific_properties [32mPASSED[0m[32m [ 55%][0m
+tests/unit/test_query_builder.py::TestFindNodeByProperty::test_reject_invalid_label [32mPASSED[0m[32m [ 55%][0m
+tests/unit/test_query_builder.py::TestFindNodeByProperty::test_reject_invalid_property [32mPASSED[0m[32m [ 55%][0m
+tests/unit/test_query_builder.py::TestFindNodeByProperty::test_custom_limit [32mPASSED[0m[32m [ 55%][0m
+tests/unit/test_query_builder.py::TestFindConnectedNodes::test_build_single_hop_query [32mPASSED[0m[32m [ 56%][0m
+tests/unit/test_query_builder.py::TestFindConnectedNodes::test_build_multi_hop_query [32mPASSED[0m[32m [ 56%][0m
+tests/unit/test_query_builder.py::TestFindConnectedNodes::test_build_query_with_specific_relationship [32mPASSED[0m[32m [ 56%][0m
+tests/unit/test_query_builder.py::TestFindConnectedNodes::test_reject_excessive_hops [32mPASSED[0m[32m [ 57%][0m
+tests/unit/test_query_builder.py::TestFindConnectedNodes::test_accept_zero_hops [32mPASSED[0m[32m [ 57%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationships::test_build_query_all_relationships [32mPASSED[0m[32m [ 57%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationships::test_build_query_specific_relationship [32mPASSED[0m[32m [ 57%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationships::test_includes_relationship_direction [32mPASSED[0m[32m [ 58%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_exact_match [32mPASSED[0m[32m [ 58%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_starts_with_match [32mPASSED[0m[32m [ 58%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_contains_match [32mPASSED[0m[32m [ 59%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_search_without_label [32mPASSED[0m[32m [ 59%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_invalid_match_type [32mPASSED[0m[32m [ 59%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_search_includes_limit [32mPASSED[0m[32m [ 59%][0m
+tests/unit/test_query_builder.py::TestSearchNodes::test_default_limit_applied [32mPASSED[0m[32m [ 60%][0m
+tests/unit/test_query_builder.py::TestParameterization::test_values_are_parameterized [32mPASSED[0m[32m [ 60%][0m
+tests/unit/test_query_builder.py::TestParameterization::test_search_values_are_parameterized [32mPASSED[0m[32m [ 60%][0m
+tests/unit/test_query_builder.py::TestMaxResultsLimit::test_default_max_results [32mPASSED[0m[32m [ 61%][0m
+tests/unit/test_query_builder.py::TestMaxResultsLimit::test_custom_max_results [32mPASSED[0m[32m [ 61%][0m
+tests/unit/test_query_builder.py::TestMaxResultsLimit::test_explicit_limit_overrides_default [32mPASSED[0m[32m [ 61%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderInit::test_inherits_from_safe_query_builder [32mPASSED[0m[32m [ 61%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderInit::test_init_sets_default_max_results [32mPASSED[0m[32m [ 62%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderInit::test_init_accepts_custom_max_results [32mPASSED[0m[32m [ 62%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderSafety::test_allows_write_keywords [32mPASSED[0m[32m [ 62%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderSafety::test_still_validates_labels [32mPASSED[0m[32m [ 63%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderSafety::test_still_validates_properties [32mPASSED[0m[32m [ 63%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderSafety::test_still_validates_relationships [32mPASSED[0m[32m [ 63%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_basic [32mPASSED[0m[32m [ 63%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_with_set_properties [32mPASSED[0m[32m [ 64%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_multiple_match_properties [32mPASSED[0m[32m [ 64%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_validates_label [32mPASSED[0m[32m [ 64%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_validates_match_properties [32mPASSED[0m[32m [ 65%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_validates_set_properties [32mPASSED[0m[32m [ 65%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNode::test_merge_node_requires_match_properties [32mPASSED[0m[32m [ 65%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_basic [32mPASSED[0m[32m [ 65%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_custom_match_property [32mPASSED[0m[32m [ 66%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_validates_labels [32mPASSED[0m[32m [ 66%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_validates_properties [32mPASSED[0m[32m [ 66%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_requires_label [32mPASSED[0m[32m [ 67%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_requires_properties [32mPASSED[0m[32m [ 67%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_empty_list [32mPASSED[0m[32m [ 67%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_missing_label [32mPASSED[0m[32m [ 68%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_missing_properties [32mPASSED[0m[32m [ 68%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_invalid_label [32mPASSED[0m[32m [ 68%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_missing_match_property [32mPASSED[0m[32m [ 68%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_invalid_property [32mPASSED[0m[32m [ 69%][0m
+tests/unit/test_query_builder.py::TestAdminMergeNodesBatch::test_merge_nodes_batch_groups_by_label [32mPASSED[0m[32m [ 69%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteNode::test_delete_node_basic [32mPASSED[0m[32m [ 69%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteNode::test_delete_node_validates_label [32mPASSED[0m[32m [ 70%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteNode::test_delete_node_validates_property [32mPASSED[0m[32m [ 70%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_basic [32mPASSED[0m[32m [ 70%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_with_properties [32mPASSED[0m[32m [ 70%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_custom_match_property [32mPASSED[0m[32m [ 71%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_validates_labels [32mPASSED[0m[32m [ 71%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_validates_relationship_type [32mPASSED[0m[32m [ 71%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_validates_properties [32mPASSED[0m[32m [ 72%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationship::test_merge_relationship_validates_match_property [32mPASSED[0m[32m [ 72%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_basic [32mPASSED[0m[32m [ 72%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_multiple_patterns [32mPASSED[0m[32m [ 72%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_without_properties [32mPASSED[0m[32m [ 73%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_custom_match_property [32mPASSED[0m[32m [ 73%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_empty_list [32mPASSED[0m[32m [ 73%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_missing_required_fields [32mPASSED[0m[32m [ 74%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_invalid_labels [32mPASSED[0m[32m [ 74%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_invalid_relationship_type [32mPASSED[0m[32m [ 74%][0m
+tests/unit/test_query_builder.py::TestAdminMergeRelationshipsBatch::test_merge_relationships_batch_groups_by_pattern [32mPASSED[0m[32m [ 74%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteRelationship::test_delete_relationship_specific_type [32mPASSED[0m[32m [ 75%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteRelationship::test_delete_relationship_all_types [32mPASSED[0m[32m [ 75%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteRelationship::test_delete_relationship_custom_match_property [32mPASSED[0m[32m [ 75%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteRelationship::test_delete_relationship_validates_labels [32mPASSED[0m[32m [ 76%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteRelationship::test_delete_relationship_validates_relationship_type [32mPASSED[0m[32m [ 76%][0m
+tests/unit/test_query_builder.py::TestAdminDeleteRelationship::test_delete_relationship_validates_match_property [32mPASSED[0m[32m [ 76%][0m
+tests/unit/test_query_builder.py::TestAdminParameterization::test_merge_nodes_batch_parameterizes_values [32mPASSED[0m[32m [ 76%][0m
+tests/unit/test_query_builder.py::TestAdminParameterization::test_merge_relationships_batch_parameterizes_values [32mPASSED[0m[32m [ 77%][0m
+tests/unit/test_query_builder.py::TestAdminValidatePropertiesDict::test_validates_all_properties_in_dict [32mPASSED[0m[32m [ 77%][0m
+tests/unit/test_query_builder.py::TestAdminValidatePropertiesDict::test_rejects_invalid_properties_in_dict [32mPASSED[0m[32m [ 77%][0m
+tests/unit/test_query_builder.py::TestAdminValidatePropertiesDict::test_accepts_empty_dict [32mPASSED[0m[32m [ 78%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_search_with_metadata_enabled [32mPASSED[0m[32m [ 78%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_search_without_metadata [32mPASSED[0m[32m [ 78%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_search_with_label_filter [32mPASSED[0m[32m [ 78%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_search_without_label_filter [32mPASSED[0m[32m [ 79%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_exact_match_type [32mPASSED[0m[32m [ 79%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_starts_with_match_type [32mPASSED[0m[32m [ 79%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_contains_match_type [32mPASSED[0m[32m [ 80%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_invalid_match_type_raises_error [32mPASSED[0m[32m [ 80%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_custom_search_property [32mPASSED[0m[32m [ 80%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_custom_limit [32mPASSED[0m[32m [ 80%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithMetadata::test_parameterization [32mPASSED[0m[32m [ 81%][0m
+tests/unit/test_query_builder.py::TestFuzzySearchNodes::test_fuzzy_search_basic [32mPASSED[0m[32m [ 81%][0m
+tests/unit/test_query_builder.py::TestFuzzySearchNodes::test_fuzzy_search_with_label [32mPASSED[0m[32m [ 81%][0m
+tests/unit/test_query_builder.py::TestFuzzySearchNodes::test_fuzzy_search_includes_metadata [32mPASSED[0m[32m [ 82%][0m
+tests/unit/test_query_builder.py::TestCheckNodeExists::test_check_exists_with_label [32mPASSED[0m[32m [ 82%][0m
+tests/unit/test_query_builder.py::TestCheckNodeExists::test_check_exists_without_label [32mPASSED[0m[32m [ 82%][0m
+tests/unit/test_query_builder.py::TestGetAllNodeNames::test_get_all_names_with_label [32mPASSED[0m[32m [ 82%][0m
+tests/unit/test_query_builder.py::TestGetAllNodeNames::test_get_all_names_without_label [32mPASSED[0m[32m [ 83%][0m
+tests/unit/test_query_builder.py::TestGetAllNodeNames::test_get_all_names_includes_metadata [32mPASSED[0m[32m [ 83%][0m
+tests/unit/test_query_builder.py::TestGetAllNodeNames::test_get_all_names_custom_limit [32mPASSED[0m[32m [ 83%][0m
+tests/unit/test_query_builder.py::TestGetAllNodeNames::test_get_all_names_custom_property [32mPASSED[0m[32m [ 84%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_with_metadata [32mPASSED[0m[32m [ 84%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_without_label [32mPASSED[0m[32m [ 84%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_with_specific_label [32mPASSED[0m[32m [ 85%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_with_relationship_filter [32mPASSED[0m[32m [ 85%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_without_metadata [32mPASSED[0m[32m [ 85%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_includes_direction [32mPASSED[0m[32m [ 85%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_uses_optional_match [32mPASSED[0m[32m [ 86%][0m
+tests/unit/test_query_builder.py::TestGetNodeWithRelationshipsEnhanced::test_get_node_custom_limit [32mPASSED[0m[32m [ 86%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderValidation::test_admin_allows_write_operations [32mPASSED[0m[32m [ 86%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderValidation::test_admin_validate_properties_dict_valid [32mPASSED[0m[32m [ 87%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderValidation::test_admin_validate_properties_dict_invalid_key [32mPASSED[0m[32m [ 87%][0m
+tests/unit/test_query_builder.py::TestAdminQueryBuilderValidation::test_admin_validate_properties_dict_empty [32mPASSED[0m[32m [ 87%][0m
+tests/unit/test_query_builder.py::TestMergeNode::test_merge_node_basic [32mPASSED[0m[32m [ 87%][0m
+tests/unit/test_query_builder.py::TestMergeNode::test_merge_node_without_set_properties [32mPASSED[0m[32m [ 88%][0m
+tests/unit/test_query_builder.py::TestMergeNode::test_merge_node_invalid_label [32mPASSED[0m[32m [ 88%][0m
+tests/unit/test_query_builder.py::TestMergeNode::test_merge_node_invalid_property_in_match [32mPASSED[0m[32m [ 88%][0m
+tests/unit/test_query_builder.py::TestMergeNode::test_merge_node_invalid_property_in_set [32mPASSED[0m[32m [ 89%][0m
+tests/unit/test_query_builder.py::TestMergeNodesBatch::test_merge_nodes_batch_single_label [32mPASSED[0m[32m [ 89%][0m
+tests/unit/test_query_builder.py::TestMergeNodesBatch::test_merge_nodes_batch_multiple_labels [32mPASSED[0m[32m [ 89%][0m
+tests/unit/test_query_builder.py::TestMergeNodesBatch::test_merge_nodes_batch_empty_list [32mPASSED[0m[32m [ 89%][0m
+tests/unit/test_query_builder.py::TestMergeNodesBatch::test_merge_nodes_batch_missing_label [32mPASSED[0m[32m [ 90%][0m
+tests/unit/test_query_builder.py::TestMergeNodesBatch::test_merge_nodes_batch_missing_match_property [32mPASSED[0m[32m [ 90%][0m
+tests/unit/test_query_builder.py::TestDeleteNode::test_delete_node_basic [32mPASSED[0m[32m [ 90%][0m
+tests/unit/test_query_builder.py::TestDeleteNode::test_delete_node_with_id [32mPASSED[0m[32m [ 91%][0m
+tests/unit/test_query_builder.py::TestDeleteNode::test_delete_node_invalid_label [32mPASSED[0m[32m [ 91%][0m
+tests/unit/test_query_builder.py::TestDeleteNode::test_delete_node_invalid_property_name [32mPASSED[0m[32m [ 91%][0m
+tests/unit/test_query_builder.py::TestMergeRelationship::test_merge_relationship_basic [32mPASSED[0m[32m [ 91%][0m
+tests/unit/test_query_builder.py::TestMergeRelationship::test_merge_relationship_with_properties [32mPASSED[0m[32m [ 92%][0m
+tests/unit/test_query_builder.py::TestMergeRelationship::test_merge_relationship_invalid_type [32mPASSED[0m[32m [ 92%][0m
+tests/unit/test_query_builder.py::TestMergeRelationship::test_merge_relationship_invalid_property [32mPASSED[0m[32m [ 92%][0m
+tests/unit/test_query_builder.py::TestMergeRelationshipsBatch::test_merge_relationships_batch_single_pattern [32mPASSED[0m[32m [ 93%][0m
+tests/unit/test_query_builder.py::TestMergeRelationshipsBatch::test_merge_relationships_batch_multiple_patterns [32mPASSED[0m[32m [ 93%][0m
+tests/unit/test_query_builder.py::TestMergeRelationshipsBatch::test_merge_relationships_batch_missing_fields [32mPASSED[0m[32m [ 93%][0m
+tests/unit/test_query_builder.py::TestMergeRelationshipsBatch::test_merge_relationships_batch_with_properties [32mPASSED[0m[32m [ 93%][0m
+tests/unit/test_query_builder.py::TestDeleteRelationship::test_delete_relationship_specific_type [32mPASSED[0m[32m [ 94%][0m
+tests/unit/test_query_builder.py::TestDeleteRelationship::test_delete_relationship_all_types [32mPASSED[0m[32m [ 94%][0m
+tests/unit/test_query_builder.py::TestDeleteRelationship::test_delete_relationship_custom_match_property [32mPASSED[0m[32m [ 94%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_with_both_dates [32mPASSED[0m[32m [ 95%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_start_only [32mPASSED[0m[32m [ 95%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_end_only [32mPASSED[0m[32m [ 95%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_no_dates [32mPASSED[0m[32m [ 95%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_with_label [32mPASSED[0m[32m [ 96%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_invalid_date_range [32mPASSED[0m[32m [ 96%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_exact_match_with_dates [32mPASSED[0m[32m [ 96%][0m
+tests/unit/test_query_builder.py::TestSearchNodesWithTimeFilter::test_time_filter_contains_with_start_date [32mPASSED[0m[32m [ 97%][0m
+tests/unit/test_query_builder.py::TestCountMethods::test_count_nodes_all [32mPASSED[0m[32m [ 97%][0m
+tests/unit/test_query_builder.py::TestCountMethods::test_count_nodes_with_label [32mPASSED[0m[32m [ 97%][0m
+tests/unit/test_query_builder.py::TestCountMethods::test_count_relationships [32mPASSED[0m[32m [ 97%][0m
+tests/unit/test_query_builder.py::TestGetAllNodes::test_get_all_nodes_basic [32mPASSED[0m[32m [ 98%][0m
+tests/unit/test_query_builder.py::TestGetAllNodes::test_get_all_nodes_with_label [32mPASSED[0m[32m [ 98%][0m
+tests/unit/test_query_builder.py::TestGetAllNodes::test_get_all_nodes_custom_limit [32mPASSED[0m[32m [ 98%][0m
+tests/unit/test_query_builder.py::TestEdgeCases::test_empty_string_search [32mPASSED[0m[32m [ 99%][0m
+tests/unit/test_query_builder.py::TestEdgeCases::test_unicode_in_search [32mPASSED[0m[32m [ 99%][0m
+tests/unit/test_query_builder.py::TestEdgeCases::test_very_long_limit [32mPASSED[0m[32m [ 99%][0m
+tests/unit/test_query_builder.py::TestEdgeCases::test_special_characters_in_value [32mPASSED[0m[32m [100%][0m
+
+[32m============================= [32m[1m347 passed[0m[32m in 0.82s[0m[32m ==============================[0m
+
+------- FRONTEND UNIT TESTS (vitest) -------
+
+> frontend@0.0.0 test
+> vitest --run --reporter=verbose
+
+
+[1m[46m RUN [49m[22m [36mv4.0.13 [39m[90m/app[39m
+
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould normalize compatible characters[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould handle empty string[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould normalize accented characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mtrimAndCollapseSpaces[2m > [22mshould trim leading and trailing spaces[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mtrimAndCollapseSpaces[2m > [22mshould collapse multiple spaces to single space[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mtrimAndCollapseSpaces[2m > [22mshould handle tabs and newlines[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mtrimAndCollapseSpaces[2m > [22mshould handle empty string[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mtrimAndCollapseSpaces[2m > [22mshould handle only whitespace[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasControlCharacters[2m > [22mshould detect null character[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasControlCharacters[2m > [22mshould detect tab character[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasControlCharacters[2m > [22mshould detect newline[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasControlCharacters[2m > [22mshould detect carriage return[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasControlCharacters[2m > [22mshould not detect normal characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasControlCharacters[2m > [22mshould detect DEL character[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEmojis[2m > [22mshould detect common emojis[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEmojis[2m > [22mshould not detect normal text[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEmojis[2m > [22mshould detect various emoji ranges[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEscapeSequences[2m > [22mshould detect backslash n[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEscapeSequences[2m > [22mshould detect hex escapes[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEscapeSequences[2m > [22mshould detect unicode escapes[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEscapeSequences[2m > [22mshould not detect normal backslashes in paths[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasEscapeSequences[2m > [22mshould detect various escape types[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould detect script tags[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould detect iframe tags[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould detect javascript protocol[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould detect event handlers[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould detect eval[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould detect Function constructor[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mhasCodePatterns[2m > [22mshould not detect normal text[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateLength[2m > [22mshould accept valid length[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateLength[2m > [22mshould reject too short input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateLength[2m > [22mshould reject too long input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateLength[2m > [22mshould accept exactly 3 characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateLength[2m > [22mshould accept exactly 100 characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateAllowedCharacters[2m > [22mshould accept alphanumeric[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateAllowedCharacters[2m > [22mshould accept allowed special characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateAllowedCharacters[2m > [22mshould accept spaces between characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateAllowedCharacters[2m > [22mshould reject special characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateAllowedCharacters[2m > [22mshould reject brackets and parentheses[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateSafety[2m > [22mshould pass safe input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateSafety[2m > [22mshould reject control characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateSafety[2m > [22mshould reject emojis[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateSafety[2m > [22mshould reject escape sequences[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateSafety[2m > [22mshould reject code patterns[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22msanitizeInput[2m > [22mshould trim and normalize[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22msanitizeInput[2m > [22mshould collapse multiple spaces[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22msanitizeInput[2m > [22mshould normalize unicode[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22msanitizeInput[2m > [22mshould handle empty input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22msanitizeInput[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould validate correct input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould trim and normalize input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject too short input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject too long input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject invalid characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject emojis[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject code patterns[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould accept valid names with spaces[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould accept valid names with allowed special chars[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould collapse multiple spaces[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22misValidForAutocomplete[2m > [22mshould accept short valid input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22misValidForAutocomplete[2m > [22mshould reject empty input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22misValidForAutocomplete[2m > [22mshould reject dangerous content even when short[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22misValidForAutocomplete[2m > [22mshould accept normal input[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould escape HTML entities[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould handle empty string[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould escape all dangerous characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle typical threat actor names[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle malware names[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle CVE identifiers[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle email-like patterns[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle IP addresses[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle domain names[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould reject SQL injection attempts[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould reject Cypher injection attempts[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould handle exactly 3 characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould handle exactly 100 characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould reject 101 characters[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould handle mixed valid characters at max length[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould generate a report with minimal required data[32m 25[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include timeline when provided[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include search parameters when configured[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include user text when configured[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include connections section with multiple nodes[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould generate valid HTML5 document structure[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include CSS styles in the document[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include print button with onclick handler[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include metadata section with generated date[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include footer with copyright[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mMain Node Section[2m > [22mshould display main node with properties[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mMain Node Section[2m > [22mshould handle main node with unknown name and type[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould format search parameters with label filter[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould show 'All Types' when no label filter[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould show 'No time filter' when dates are missing[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould format date range when provided[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould render node cards for connected entities[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould limit properties in node cards to 5[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould truncate long property values[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould render relationship items[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould hide relationships when config disables them[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould count node connections correctly[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould escape HTML in node properties[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould escape special characters: ampersand, quotes[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle empty nodes array[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle empty edges array[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle nodes without properties[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle very long entity names gracefully[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle special characters in all fields[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle numeric values in properties[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle newlines in user text[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mReport Metadata[2m > [22mshould include current date in metadata[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mReport Metadata[2m > [22mshould count nodes correctly[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mReport Metadata[2m > [22mshould count edges correctly[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mWindow.open Integration[2m > [22mshould open report in new tab[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mWindow.open Integration[2m > [22mshould write HTML to opened window[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mAPI_BASE_URL[2m > [22mshould have a default API base URL[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould return empty suggestions for queries under 3 characters[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould return empty suggestions for empty query[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould fetch suggestions for valid query[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould include label filter when provided[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould not include label filter when set to 'all'[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould include date filters when provided[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle API errors gracefully[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle network errors[32m 2[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould sanitize input before sending to API[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle null query[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle undefined query[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould fetch node data with default hops[32m 9[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for empty name[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for null name[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for undefined name[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould include label filter when provided[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould accept explicit hops parameter[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (too low)[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (too high)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (NaN)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould handle API errors[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould sanitize node name before sending[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould encode special characters in node name[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould handle network errors[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould fetch health status[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould handle unhealthy backend[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould handle network errors[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould fetch database statistics[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould handle API errors[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould handle network errors[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mapiRequest (internal error handling)[2m > [22mshould handle malformed JSON responses[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mapiRequest (internal error handling)[2m > [22mshould include Content-Type header[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mapiRequest (internal error handling)[2m > [22mshould log errors to console[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle very long query strings[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle special characters in queries[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle concurrent requests[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle empty response data[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle null response data[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mURL Construction[2m > [22mshould construct correct autocomplete URL with all params[32m 4[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mURL Construction[2m > [22mshould construct correct node URL with all params[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould initialize with default value of 1 when localStorage is empty[32m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould initialize from localStorage when available[32m 18[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould save to localStorage when value changes[32m 29[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould handle invalid localStorage values[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould handle numeric string values correctly[32m 14[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould update subscribers when value changes[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould initialize with 'all' when localStorage is empty[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould initialize from localStorage when available[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould save to localStorage when value changes[32m 21[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould handle empty string value[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould update subscribers when value changes[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould initialize with null when localStorage is empty[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould initialize from localStorage when available[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould save to localStorage when value is set[32m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould remove from localStorage when value is set to null[32m 21[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould remove from localStorage when value is set to empty string[32m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould update subscribers when value changes[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould initialize with null when localStorage is empty[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould initialize from localStorage when available[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould save to localStorage when value is set[32m 19[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould remove from localStorage when value is set to null[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould remove from localStorage when value is set to undefined[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould update subscribers when value changes[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mStore Integration[2m > [22mshould handle multiple stores independently[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mStore Integration[2m > [22mshould persist all stores to localStorage[32m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle rapid successive updates[32m 60[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle update and subscribe pattern[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle unsubscribe correctly[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle zero values correctly[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle false values correctly for date stores[32m 19[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould handle string numbers for contextDepth[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould handle floating point strings for contextDepth[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould preserve string values for labelFilter[32m 9[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould preserve string values for date stores[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould not save null/undefined values to localStorage for dates[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould always save values to localStorage for contextDepth[32m 19[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould always save values to localStorage for labelFilter[32m 18[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
+[2m      Tests [22m [1m[32m195 passed[39m[22m[90m (195)[39m
+[2m   Start at [22m 05:17:04
+[2m   Duration [22m 1.56s[2m (transform 661ms, setup 0ms, collect 929ms, tests 743ms, environment 1.17s, prepare 28ms)[22m
+
+
+------- INTEGRATION TESTS -------
+================================
+Running Integration Tests
+================================
+
+Stopping dev stack...
+Starting test stack...
+Waiting for Neo4j to be healthy...
+Neo4j ready.
+
+------- BACKEND INTEGRATION TESTS -------
+[1m============================= test session starts ==============================[0m
+platform linux -- Python 3.13.12, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.13
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: cov-7.1.0, flask-1.3.0
+[1mcollecting ... [0mcollected 18 items
+
+[INT-IMP-001] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_nodes_are_persisted_in_neo4j <- tests/integration/test_import_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:109 Neo4j driver initialized.
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: RETURN 1 AS test with params: None
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_nodes_are_persisted_in_ne0/standard.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'IMPORT_TEST_Actor', 'type': 'Nation-State'}]}
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'IMPORT_TEST_Malware', 'family': 'TestFamily'}]}
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'IMPORT_TEST_Actor', 'to_value': 'IMPORT_TEST_Malware', 'properties': {}}]}
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:Malware) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
+[32mPASSED[0m[32m                                                                   [  5%][0m
+[1m------------------------------ live log teardown -------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+
+[INT-IMP-002] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_all_properties_stored_correctly <- tests/integration/test_import_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_all_properties_stored_cor0/props.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (217 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 1 nodes...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'IMPORT_TEST_PropTest', 'type': 'Nation-State', 'motivation': 'Espionage', 'first_seen': '2015-01-01'}]}
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 1 nodes total across 1 labels
+[32mINFO    [0m ImportService:import_service.py:398 No relationships to import
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 1
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 0
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor {name: $name}) RETURN n with params: {'name': 'IMPORT_TEST_PropTest'}
+[32mPASSED[0m[32m                                                                   [ 11%][0m
+[1m------------------------------ live log teardown -------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+
+[INT-IMP-003] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_relationship_is_created <- tests/integration/test_import_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_relationship_is_created0/standard.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'IMPORT_TEST_Actor', 'type': 'Nation-State'}]}
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'IMPORT_TEST_Malware', 'family': 'TestFamily'}]}
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'IMPORT_TEST_Actor', 'to_value': 'IMPORT_TEST_Malware', 'properties': {}}]}
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n {name: $name})-[r:USES]->() RETURN count(r) AS c with params: {'name': 'IMPORT_TEST_Actor'}
+[32mPASSED[0m[32m                                                                   [ 16%][0m
+[1m------------------------------ live log teardown -------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+
+[INT-IMP-004] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_merge_prevents_duplicates_on_repeated_import <- tests/integration/test_import_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_merge_prevents_duplicates0/standard.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'IMPORT_TEST_Actor', 'type': 'Nation-State'}]}
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'IMPORT_TEST_Malware', 'family': 'TestFamily'}]}
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'IMPORT_TEST_Actor', 'to_value': 'IMPORT_TEST_Malware', 'properties': {}}]}
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_merge_prevents_duplicates0/standard.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
+[32mINFO    [0m ImportService:import_service.py:545 ============================================================
+[32mINFO    [0m ImportService:import_service.py:546 Starting import...
+[32mINFO    [0m ImportService:import_service.py:547 ============================================================
+[32mINFO    [0m ImportService:import_service.py:357 Importing 2 nodes...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'IMPORT_TEST_Actor', 'type': 'Nation-State'}]}
+[32mINFO    [0m ImportService:import_service.py:375  ThreatActor: 1 nodes
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'IMPORT_TEST_Malware', 'family': 'TestFamily'}]}
+[32mINFO    [0m ImportService:import_service.py:375  Malware: 1 nodes
+[32mINFO    [0m ImportService:import_service.py:377 Imported 2 nodes total across 2 labels
+[32mINFO    [0m ImportService:import_service.py:401 Importing 1 relationships...
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'IMPORT_TEST_Actor', 'to_value': 'IMPORT_TEST_Malware', 'properties': {}}]}
+[32mINFO    [0m ImportService:import_service.py:421  (ThreatActor)-[USES]->(Malware): 1 relationships
+[32mINFO    [0m ImportService:import_service.py:429 Imported 1 relationships total across 1 patterns
+[32mINFO    [0m ImportService:import_service.py:587 ============================================================
+[32mINFO    [0m ImportService:import_service.py:588  Import completed successfully!
+[32mINFO    [0m ImportService:import_service.py:589   Nodes: 2
+[32mINFO    [0m ImportService:import_service.py:590   Relationships: 1
+[32mINFO    [0m ImportService:import_service.py:593 ============================================================
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:ThreatActor) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n:Malware) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n {name: $name})-[r:USES]->() RETURN count(r) AS c with params: {'name': 'IMPORT_TEST_Actor'}
+[32mPASSED[0m[32m                                                                   [ 22%][0m
+[1m------------------------------ live log teardown -------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+
+[INT-IMP-005] tests/integration/test_import_integration.py::TestImportServiceNeo4j::test_dry_run_writes_nothing_to_neo4j <- tests/integration/test_import_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m ImportService:import_service.py:104 Loading JSON file: /tmp/pytest-of-root/pytest-0/test_dry_run_writes_nothing_to0/standard.json
+[32mINFO    [0m ImportService:import_service.py:109 Loaded JSON file (462 bytes)
+[32mINFO    [0m ImportService:import_service.py:467 Validating JSON structure...
+[32mINFO    [0m ImportService:import_service.py:475 JSON structure is valid
+[32mINFO    [0m ImportService:import_service.py:482 Validating 2 nodes...
+[32mINFO    [0m ImportService:import_service.py:506  Node validation passed
+[32mINFO    [0m ImportService:import_service.py:510 Validating 1 relationships...
+[32mINFO    [0m ImportService:import_service.py:536  Relationship validation passed
+[32mINFO    [0m ImportService:import_service.py:540  Dry run completed - no data imported
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' RETURN count(n) AS c with params: None
+[32mPASSED[0m[32m                                                                   [ 27%][0m
+[1m------------------------------ live log teardown -------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: MATCH (n) WHERE n.name STARTS WITH 'IMPORT_TEST_' DETACH DELETE n with params: None
+
+[INT-AC-001] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_prefix_match_returns_correct_node <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State', 'motivation': 'Espionage', 'first_seen': '2015-01-01', 'last_seen': '2024-01-01'}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'APT', 'limit': 10}
+[32mPASSED[0m[32m                                                                   [ 33%][0m
+[INT-AC-002] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_prefix_match_is_case_insensitive <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State', 'motivation': 'Espionage', 'first_seen': '2015-01-01', 'last_seen': '2024-01-01'}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'apt', 'limit': 10}
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'APT', 'limit': 10}
+[32mPASSED[0m[32m                                                                   [ 38%][0m
+[INT-AC-003] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_no_match_returns_empty_list <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State', 'motivation': 'Espionage', 'first_seen': '2015-01-01', 'last_seen': '2024-01-01'}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'XYZ_NONEXISTENT_999', 'limit': 10}
+[32mPASSED[0m[32m                                                                   [ 44%][0m
+[INT-AC-004] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_label_filter_restricts_results <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'AlphaGroup'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'AlphaBot'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Campaign AS props
+MERGE (n:Campaign {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Campaign' AS label with params: {'nodes_Campaign': [{'name': 'AlphaOperation'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n:ThreatActor)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'Alpha', 'limit': 10}
+[32mPASSED[0m[32m                                                                   [ 50%][0m
+[INT-AC-005] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_limit_parameter_is_respected <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'TestActor00'}, {'name': 'TestActor01'}, {'name': 'TestActor02'}, {'name': 'TestActor03'}, {'name': 'TestActor04'}, {'name': 'TestActor05'}, {'name': 'TestActor06'}, {'name': 'TestActor07'}, {'name': 'TestActor08'}, {'name': 'TestActor09'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'TestActor', 'limit': 3}
+[32mPASSED[0m[32m                                                                   [ 55%][0m
+[INT-AC-006] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_fuzzy_search_finds_substring <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State', 'motivation': 'Espionage', 'first_seen': '2015-01-01', 'last_seen': '2024-01-01'}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL
+          AND toLower(n.name) CONTAINS toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id,
+                   CASE
+                     WHEN toLower(n.name) STARTS WITH toLower($search_value) THEN 1
+                     ELSE 2
+                   END AS relevance
+        ORDER BY relevance, n.name
+        LIMIT $limit
+         with params: {'search_value': 'PT2', 'limit': 10}
+[32mPASSED[0m[32m                                                                   [ 61%][0m
+[INT-AC-007] tests/integration/test_neo4j_integration.py::TestAutocompleteIntegration::test_result_contains_required_frontend_fields <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State', 'motivation': 'Espionage', 'first_seen': '2015-01-01', 'last_seen': '2024-01-01'}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (n)
+        WHERE n.name IS NOT NULL AND toLower(n.name) STARTS WITH toLower($search_value)
+        RETURN n.name AS name,
+                   labels(n)[0] AS label,
+                   elementId(n) AS id
+        ORDER BY n.name
+        LIMIT $limit
+         with params: {'search_value': 'APT', 'limit': 10}
+[32mPASSED[0m[32m                                                                   [ 66%][0m
+[INT-HOP-001] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_zero_returns_only_start_node <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'X-Agent', 'family': 'Sofacy'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Organization AS props
+MERGE (n:Organization {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Organization' AS label with params: {'nodes_Organization': [{'name': 'AcmeCorp', 'sector': 'Finance'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Campaign AS props
+MERGE (n:Campaign {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Campaign' AS label with params: {'nodes_Campaign': [{'name': 'Operation Aurora', 'start_date': '2020-01-01'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'APT28', 'to_value': 'X-Agent', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_TARGETS_Organization AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Organization {name: relData.to_value})
+MERGE (from)-[r:TARGETS]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Organization' AS to_label, 'TARGETS' AS type with params: {'rels_ThreatActor_TARGETS_Organization': [{'from_value': 'APT28', 'to_value': 'AcmeCorp', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_Campaign_INVOLVES_ThreatActor AS relData
+MATCH (from:Campaign {name: relData.from_value})
+MATCH (to:ThreatActor {name: relData.to_value})
+MERGE (from)-[r:INVOLVES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'Campaign' AS from_label, 'ThreatActor' AS to_label, 'INVOLVES' AS type with params: {'rels_Campaign_INVOLVES_ThreatActor': [{'from_value': 'Operation Aurora', 'to_value': 'APT28', 'properties': {}}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+            MATCH (start:ThreatActor {name: $start_value})
+            RETURN
+                start,
+                labels(start)[0] AS start_label,
+                null AS connected,
+                null AS connected_label,
+                [] AS relationship_details,
+                [start] AS pathNodes
+            LIMIT $limit
+             with params: {'start_value': 'APT28', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [ 72%][0m
+[INT-HOP-002] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_one_returns_direct_neighbors <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'X-Agent', 'family': 'Sofacy'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Organization AS props
+MERGE (n:Organization {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Organization' AS label with params: {'nodes_Organization': [{'name': 'AcmeCorp', 'sector': 'Finance'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Campaign AS props
+MERGE (n:Campaign {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Campaign' AS label with params: {'nodes_Campaign': [{'name': 'Operation Aurora', 'start_date': '2020-01-01'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'APT28', 'to_value': 'X-Agent', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_TARGETS_Organization AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Organization {name: relData.to_value})
+MERGE (from)-[r:TARGETS]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Organization' AS to_label, 'TARGETS' AS type with params: {'rels_ThreatActor_TARGETS_Organization': [{'from_value': 'APT28', 'to_value': 'AcmeCorp', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_Campaign_INVOLVES_ThreatActor AS relData
+MATCH (from:Campaign {name: relData.from_value})
+MATCH (to:ThreatActor {name: relData.to_value})
+MERGE (from)-[r:INVOLVES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'Campaign' AS from_label, 'ThreatActor' AS to_label, 'INVOLVES' AS type with params: {'rels_Campaign_INVOLVES_ThreatActor': [{'from_value': 'Operation Aurora', 'to_value': 'APT28', 'properties': {}}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (start:ThreatActor {name: $start_value})
+        OPTIONAL MATCH path = (start)-[r*1..1]-(connected)
+        WITH start, connected, 
+             CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS rels,
+             CASE WHEN path IS NULL THEN [start] ELSE nodes(path) END AS pathNodes
+        RETURN
+            start,
+            labels(start)[0] AS start_label,
+            connected,
+            labels(connected)[0] AS connected_label,
+            [rel in rels | {
+                type: type(rel),
+                start_node: startNode(rel),
+                start_node_label: labels(startNode(rel))[0],
+                end_node: endNode(rel),
+                end_node_label: labels(endNode(rel))[0]
+            }] AS relationship_details,
+            pathNodes
+        LIMIT $limit
+         with params: {'start_value': 'APT28', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [ 77%][0m
+[INT-HOP-003] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_hops_two_finds_indirect_connections <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'X-Agent'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Vulnerability AS props
+MERGE (n:Vulnerability {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Vulnerability' AS label with params: {'nodes_Vulnerability': [{'name': 'CVE-2021-1234', 'cve_id': 'CVE-2021-1234'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'APT28', 'to_value': 'X-Agent', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_Malware_USES_Vulnerability AS relData
+MATCH (from:Malware {name: relData.from_value})
+MATCH (to:Vulnerability {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'Malware' AS from_label, 'Vulnerability' AS to_label, 'USES' AS type with params: {'rels_Malware_USES_Vulnerability': [{'from_value': 'X-Agent', 'to_value': 'CVE-2021-1234', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (start:ThreatActor {name: $start_value})
+        OPTIONAL MATCH path = (start)-[r*1..2]-(connected)
+        WITH start, connected, 
+             CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS rels,
+             CASE WHEN path IS NULL THEN [start] ELSE nodes(path) END AS pathNodes
+        RETURN
+            start,
+            labels(start)[0] AS start_label,
+            connected,
+            labels(connected)[0] AS connected_label,
+            [rel in rels | {
+                type: type(rel),
+                start_node: startNode(rel),
+                start_node_label: labels(startNode(rel))[0],
+                end_node: endNode(rel),
+                end_node_label: labels(endNode(rel))[0]
+            }] AS relationship_details,
+            pathNodes
+        LIMIT $limit
+         with params: {'start_value': 'APT28', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [ 83%][0m
+[INT-HOP-004] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_isolated_node_is_returned <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'LoneWolf'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (start:ThreatActor {name: $start_value})
+        OPTIONAL MATCH path = (start)-[r*1..1]-(connected)
+        WITH start, connected, 
+             CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS rels,
+             CASE WHEN path IS NULL THEN [start] ELSE nodes(path) END AS pathNodes
+        RETURN
+            start,
+            labels(start)[0] AS start_label,
+            connected,
+            labels(connected)[0] AS connected_label,
+            [rel in rels | {
+                type: type(rel),
+                start_node: startNode(rel),
+                start_node_label: labels(startNode(rel))[0],
+                end_node: endNode(rel),
+                end_node_label: labels(endNode(rel))[0]
+            }] AS relationship_details,
+            pathNodes
+        LIMIT $limit
+         with params: {'start_value': 'LoneWolf', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [ 88%][0m
+[INT-HOP-005] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_nonexistent_node_returns_empty_list <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (start:ThreatActor {name: $start_value})
+        OPTIONAL MATCH path = (start)-[r*1..1]-(connected)
+        WITH start, connected, 
+             CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS rels,
+             CASE WHEN path IS NULL THEN [start] ELSE nodes(path) END AS pathNodes
+        RETURN
+            start,
+            labels(start)[0] AS start_label,
+            connected,
+            labels(connected)[0] AS connected_label,
+            [rel in rels | {
+                type: type(rel),
+                start_node: startNode(rel),
+                start_node_label: labels(startNode(rel))[0],
+                end_node: endNode(rel),
+                end_node_label: labels(endNode(rel))[0]
+            }] AS relationship_details,
+            pathNodes
+        LIMIT $limit
+         with params: {'start_value': 'DOES_NOT_EXIST', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [ 94%][0m
+[INT-HOP-006] tests/integration/test_neo4j_integration.py::TestNodeByNameHopsIntegration::test_relationship_type_included_in_result <- tests/integration/test_neo4j_integration.py 
+[1m-------------------------------- live log setup --------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_ThreatActor AS props
+MERGE (n:ThreatActor {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'ThreatActor' AS label with params: {'nodes_ThreatActor': [{'name': 'APT28', 'type': 'Nation-State'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Malware AS props
+MERGE (n:Malware {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Malware' AS label with params: {'nodes_Malware': [{'name': 'X-Agent', 'family': 'Sofacy'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Organization AS props
+MERGE (n:Organization {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Organization' AS label with params: {'nodes_Organization': [{'name': 'AcmeCorp', 'sector': 'Finance'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $nodes_Campaign AS props
+MERGE (n:Campaign {name: props.name})
+SET n += props
+RETURN count(n) AS count, 'Campaign' AS label with params: {'nodes_Campaign': [{'name': 'Operation Aurora', 'start_date': '2020-01-01'}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_USES_Malware AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Malware {name: relData.to_value})
+MERGE (from)-[r:USES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Malware' AS to_label, 'USES' AS type with params: {'rels_ThreatActor_USES_Malware': [{'from_value': 'APT28', 'to_value': 'X-Agent', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_ThreatActor_TARGETS_Organization AS relData
+MATCH (from:ThreatActor {name: relData.from_value})
+MATCH (to:Organization {name: relData.to_value})
+MERGE (from)-[r:TARGETS]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'ThreatActor' AS from_label, 'Organization' AS to_label, 'TARGETS' AS type with params: {'rels_ThreatActor_TARGETS_Organization': [{'from_value': 'APT28', 'to_value': 'AcmeCorp', 'properties': {}}]}
+[32mINFO    [0m GraphDBDriver:driver.py:169 Write query executed: 
+UNWIND $rels_Campaign_INVOLVES_ThreatActor AS relData
+MATCH (from:Campaign {name: relData.from_value})
+MATCH (to:ThreatActor {name: relData.to_value})
+MERGE (from)-[r:INVOLVES]->(to)
+SET r += relData.properties
+RETURN count(r) AS count, 'Campaign' AS from_label, 'ThreatActor' AS to_label, 'INVOLVES' AS type with params: {'rels_Campaign_INVOLVES_ThreatActor': [{'from_value': 'Operation Aurora', 'to_value': 'APT28', 'properties': {}}]}
+[1m-------------------------------- live log call ---------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:172 Read query executed: 
+        MATCH (start:ThreatActor {name: $start_value})
+        OPTIONAL MATCH path = (start)-[r*1..1]-(connected)
+        WITH start, connected, 
+             CASE WHEN path IS NULL THEN [] ELSE relationships(path) END AS rels,
+             CASE WHEN path IS NULL THEN [start] ELSE nodes(path) END AS pathNodes
+        RETURN
+            start,
+            labels(start)[0] AS start_label,
+            connected,
+            labels(connected)[0] AS connected_label,
+            [rel in rels | {
+                type: type(rel),
+                start_node: startNode(rel),
+                start_node_label: labels(startNode(rel))[0],
+                end_node: endNode(rel),
+                end_node_label: labels(endNode(rel))[0]
+            }] AS relationship_details,
+            pathNodes
+        LIMIT $limit
+         with params: {'start_value': 'APT28', 'limit': 100}
+[32mPASSED[0m[32m                                                                   [100%][0m
+[1m------------------------------ live log teardown -------------------------------[0m
+[32mINFO    [0m GraphDBDriver:driver.py:129 Neo4j driver closed.
+
+
+[32m============================== [32m[1m18 passed[0m[32m in 2.26s[0m[32m ==============================[0m
+
+Stopping test stack...
+Restarting dev stack...
+
+================================
+Integration tests: PASSED
+================================
+
+================================
+Final Test Summary
+================================
+Backend unit tests:   PASSED
+Frontend unit tests:  PASSED
+Integration tests:    PASSED
+================================

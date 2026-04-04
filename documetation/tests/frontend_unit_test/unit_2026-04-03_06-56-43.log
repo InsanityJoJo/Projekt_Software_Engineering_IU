@@ -5,7 +5,7 @@
 
 [1m[46m RUN [49m[22m [36mv4.0.13 [39m[90m/app[39m
 
- [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould normalize compatible characters[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould normalize compatible characters[32m 2[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould handle empty string[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mnormalizeUnicode[2m > [22mshould normalize accented characters[32m 0[2mms[22m[39m
@@ -60,7 +60,7 @@
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject too short input[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject too long input[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject invalid characters[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject emojis[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject emojis[32m 2[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould reject code patterns[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mvalidateInput - Main validation function[2m > [22mshould accept valid names with spaces[32m 0[2mms[22m[39m
@@ -74,7 +74,7 @@
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould handle empty string[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould handle non-string input[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mescapeHtml[2m > [22mshould escape all dangerous characters[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle typical threat actor names[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle typical threat actor names[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle malware names[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle CVE identifiers[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mEdge cases and real-world scenarios[2m > [22mshould handle email-like patterns[32m 0[2mms[22m[39m
@@ -86,13 +86,13 @@
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould handle exactly 100 characters[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould reject 101 characters[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/inputvalidation.test.js[2m > [22mInput Validation[2m > [22mPerformance and boundary testing[2m > [22mshould handle mixed valid characters at max length[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould generate a report with minimal required data[32m 24[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould generate a report with minimal required data[32m 22[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include timeline when provided[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include search parameters when configured[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include user text when configured[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mgenerateReport - Main Function[2m > [22mshould include connections section with multiple nodes[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould generate valid HTML5 document structure[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include CSS styles in the document[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include CSS styles in the document[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include print button with onclick handler[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include metadata section with generated date[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mHTML Structure and Content[2m > [22mshould include footer with copyright[32m 0[2mms[22m[39m
@@ -101,7 +101,7 @@
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould format search parameters with label filter[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould show 'All Types' when no label filter[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould show 'No time filter' when dates are missing[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould format date range when provided[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mSearch Parameters Section[2m > [22mshould format date range when provided[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould render node cards for connected entities[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould limit properties in node cards to 5[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould truncate long property values[32m 0[2mms[22m[39m
@@ -112,15 +112,15 @@
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mNode Cards and Relationships[2m > [22mshould escape special characters: ampersand, quotes[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle empty nodes array[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle empty edges array[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle nodes without properties[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle very long entity names gracefully[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle special characters in all fields[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle nodes without properties[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle very long entity names gracefully[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle special characters in all fields[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle numeric values in properties[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mEdge Cases and Error Handling[2m > [22mshould handle newlines in user text[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mReport Metadata[2m > [22mshould include current date in metadata[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mReport Metadata[2m > [22mshould count nodes correctly[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mReport Metadata[2m > [22mshould count edges correctly[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mWindow.open Integration[2m > [22mshould open report in new tab[32m 3[2mms[22m[39m
+ [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mWindow.open Integration[2m > [22mshould open report in new tab[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/ReportGenerator.test.js[2m > [22mReportGenerator[2m > [22mWindow.open Integration[2m > [22mshould write HTML to opened window[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mAPI_BASE_URL[2m > [22mshould have a default API base URL[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould return empty suggestions for queries under 3 characters[32m 1[2mms[22m[39m
@@ -129,28 +129,28 @@
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould include label filter when provided[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould not include label filter when set to 'all'[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould include date filters when provided[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle API errors gracefully[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle API errors gracefully[32m 11[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle network errors[32m 2[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould sanitize input before sending to API[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle null query[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetAutocompleteSuggestions[2m > [22mshould handle undefined query[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould fetch node data with default hops[32m 5[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould fetch node data with default hops[32m 6[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for empty name[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for null name[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for null name[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould throw error for undefined name[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould include label filter when provided[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould accept explicit hops parameter[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (too low)[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (too high)[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (too high)[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould validate hops parameter (NaN)[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould handle API errors[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould sanitize node name before sending[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould encode special characters in node name[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetNodeByName[2m > [22mshould handle network errors[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould fetch health status[32m 0[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould fetch health status[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould handle unhealthy backend[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mhealthCheck[2m > [22mshould handle network errors[32m 1[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould fetch database statistics[32m 4[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould fetch database statistics[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould handle API errors[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mgetStats[2m > [22mshould handle network errors[32m 1[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mapiRequest (internal error handling)[2m > [22mshould handle malformed JSON responses[32m 1[2mms[22m[39m
@@ -161,48 +161,48 @@
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle concurrent requests[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle empty response data[32m 0[2mms[22m[39m
  [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mEdge Cases and Special Scenarios[2m > [22mshould handle null response data[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mURL Construction[2m > [22mshould construct correct autocomplete URL with all params[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mURL Construction[2m > [22mshould construct correct node URL with all params[32m 0[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould initialize with default value of 1 when localStorage is empty[32m 38[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould initialize from localStorage when available[32m 23[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould save to localStorage when value changes[32m 29[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould handle invalid localStorage values[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mURL Construction[2m > [22mshould construct correct autocomplete URL with all params[32m 5[2mms[22m[39m
+ [32m✓[39m tests/unit/api.test.js[2m > [22mAPI Service[2m > [22mURL Construction[2m > [22mshould construct correct node URL with all params[32m 1[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould initialize with default value of 1 when localStorage is empty[32m 23[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould initialize from localStorage when available[32m 18[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould save to localStorage when value changes[32m 28[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould handle invalid localStorage values[32m 14[2mms[22m[39m
  [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould handle numeric string values correctly[32m 13[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould update subscribers when value changes[32m 12[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould initialize with 'all' when localStorage is empty[32m 11[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould initialize from localStorage when available[32m 12[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould save to localStorage when value changes[32m 22[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould handle empty string value[32m 10[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould update subscribers when value changes[32m 10[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould initialize with null when localStorage is empty[32m 11[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould initialize from localStorage when available[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mcontextDepth store[2m > [22mshould update subscribers when value changes[32m 13[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould initialize with 'all' when localStorage is empty[32m 14[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould initialize from localStorage when available[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould save to localStorage when value changes[32m 23[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould handle empty string value[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlabelFilter store[2m > [22mshould update subscribers when value changes[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould initialize with null when localStorage is empty[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould initialize from localStorage when available[32m 10[2mms[22m[39m
  [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould save to localStorage when value is set[32m 23[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould remove from localStorage when value is set to null[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould remove from localStorage when value is set to null[32m 21[2mms[22m[39m
  [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould remove from localStorage when value is set to empty string[32m 21[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould update subscribers when value changes[32m 10[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould initialize with null when localStorage is empty[32m 10[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould initialize from localStorage when available[32m 13[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould save to localStorage when value is set[32m 21[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mstartDate store[2m > [22mshould update subscribers when value changes[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould initialize with null when localStorage is empty[32m 12[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould initialize from localStorage when available[32m 21[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould save to localStorage when value is set[32m 25[2mms[22m[39m
  [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould remove from localStorage when value is set to null[32m 22[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould remove from localStorage when value is set to undefined[32m 20[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould update subscribers when value changes[32m 12[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mStore Integration[2m > [22mshould handle multiple stores independently[32m 20[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mStore Integration[2m > [22mshould persist all stores to localStorage[32m 20[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle rapid successive updates[32m 60[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle update and subscribe pattern[32m 10[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle unsubscribe correctly[32m 11[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle zero values correctly[32m 20[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle false values correctly for date stores[32m 20[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould handle string numbers for contextDepth[32m 9[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould handle floating point strings for contextDepth[32m 11[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould remove from localStorage when value is set to undefined[32m 24[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mendDate store[2m > [22mshould update subscribers when value changes[32m 15[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mStore Integration[2m > [22mshould handle multiple stores independently[32m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mStore Integration[2m > [22mshould persist all stores to localStorage[32m 21[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle rapid successive updates[32m 61[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle update and subscribe pattern[32m 15[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle unsubscribe correctly[32m 15[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle zero values correctly[32m 22[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mEdge Cases[2m > [22mshould handle false values correctly for date stores[32m 23[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould handle string numbers for contextDepth[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould handle floating point strings for contextDepth[32m 9[2mms[22m[39m
  [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould preserve string values for labelFilter[32m 9[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould preserve string values for date stores[32m 9[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould not save null/undefined values to localStorage for dates[32m 22[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould always save values to localStorage for contextDepth[32m 19[2mms[22m[39m
- [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould always save values to localStorage for labelFilter[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mType Coercion[2m > [22mshould preserve string values for date stores[32m 10[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould not save null/undefined values to localStorage for dates[32m 20[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould always save values to localStorage for contextDepth[32m 21[2mms[22m[39m
+ [32m✓[39m tests/unit/stores.test.js[2m > [22mStores[2m > [22mlocalStorage Persistence Behavior[2m > [22mshould always save values to localStorage for labelFilter[32m 19[2mms[22m[39m
 
 [2m Test Files [22m [1m[32m4 passed[39m[22m[90m (4)[39m
 [2m      Tests [22m [1m[32m195 passed[39m[22m[90m (195)[39m
-[2m   Start at [22m 04:56:35
-[2m   Duration [22m 1.65s[2m (transform 655ms, setup 0ms, collect 1.01s, tests 764ms, environment 1.16s, prepare 27ms)[22m
+[2m   Start at [22m 04:56:44
+[2m   Duration [22m 1.59s[2m (transform 692ms, setup 0ms, collect 950ms, tests 789ms, environment 1.14s, prepare 28ms)[22m
 

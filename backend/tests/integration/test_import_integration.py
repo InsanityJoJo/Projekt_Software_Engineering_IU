@@ -1,8 +1,7 @@
-"""Integrationstests fuer ImportService gegen echte Neo4j-Instanz.
+"""Integration tests for ImportService against a real Neo4j instance.
 
-Wenige, fokussierte Tests - Import ist Infrastruktur, nicht Kernfunktion.
-Verifiziert dass Daten tatsaechlich in Neo4j ankommen, was Mock-Tests
-nicht koennen.
+A small number of focused tests - import is infrastructure, not core functionality.
+Verifies that data actually arrives in Neo4j, which mock-based tests cannot do.
 """
 
 import json
@@ -12,18 +11,18 @@ from src.services.import_service import ImportService
 
 pytestmark = pytest.mark.integration
 
-# Eindeutiger Prefix damit Import-Tests nicht mit Seed-Daten kollidieren
+# Unique prefix so import tests do not collide with seed data
 _PREFIX = "IMPORT_TEST_"
 _ACTOR = f"{_PREFIX}Actor"
 _MALWARE = f"{_PREFIX}Malware"
 
 
 # ---------------------------------------------------------------------------
-# Hilfsfunktionen
+# Helper functions
 # ---------------------------------------------------------------------------
 
 def _count(driver, label=None):
-    """Zaehlt nur Nodes mit _PREFIX - ignoriert Seed-Daten."""
+    """Count only nodes with _PREFIX - ignores seed data."""
     if label:
         q = (
             f"MATCH (n:{label}) WHERE n.name STARTS WITH '{_PREFIX}' "
@@ -38,7 +37,7 @@ def _count(driver, label=None):
 
 
 def _count_rels(driver, from_name, rel_type):
-    """Zaehlt Relationships vom angegebenen Node-Namen."""
+    """Count relationships originating from the given node name."""
     result = driver.run_safe_query(
         f"MATCH (n {{name: $name}})-[r:{rel_type}]->() RETURN count(r) AS c",
         {"name": from_name},
@@ -47,7 +46,7 @@ def _count_rels(driver, from_name, rel_type):
 
 
 def _get_node(driver, label, name):
-    """Liest einen einzelnen Node aus Neo4j."""
+    """Read a single node from Neo4j."""
     result = driver.run_safe_query(
         f"MATCH (n:{label} {{name: $name}}) RETURN n",
         {"name": name},
@@ -66,9 +65,9 @@ def import_service(neo4j_driver):
 
 @pytest.fixture
 def standard_json(tmp_path):
-    """JSON-Datei mit einem ThreatActor, einem Malware-Node und einer USES-Relation.
+    """JSON file with one ThreatActor, one Malware node, and one USES relationship.
 
-    Verwendet _PREFIX-Namen damit keine Kollision mit Seed-Daten entsteht.
+    Uses _PREFIX names to avoid collisions with seed data.
     """
     data = {
         "metadata": {"version": "1.0", "source": "Integration Test"},
@@ -95,10 +94,10 @@ def standard_json(tmp_path):
 
 @pytest.fixture(autouse=True)
 def cleanup_import_test_nodes(neo4j_driver):
-    """Loescht IMPORT_TEST_-Nodes vor und nach jedem Test in dieser Datei.
+    """Deletes IMPORT_TEST_ nodes before and after each test in this file.
 
-    autouse=True gilt hier nur fuer Tests in test_import_integration.py,
-    nicht global - Fixtures in Testdateien haben nur lokalen Scope.
+    autouse=True applies only within test_import_integration.py, not globally -
+    fixtures defined in test files have local scope only.
     """
     neo4j_driver.execute(
         f"MATCH (n) WHERE n.name STARTS WITH '{_PREFIX}' DETACH DELETE n",
@@ -110,27 +109,30 @@ def cleanup_import_test_nodes(neo4j_driver):
         write=True,
     )
 
+
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
 
 class TestImportServiceNeo4j:
-    """Schreibt Daten in Neo4j und liest sie zurueck - das koennen Mocks nicht."""
+    """Writes data to Neo4j and reads it back - something mock-based tests cannot do."""
 
-    def test_nodes_landen_wirklich_in_neo4j(
+    @pytest.mark.test_id("INT-IMP-001")
+    def test_nodes_are_persisted_in_neo4j(
         self, neo4j_driver, import_service, standard_json
     ):
-        """Smoke-Test: Nodes mit _PREFIX sind nach dem Import auffindbar."""
+        """Smoke test: nodes with _PREFIX are retrievable after import."""
         result = import_service.import_from_json(standard_json, validate=False)
 
         assert result.success is True
         assert _count(neo4j_driver, "ThreatActor") == 1
         assert _count(neo4j_driver, "Malware") == 1
 
-    def test_alle_properties_korrekt_gespeichert(
+    @pytest.mark.test_id("INT-IMP-002")
+    def test_all_properties_stored_correctly(
         self, neo4j_driver, import_service, tmp_path
     ):
-        """Properties kommen unveraendert in Neo4j an."""
+        """Properties arrive in Neo4j unchanged."""
         name = f"{_PREFIX}PropTest"
         data = {
             "metadata": {"version": "1.0"},
@@ -157,19 +159,21 @@ class TestImportServiceNeo4j:
         assert node["motivation"] == "Espionage"
         assert node["first_seen"] == "2015-01-01"
 
-    def test_relationship_wird_erstellt(
+    @pytest.mark.test_id("INT-IMP-003")
+    def test_relationship_is_created(
         self, neo4j_driver, import_service, standard_json
     ):
-        """USES-Relationship vom _PREFIX-Actor existiert nach dem Import."""
+        """USES relationship from the _PREFIX actor exists after import."""
         import_service.import_from_json(standard_json, validate=False)
 
-        # from_name ist der Node-Name, nicht der Relationship-Typ
+        # from_name is the node name, not the relationship type
         assert _count_rels(neo4j_driver, _ACTOR, "USES") == 1
 
-    def test_merge_verhindert_duplikate_bei_wiederholtem_import(
+    @pytest.mark.test_id("INT-IMP-004")
+    def test_merge_prevents_duplicates_on_repeated_import(
         self, neo4j_driver, import_service, standard_json
     ):
-        """MERGE: zweifacher Import erzeugt keine doppelten Nodes oder Kanten."""
+        """MERGE: importing the same data twice does not create duplicate nodes or edges."""
         import_service.import_from_json(standard_json, validate=False)
         import_service.import_from_json(standard_json, validate=False)
 
@@ -177,12 +181,13 @@ class TestImportServiceNeo4j:
         assert _count(neo4j_driver, "Malware") == 1
         assert _count_rels(neo4j_driver, _ACTOR, "USES") == 1
 
-    def test_dry_run_schreibt_nichts_in_neo4j(
+    @pytest.mark.test_id("INT-IMP-005")
+    def test_dry_run_writes_nothing_to_neo4j(
         self, neo4j_driver, import_service, standard_json
     ):
-        """dry_run=True: kein Node mit _PREFIX in der DB danach."""
+        """dry_run=True: no node with _PREFIX exists in the database afterwards."""
         result = import_service.import_from_json(standard_json, dry_run=True)
 
         assert result.success is True
-        # Zaehlt nur _PREFIX-Nodes, nicht die Seed-Daten
+        # Counts only _PREFIX nodes, not seed data
         assert _count(neo4j_driver) == 0

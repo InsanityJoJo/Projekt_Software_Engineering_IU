@@ -1,14 +1,13 @@
-"""Geteilte Fixtures fuer alle Integrationstests.
+"""Shared fixtures for all integration tests.
 
-Diese conftest.py liegt in tests/integration/ und gilt nur fuer
-Integrationstests - nicht fuer Unit-Tests in tests/unit/.
+This conftest.py lives in tests/integration/ and applies only to
+integration tests - not to unit tests in tests/unit/.
 
-Verbindet sich zu neo4j-test:7687 - beide Container laufen im
-selben test_network und finden sich per Containername.
+Connects to neo4j-test:7687 - both containers run in the same
+test_network and resolve each other by container name.
 
-Seed-Daten werden einmalig manuell importiert und per tmpfs
-eingefroren. Kein clean_db noetig - tmpfs garantiert sauberen
-Zustand pro Test-Session (Container-Stop = Daten weg).
+Seed data is imported once manually and frozen in a named volume.
+No clean_db needed - stopping the container clears the volume.
 """
 
 import pytest
@@ -22,16 +21,16 @@ TEST_NEO4J_PASSWORD = "testpassword"
 
 @pytest.fixture(scope="session")
 def neo4j_driver():
-    """Verbindung zur Test-Neo4j-Instanz (einmal pro Test-Session).
+    """Connection to the test Neo4j instance (once per test session).
 
-    scope=session: eine Verbindung fuer alle Integrationstests zusammen.
-    Neo4j-Verbindungsaufbau kostet Zeit - nicht pro Test wiederholen.
+    scope=session: one connection shared across all integration tests.
+    Establishing a Neo4j connection is costly - do not repeat per test.
 
-    Kein autouse, kein Einfluss auf Unit-Tests - wird nur instanziiert
-    wenn ein Integrationstest sie explizit anfordert.
+    No autouse, no effect on unit tests - only instantiated when an
+    integration test explicitly requests this fixture.
 
-    pytest.skip() statt Exception damit der Fehler lesbar bleibt
-    wenn der Test-Stack nicht laeuft.
+    pytest.skip() instead of raising an exception so the failure message
+    stays readable when the test stack is not running.
     """
     try:
         driver = GraphDBDriver(
@@ -42,21 +41,21 @@ def neo4j_driver():
         result = driver.run_safe_query("RETURN 1 AS test")
         if not result.success:
             pytest.skip(
-                f"Neo4j Test-Instanz nicht erreichbar: {result.error}\n"
-                "Starte den Test-Stack mit: seppt-int"
+                f"Neo4j test instance not reachable: {result.error}\n"
+                "Start the test stack with: seppt-int"
             )
         yield driver
         driver.close()
     except Exception as e:
         pytest.skip(
-            f"Neo4j Test-Instanz nicht erreichbar: {e}\n"
-            "Starte den Test-Stack mit: seppt-int"
+            f"Neo4j test instance not reachable: {e}\n"
+            "Start the test stack with: seppt-int"
         )
- 
+
 
 @pytest.fixture
 def sample_threat_actor(neo4j_driver):
-    """Erstellt einen einzelnen ThreatActor-Node fuer einfache Tests."""
+    """Creates a single ThreatActor node for simple tests."""
     builder = AdminQueryBuilder()
     nodes = [
         {
@@ -77,9 +76,9 @@ def sample_threat_actor(neo4j_driver):
 
 @pytest.fixture
 def sample_graph(neo4j_driver):
-    """Erstellt einen kleinen Graphen fuer Relationship-Tests.
+    """Creates a small graph for relationship tests.
 
-    Topologie:
+    Topology:
         APT28 (ThreatActor) -[USES]->    X-Agent (Malware)
         APT28 (ThreatActor) -[TARGETS]-> AcmeCorp (Organization)
         Operation Aurora (Campaign) -[INVOLVES]-> APT28 (ThreatActor)
@@ -124,4 +123,26 @@ def sample_graph(neo4j_driver):
         neo4j_driver.execute(query, params, write=True)
 
     return {"main_node": "APT28", "label": "ThreatActor"}
-  
+
+
+# ---------------------------------------------------------------------------
+# Test ID marker
+# ---------------------------------------------------------------------------
+
+def pytest_configure(config):
+    """Registers the custom test_id marker."""
+    config.addinivalue_line(
+        "markers", "test_id(id): unique test ID for the test protocol"
+    )
+
+def pytest_collection_modifyitems(items):
+    """Prepends the test_id marker value to each item's node ID.
+
+    Runs once after collection, before any output is printed.
+    Modifying nodeid here ensures the ID appears in all output
+    including the -v test list, the progress line, and the summary.
+    """
+    for item in items:
+        marker = item.get_closest_marker("test_id")
+        if marker and marker.args:
+            item._nodeid = f"[{marker.args[0]}] {item.nodeid}"
