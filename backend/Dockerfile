@@ -40,4 +40,4 @@ ENV PYTHONDONTWRITEBYTECODE=1
 EXPOSE 8000
 
 # Run the application
-CMD ["python", "src/main.py", "src/scripts/import_data.py", "src/data/demo_data.json"]
+CMD ["python", "src/main.py"]
