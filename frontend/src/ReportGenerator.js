@@ -800,7 +800,7 @@ function buildFooter() {
     <footer class="report-footer">
       <p><strong>Threat Intelligence Platform</strong></p>
       <p>Generated automatically from graph data</p>
-      <p>&copy; 2025 - For internal use only</p>
+      <p>&copy; 2026 - For internal use only</p>
     </footer>
   `;
 }

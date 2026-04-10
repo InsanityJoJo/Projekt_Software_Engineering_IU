@@ -727,7 +727,7 @@
 	<!-- ============================================ -->
 	<footer class="footer">
 		<p>
-			<Copyright size={13} /> 2025 Johannes Liebscher &mdash; CTI Platform Version 0.21 Prototype
+			<Copyright size={13} /> 2026 Johannes Liebscher &mdash; CTI Platform Version 1.0
 		</p>
 		<p>Impressum</p>
 	</footer>
